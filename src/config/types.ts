@@ -1,12 +1,12 @@
 
-type aviso = {
+type reminder = {
     id: string,
-    titulo: string,
-    itemsTexto: string[],
+    title: string,
+    itemsText: string[],
     itemsAudio: any,
     itemsImage: any,
 }
 
 export {
-    aviso,
+    reminder,
 };

@@ -10,7 +10,7 @@ const persistConfig = {
     whitelist: ['reminders']
   }
 
-const rootReducer = combineReducers({
+export const rootReducer = combineReducers({
     remindersReducer: persistReducer<RootStateOrAny>(persistConfig, remindersReducer)
   });
 

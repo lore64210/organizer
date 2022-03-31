@@ -1,44 +1,32 @@
 import {
     FIND_ALL_REMINDERS,
-    SAVE_REMINDER,
+    CREATE_REMINDER,
     UPDATE_REMINDER,
     DELETE_REMINDER,
     SET_CURRENT_REMINDER,
     GET_CURRENT_REMINDER,
 } from './actions';
-import {aviso} from '../types';
+import {reminder} from '../types';
 
-const initialState : {reminders: aviso[], currentReminder: aviso|null} = {
+const initialState : {reminders: reminder[], currentReminder: reminder|null} = {
   reminders: [],
   currentReminder: null,
 };
 
-function remindersReducer(state = initialState, action: {type: string, payload: aviso|aviso[]}) {
+function remindersReducer(state = initialState, action: {type: string, payload: reminder}) {
   const {payload, type} = action;
-  const {reminders, currentReminder} = state;
+  const {reminders} = state;
   switch (type) {
-    case FIND_ALL_REMINDERS:
-      return state.reminders;
-    case SAVE_REMINDER:
-      if (!Array.isArray(payload))
-        state = {...state, reminders: [...reminders, payload]};
-      break;
+    case CREATE_REMINDER:
+        return {...state, reminders: (!reminders ? [payload] : [...reminders, payload])};
     case UPDATE_REMINDER:
-      if (!Array.isArray(payload))
-        state = {...state, reminders: reminders.map(r => r.id === payload.id ? payload : r)};
-      break;
+        return {...state, reminders: reminders.map(r => r.id === payload.id ? payload : r)};
     case DELETE_REMINDER:
-      if (!Array.isArray(payload))
-        state = {...state, reminders: reminders.filter(r => r.id !== payload.id)};
-      break;
+        return {...state, reminders: reminders.filter(r => r.id !== payload.id)};
     case SET_CURRENT_REMINDER:
-      if (!Array.isArray(payload))
-        state = {...state, currentReminder: payload};
-      break;
-    case GET_CURRENT_REMINDER:
-      return currentReminder;
+        return {...state, currentReminder: payload};
     default:
-      return state;
+      return {...state};
   }
 }
 
