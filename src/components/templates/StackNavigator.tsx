@@ -6,7 +6,7 @@ const {Navigator, Screen} = createStackNavigator();
 const StackNavigator = () => {
   return (
     <NavigationContainer>
-      <Navigator initialRouteName="HomeScreen">
+      <Navigator screenOptions={{headerShown: false}} initialRouteName="HomeScreen">
         <Screen name="HomeScreen" component={HomeScreen} />
         <Screen name="ReminderScreen" component={ReminderScreen} />
         <Screen name="CameraScreen" component={CameraScreen} />
