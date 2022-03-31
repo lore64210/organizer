@@ -1,5 +1,5 @@
 import { createStackNavigator } from '@react-navigation/stack';
-import { CameraScreen, HomeScreen, ReminderScreen } from '../../screens';
+import { CameraScreen, HomeScreen, ReminderScreen } from '../organisms';
 import { NavigationContainer } from '@react-navigation/native';
 const {Navigator, Screen} = createStackNavigator();
 
