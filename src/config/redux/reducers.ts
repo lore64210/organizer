@@ -9,7 +9,29 @@ import {
 import {reminder} from '../types';
 
 const initialState : {reminders: reminder[], currentReminder: reminder|null} = {
-  reminders: [],
+  reminders: [
+    {
+      id: '1',
+      title: 'Titulo 1',
+      itemsText: [],
+      itemsAudio: [],
+      itemsImage: []
+    },
+    {
+      id: '2',
+      title: 'Titulo 2',
+      itemsText: [],
+      itemsAudio: [],
+      itemsImage: []
+    },
+    {
+      id: '3',
+      title: 'Titulo 3',
+      itemsText: [],
+      itemsAudio: [],
+      itemsImage: []
+    },
+  ],
   currentReminder: null,
 };
 

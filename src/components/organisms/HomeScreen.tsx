@@ -1,7 +1,14 @@
-import {View, Text, TouchableOpacity} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 import { useSelector, useDispatch, } from 'react-redux';
 import { CREATE_REMINDER } from '../../config/redux/actions';
-import {Header} from '../molecules';
+import {Header, HomeItem} from '../molecules';
+
+const styles = StyleSheet.create({
+    container: {
+        backgroundColor: '#041C32',
+        flex: 1
+    }
+})
 
 const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
@@ -18,8 +25,14 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
     }
 
     return (
-        <View>
+        <View style={styles.container}>
             <Header title="Reminders" />
+
+            {
+                reminders.map(reminder => (
+                    <HomeItem key={reminder.id} item={reminder} />
+                ))
+            }
         </View>
     )
 }
