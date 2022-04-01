@@ -1,6 +1,6 @@
 import {View, StyleSheet} from 'react-native';
 import { useSelector, useDispatch, } from 'react-redux';
-import { CREATE_REMINDER } from '../../config/redux/actions';
+import { CREATE_REMINDER, SET_CURRENT_REMINDER } from '../../config/redux/actions';
 import {Header, HomeItem} from '../molecules';
 
 const styles = StyleSheet.create({
@@ -19,9 +19,14 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
     const dispatch = useDispatch();
 
-    const onPress = () => {
-        //navigation.navigate('ReminderScreen')
+    const onCreatePress = () => {
+        navigation.navigate('ReminderScreen')
         dispatch({type: CREATE_REMINDER, payload: {id: 123, title: "asd"}});    
+    }
+
+    const onItemPress = reminder => {
+        navigation.navigate('ReminderScreen')
+        dispatch({type: SET_CURRENT_REMINDER, payload: reminder});    
     }
 
     return (
@@ -30,7 +35,7 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
             {
                 reminders.map(reminder => (
-                    <HomeItem key={reminder.id} item={reminder} />
+                    <HomeItem key={reminder.id} item={reminder} onItemPress={() => onItemPress(reminder)}/>
                 ))
             }
         </View>

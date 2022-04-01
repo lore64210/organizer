@@ -1,4 +1,5 @@
-import {View, StyleSheet, Text} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 
 const styles = StyleSheet.create({
     container: {
@@ -15,10 +16,10 @@ const styles = StyleSheet.create({
     }
 })
 
-export default ({item}) => {
+export default ({item, onItemPress}) => {
     return (
-        <View style={styles.container}>
+        <TouchableOpacity onPress={onItemPress} style={styles.container}>
             <Text style={styles.title}>{item.title}</Text>
-        </View>
+        </TouchableOpacity>
     )
 }
