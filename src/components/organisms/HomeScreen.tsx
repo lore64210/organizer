@@ -1,6 +1,7 @@
 import {View, Text, TouchableOpacity} from 'react-native';
 import { useSelector, useDispatch, } from 'react-redux';
 import { CREATE_REMINDER } from '../../config/redux/actions';
+import {Header} from '../molecules';
 
 const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
@@ -18,44 +19,7 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
     return (
         <View>
-            <TouchableOpacity onPress={onPress}>
-                <Text>Para ir al reminder</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onPress}>
-                <Text>Para ir al reminder</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onPress}>
-                <Text>Para ir al reminder</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onPress}>
-                <Text>Para ir al reminder</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onPress}>
-                <Text>Para ir al reminder</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onPress}>
-                <Text>Para ir al reminder</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onPress}>
-                <Text>Para ir al reminder</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onPress}>
-                <Text>Para ir al reminder</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onPress}>
-                <Text>Para ir al reminder</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onPress}>
-                <Text>Para ir al reminder</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onPress}>
-                <Text>Para ir al reminder</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onPress}>
-                <Text>Para ir al reminder</Text>
-            </TouchableOpacity>
-            
-            <Text>{reminders?.length}</Text>
+            <Header title="Reminders" />
         </View>
     )
 }
