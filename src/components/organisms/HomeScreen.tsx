@@ -1,9 +1,10 @@
 import {View, StyleSheet} from 'react-native';
-import { useSelector, useDispatch, } from 'react-redux';
-import { CREATE_REMINDER, SET_CURRENT_REMINDER } from '../../config/redux/actions';
-import { reminder } from '../../config/types';
-import { IconButton } from '../atoms';
+import {useSelector, useDispatch} from 'react-redux';
+import {SET_CURRENT_REMINDER} from '../../config/redux/actions';
+import {reminder} from '../../config/types';
+import {IconButton} from '../atoms';
 import {Header, HomeItem} from '../molecules';
+import uuid from '../../utils/uuidUtil';
 
 const styles = StyleSheet.create({
     container: {
@@ -14,7 +15,7 @@ const styles = StyleSheet.create({
 });
 
 const emptyReminder: reminder = {
-    id: '123123',
+    id: '',
     title: '',
     itemsText: [],
     itemsAudio: [],
@@ -40,10 +41,10 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
             <Header title="Reminders" />
             {
                 reminders.map(reminder => (
-                    <HomeItem key={reminder.id} item={reminder} onItemPress={() => onItemPress(reminder)}/>
+                    <HomeItem key={reminder.id} item={reminder} onItemPress={() => onPress(reminder)}/>
                 ))
             }
-            <IconButton name="plus" onPress={() => onPress(emptyReminder)} />
+            <IconButton name="plus" onPress={() => onPress({...emptyReminder, id: uuid()})} />
         </View>
     )
 }
