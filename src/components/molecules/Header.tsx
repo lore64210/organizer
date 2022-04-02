@@ -2,21 +2,22 @@ import {View, Text, StyleSheet} from 'react-native';
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#04293A',
-        alignItems: 'center'
+        backgroundColor: '#041C32',
+        alignItems: 'center',
+        borderBottomColor: '#04293A',
+        borderBottomWidth: 5,
     },
     title: {
         color: '#ECB365',
         fontWeight: 'bold',
         fontSize: 20,
         paddingTop: 50,
-        paddingBottom: 10,
+        paddingBottom: 5,
     },
-    red: {
-        color: 'red',
+    separator: {
+       
     },
 });
-  
 
 export default ({title}) => {
     return (
