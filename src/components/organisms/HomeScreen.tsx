@@ -1,6 +1,8 @@
 import {View, StyleSheet} from 'react-native';
 import { useSelector, useDispatch, } from 'react-redux';
 import { CREATE_REMINDER, SET_CURRENT_REMINDER } from '../../config/redux/actions';
+import { reminder } from '../../config/types';
+import { IconButton } from '../atoms';
 import {Header, HomeItem} from '../molecules';
 
 const styles = StyleSheet.create({
@@ -9,7 +11,15 @@ const styles = StyleSheet.create({
 
         flex: 1
     }
-})
+});
+
+const emptyReminder: reminder = {
+    id: '123123',
+    title: '',
+    itemsText: [],
+    itemsAudio: [],
+    itemsImage: []
+};
 
 const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
@@ -20,12 +30,7 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
     const dispatch = useDispatch();
 
-    const onCreatePress = () => {
-        navigation.navigate('ReminderScreen')
-        dispatch({type: CREATE_REMINDER, payload: {id: 123, title: "asd"}});    
-    }
-
-    const onItemPress = reminder => {
+    const onPress = reminder => {
         navigation.navigate('ReminderScreen')
         dispatch({type: SET_CURRENT_REMINDER, payload: reminder});    
     }
@@ -33,12 +38,12 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
     return (
         <View style={styles.container}>
             <Header title="Reminders" />
-
             {
                 reminders.map(reminder => (
                     <HomeItem key={reminder.id} item={reminder} onItemPress={() => onItemPress(reminder)}/>
                 ))
             }
+            <IconButton name="plus" onPress={() => onPress(emptyReminder)} />
         </View>
     )
 }
