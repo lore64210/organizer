@@ -1,4 +1,4 @@
-import {useState, useRef, useEffect} from 'react';
+import {useRef, useEffect} from 'react';
 import {TouchableOpacity, Animated, StyleSheet} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 

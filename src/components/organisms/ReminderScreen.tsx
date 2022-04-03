@@ -66,7 +66,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
             />
             <AnimatedIconButton 
                 name="camera" 
-                onPress={() => console.log('test')} 
+                onPress={onCameraButtonPress} 
                 position={140} 
                 showButton={showButtons}
                 containerStyle={{zIndex: 8}}

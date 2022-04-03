@@ -13,18 +13,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    icon: {
-        fontSize: 20,
-    }
 });
 
 const IconButton : React.FC<{name: any, color?: string, size?: number, onPress: () => void, style?: any, containerStyle?: any}> = (props) => {
     
-    const {name, color = "#ECB365", size = 30, onPress, style = {}, containerStyle = {}} = props;
+    const {name, color = "#ECB365", size = 20, onPress, style = {}, containerStyle = {}} = props;
 
     return (
-        <TouchableHighlight underlayColor="#041C32" onPress={onPress} style={{...containerStyle, ...styles.container}}>
-            <FontAwesome style={{...styles.icon, ...style}} name={name} color={color} size={size}/>
+        <TouchableHighlight underlayColor="#041C32" onPress={onPress} style={{...styles.container, ...containerStyle}}>
+            <FontAwesome style={style} name={name} color={color} size={size}/>
         </TouchableHighlight>
     )
 }
