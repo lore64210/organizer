@@ -88,7 +88,7 @@ const ModalTitle = ({visible, setVisible, saveTitle, title: reminderTitle, goBac
                         style={styles.input}
                         onChangeText={setTitle}
                         value={title}
-                        placeholder="Ingrese un título"
+                        placeholder="Ingrese un título..."
                         maxLength={30}
                         placeholderTextColor='#876b44'
                     />
