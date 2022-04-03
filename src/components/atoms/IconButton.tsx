@@ -18,10 +18,15 @@ const styles = StyleSheet.create({
     }
 });
 
-export default ({name, color = "#ECB365", size = 30, onPress, style = {}, containerStyle = {}}) => {
+const IconButton : React.FC<{name: any, color?: string, size?: number, onPress: () => void, style?: any, containerStyle?: any}> = (props) => {
+    
+    const {name, color = "#ECB365", size = 30, onPress, style = {}, containerStyle = styles.container} = props;
+
     return (
-        <TouchableHighlight underlayColor="#041C32" onPress={onPress} style={{...containerStyle, ...styles.container}}>
+        <TouchableHighlight underlayColor="#041C32" onPress={onPress} style={containerStyle}>
             <FontAwesome style={{...styles.icon, ...style}} name={name} color={color} size={size}/>
         </TouchableHighlight>
     )
 }
+
+export default IconButton;

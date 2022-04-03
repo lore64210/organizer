@@ -14,15 +14,12 @@ const styles = StyleSheet.create({
         paddingTop: 50,
         paddingBottom: 5,
     },
-    separator: {
-       
-    },
 });
 
-export default ({title}) => {
+export default ({title, onTitlePress = () => {}}) => {
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>{title}</Text>
+            <Text onPress={onTitlePress}  style={styles.title}>{title}</Text>
         </View>
     )
 }

@@ -4,7 +4,8 @@ import {useSelector, useDispatch} from 'react-redux';
 import {Header} from '../molecules';
 import {IconButton} from '../atoms';
 import AnimatedIconButton from '../atoms/AnimatedIconButton';
-
+import ModalTitle from '../molecules/ModalTitle';
+import { SET_CURRENT_REMINDER } from '../../config/redux/actions';
 
 const styles = StyleSheet.create({
     container: {
@@ -21,26 +22,32 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
     const showButtonsAnimation = useRef(new Animated.Value(0)).current;
 
+     //@ts-ignore
+     const reminder = useSelector(({remindersReducer: {currentReminder}}) => {
+        return currentReminder;
+    });
+
     const [showButtons, setShowButtons] = useState(false);
+    const [modalVisible, setModalVisible] = useState(!reminder.title);
 
     useEffect(() => {
         Animated.timing(showButtonsAnimation, {toValue: 1, duration: 1000, useNativeDriver: true}).start();
     }, [showButtons]);
-
-    //@ts-ignore
-    const reminder = useSelector(({remindersReducer: {currentReminder}}) => {
-        return currentReminder;
-    });
 
     const dispatch = useDispatch();
 
     const onPress = () => {
         navigation.navigate('CameraScreen')
     }
-    
+
+    const onTitlePress = () => {
+        setModalVisible(true);
+        setShowButtons(false);
+    }
+
     return (
         <View style={styles.container}>
-            <Header title={reminder.title} />
+            <Header title={reminder.title} onTitlePress={onTitlePress} />
             <IconButton name={showButtons ? 'minus' : 'plus'} onPress={() => setShowButtons(!showButtons)} style={{zIndex: 0}} />
             <AnimatedIconButton 
                 name="microphone" 
@@ -63,7 +70,13 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 showButton={showButtons}
                 containerStyle={{zIndex: -2}}
             />
-
+            <ModalTitle
+                visible={modalVisible}
+                setVisible={setModalVisible}
+                saveTitle={newTitle => dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, title: newTitle}})}
+                title={reminder.title}
+                goBack={() => navigation.goBack()}
+            />
         </View>
     )
 }
