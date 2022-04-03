@@ -92,27 +92,27 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                     ))
                 }
             </View>
-            <IconButton name={showButtons ? 'minus' : 'plus'} onPress={() => setShowButtons(!showButtons)} style={{zIndex: 0}} />
+            <IconButton name={showButtons ? 'minus' : 'plus'} onPress={() => setShowButtons(!showButtons)} containerStyle={{zIndex: 20}} />
             <AnimatedIconButton 
                 name="microphone" 
                 onPress={() => console.log('test')} 
                 position={80} 
                 showButton={showButtons}
-                containerStyle={{zIndex: -1}}
+                containerStyle={{zIndex: 9}}
             />
             <AnimatedIconButton 
                 name="camera" 
                 onPress={() => console.log('test')} 
                 position={140} 
                 showButton={showButtons}
-                containerStyle={{zIndex: -2}}
+                containerStyle={{zIndex: 8}}
             />
             <AnimatedIconButton 
                 name="pencil" 
                 onPress={addItemText} 
                 position={200} 
                 showButton={showButtons}
-                containerStyle={{zIndex: -3}}
+                containerStyle={{zIndex: 7}}
             />
             <ModalTitle
                 visible={modalVisible}
