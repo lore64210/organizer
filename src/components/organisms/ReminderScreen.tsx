@@ -1,17 +1,13 @@
 import {useState, useRef, useEffect} from 'react';
 import {View, StyleSheet, Animated} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
-import {Header} from '../molecules';
+import {Header, ModalTitle} from '../molecules';
 import {IconButton} from '../atoms';
+import { Layout } from '.';
 import AnimatedIconButton from '../atoms/AnimatedIconButton';
-import ModalTitle from '../molecules/ModalTitle';
 import { SET_CURRENT_REMINDER } from '../../config/redux/actions';
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: '#041C32',
-        flex: 1,
-    },
     button: {
         position: 'absolute',
         bottom: 40,
@@ -46,8 +42,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     }
 
     return (
-        <View style={styles.container}>
-            <Header title={reminder.title} onTitlePress={onTitlePress} />
+        <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
             <IconButton name={showButtons ? 'minus' : 'plus'} onPress={() => setShowButtons(!showButtons)} style={{zIndex: 0}} />
             <AnimatedIconButton 
                 name="microphone" 
@@ -77,7 +72,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 title={reminder.title}
                 goBack={() => navigation.goBack()}
             />
-        </View>
+        </Layout>
     )
 }
 

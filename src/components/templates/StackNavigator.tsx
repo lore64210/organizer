@@ -5,13 +5,16 @@ const {Navigator, Screen} = createStackNavigator();
 
 const StackNavigator = () => {
   return (
-    <NavigationContainer>
-      <Navigator screenOptions={{headerShown: false}} initialRouteName="HomeScreen">
-        <Screen name="HomeScreen" component={HomeScreen} />
-        <Screen name="ReminderScreen" component={ReminderScreen} />
-        <Screen name="CameraScreen" component={CameraScreen} />
-      </Navigator>
-    </NavigationContainer>
+    <>
+      {/*@ts-ignore*/}
+      <NavigationContainer theme={{colors: {background: '#041C32'}}}>
+          <Navigator screenOptions={{headerShown: false}} initialRouteName="HomeScreen">
+            <Screen name="HomeScreen" component={HomeScreen} />
+            <Screen name="ReminderScreen" component={ReminderScreen} />
+            <Screen name="CameraScreen" component={CameraScreen} />
+          </Navigator>
+      </NavigationContainer>
+    </>
   );
 }
 
