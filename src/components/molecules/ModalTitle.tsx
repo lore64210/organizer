@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
+import {useEffect, useRef} from 'react';
 import {useState} from 'react';
 import {View, Modal, Text, StyleSheet, TextInput} from 'react-native';
-import { IconButton } from '../atoms';
+import {IconButton} from '../atoms';
 
 const styles = StyleSheet.create({
     modalContainer: {
@@ -48,12 +48,14 @@ const styles = StyleSheet.create({
 
 const ModalTitle = ({visible, setVisible, saveTitle, title: reminderTitle, goBack}) => {
 
+    const inputRef = useRef<TextInput>(null);
+
     const [title, setTitle] = useState(reminderTitle);
 
     useEffect(() => {
         setTitle(reminderTitle);
     }, [reminderTitle]);
-
+    
     const saveChanges = () => {
         if (!!title) {
             saveTitle(title);
@@ -76,11 +78,13 @@ const ModalTitle = ({visible, setVisible, saveTitle, title: reminderTitle, goBac
             animationType='fade'
             transparent={true}
             visible={visible}
+            onShow={() => inputRef.current.focus()}
         >
             <View style={styles.modalContainer}>
                 <View style={styles.modalContentContainer}>
                     <Text style={styles.modalTitle}>Título del recordatorio:</Text>
                     <TextInput 
+                        ref={(input) => inputRef.current = input}
                         style={styles.input}
                         onChangeText={setTitle}
                         value={title}
