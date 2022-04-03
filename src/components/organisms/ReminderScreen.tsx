@@ -1,31 +1,16 @@
 import {useState, useRef, useEffect} from 'react';
 import {Animated, View, TextInput, StyleSheet} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
-import {Layout, ModalTitle} from '../molecules';
+import {Layout, ModalTitle, TextItemsList} from '../molecules';
 import {IconButton} from '../atoms';
 import AnimatedIconButton from '../atoms/AnimatedIconButton';
 import {SET_CURRENT_REMINDER} from '../../config/redux/actions';
 import generateUUID from '../../utils/uuidUtil';
-
-const styles = StyleSheet.create({
-    itemListContainer: {
-        alignItems: 'center',
-    },
-    textItemContainer: {
-        backgroundColor: "#064663",
-        width: '90%',
-        marginVertical: 20,
-        borderRadius: 10,
-    },
-    textItem: {
-        padding: 10,
-    }
-});
+import remindersReducer from '../../config/redux/reducers';
 
 const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
     const showButtonsAnimation = useRef(new Animated.Value(0)).current;
-    const textItemsRef = useRef({});
 
      //@ts-ignore
      const reminder = useSelector(({remindersReducer: {currentReminder}}) => {
@@ -40,15 +25,9 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
         Animated.timing(showButtonsAnimation, {toValue: 1, duration: 1000, useNativeDriver: true}).start();
     }, [showButtons]);
 
-    useEffect(() => {
-        if (textItemsRef.current[actualItemTextId]) {
-            textItemsRef.current[actualItemTextId].focus();
-        }
-    }, [actualItemTextId]);
-
     const dispatch = useDispatch();
 
-    const onPress = () => {
+    const onCameraButtonPress = () => {
         navigation.navigate('CameraScreen')
     }
 
@@ -76,22 +55,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
     return (
         <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
-            <View style={styles.itemListContainer}>
-                {
-                    reminder.itemsText.map((itemText) => (
-                        <View key={itemText.id} style={styles.textItemContainer}>
-                            <TextInput 
-                                ref={input => textItemsRef.current[itemText.id] = input}
-                                multiline
-                                style={styles.textItem} 
-                                onChangeText={(newText) => changeItemText(newText, itemText.id)} 
-                                placeholderTextColor='#876b44'
-                                placeholder='Nuevo reminder...'
-                            />
-                        </View>
-                    ))
-                }
-            </View>
+            <TextItemsList actualItemTextId={actualItemTextId} items={reminder.itemsText} changeItemText={changeItemText} />
             <IconButton name={showButtons ? 'minus' : 'plus'} onPress={() => setShowButtons(!showButtons)} containerStyle={{zIndex: 20}} />
             <AnimatedIconButton 
                 name="microphone" 
