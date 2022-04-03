@@ -1,11 +1,9 @@
-import {View} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
 import {SET_CURRENT_REMINDER} from '../../config/redux/actions';
 import {reminder} from '../../config/types';
 import {IconButton} from '../atoms';
-import {Header, HomeItem} from '../molecules';
+import {HomeItem, Layout} from '../molecules';
 import uuid from '../../utils/uuidUtil';
-import { Layout } from '.';
 
 const emptyReminder: reminder = {
     id: '',

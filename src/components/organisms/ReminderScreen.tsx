@@ -1,18 +1,10 @@
 import {useState, useRef, useEffect} from 'react';
-import {View, StyleSheet, Animated} from 'react-native';
+import {Animated} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
-import {Header, ModalTitle} from '../molecules';
+import {Layout, ModalTitle} from '../molecules';
 import {IconButton} from '../atoms';
-import { Layout } from '.';
 import AnimatedIconButton from '../atoms/AnimatedIconButton';
-import { SET_CURRENT_REMINDER } from '../../config/redux/actions';
-
-const styles = StyleSheet.create({
-    button: {
-        position: 'absolute',
-        bottom: 40,
-    }
-});
+import {SET_CURRENT_REMINDER} from '../../config/redux/actions';
 
 const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
 

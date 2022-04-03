@@ -5,3 +5,4 @@ export {default as PicturesList} from './PicturesList';
 export {default as ReminderItem} from './ReminderItem';
 export {default as HomeItem} from './HomeItem';
 export {default as ModalTitle} from './ModalTitle';
+export {default as Layout} from './Layout';

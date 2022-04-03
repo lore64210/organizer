@@ -1,5 +1,5 @@
 import {StyleSheet, View} from 'react-native';
-import { Header } from '../molecules';
+import Header from './Header';
 
 const styles = StyleSheet.create({
     container: {
