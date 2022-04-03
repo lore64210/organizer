@@ -9,7 +9,6 @@ import uuid from '../../utils/uuidUtil';
 const styles = StyleSheet.create({
     container: {
         backgroundColor: '#041C32',
-
         flex: 1
     }
 });

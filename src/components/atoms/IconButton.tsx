@@ -1,4 +1,4 @@
-import {TouchableOpacity, View, StyleSheet} from 'react-native';
+import {TouchableHighlight, StyleSheet} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 
 const styles = StyleSheet.create({
@@ -18,10 +18,10 @@ const styles = StyleSheet.create({
     }
 });
 
-export default ({name, color = "#ECB365", size = 30, onPress}) => {
+export default ({name, color = "#ECB365", size = 30, onPress, style = {}, containerStyle = {}}) => {
     return (
-        <TouchableOpacity onPress={onPress} style={styles.container}>
-            <FontAwesome style={styles.icon} name={name} color={color} size={size}/>
-        </TouchableOpacity>
+        <TouchableHighlight underlayColor="#041C32" onPress={onPress} style={{...containerStyle, ...styles.container}}>
+            <FontAwesome style={{...styles.icon, ...style}} name={name} color={color} size={size}/>
+        </TouchableHighlight>
     )
 }
