@@ -1,4 +1,5 @@
 import {View, StyleSheet, Image, ScrollView, useWindowDimensions} from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const styles = StyleSheet.create({
     container: {
@@ -21,7 +22,7 @@ const styles = StyleSheet.create({
     }
 });
 
-const ImagesItemList = ({items}) => {
+const ImagesItemList = ({items, onPress}) => {
     const window = useWindowDimensions();
     return (
         <>
@@ -32,7 +33,9 @@ const ImagesItemList = ({items}) => {
 
                             {
                                 items.map(item => (
-                                    <Image key={item.id} style={{...styles.item, height: window.height / 3, width: window.width / 3}} source={{uri: item.value}} />
+                                    <TouchableOpacity key={item.id} onPress={() => onPress(item)}>
+                                        <Image style={{...styles.item, height: window.height / 3, width: window.width / 3}} source={{uri: item.value}}/>
+                                    </TouchableOpacity>
                                 ))
                             }
                         </ScrollView>

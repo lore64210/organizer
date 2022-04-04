@@ -1,7 +1,7 @@
 import {useState, useRef, useEffect} from 'react';
 import {Animated} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
-import {Layout, ModalTitle, TextItemList, ImageItemList} from '../molecules';
+import {Layout, ModalTitle, TextItemList, ImageItemList, ModalImage} from '../molecules';
 import {IconButton} from '../atoms';
 import AnimatedIconButton from '../atoms/AnimatedIconButton';
 import {SET_CURRENT_REMINDER} from '../../config/redux/actions';
@@ -19,6 +19,8 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     const [showButtons, setShowButtons] = useState(false);
     const [modalVisible, setModalVisible] = useState(!reminder.title);
     const [actualItemTextId, setActualItemTextId] = useState(null);
+    const [showModalImage, setShowModalImage] = useState(false)
+    const [selectedImage, setSelectedImage] = useState(null);
 
     useEffect(() => {
         Animated.timing(showButtonsAnimation, {toValue: 1, duration: 1000, useNativeDriver: true}).start();
@@ -53,9 +55,14 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
         dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, itemsText}});
     }
 
+    const onImagePress = (item) => {
+        setSelectedImage(item);
+        setShowModalImage(true);
+    }
+
     return (
         <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
-            <ImageItemList items={reminder.itemsImage} />
+            <ImageItemList items={reminder.itemsImage} onPress={onImagePress} />
             <TextItemList actualItemTextId={actualItemTextId} items={reminder.itemsText} changeItemText={changeItemText} />
             <IconButton name={showButtons ? 'minus' : 'plus'} onPress={() => setShowButtons(!showButtons)} containerStyle={{zIndex: 20}} />
             <AnimatedIconButton 
@@ -86,6 +93,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 title={reminder.title}
                 goBack={() => navigation.goBack()}
             />
+            <ModalImage item={selectedImage} visible={showModalImage} setVisible={setShowModalImage} />
         </Layout>
     )
 }
