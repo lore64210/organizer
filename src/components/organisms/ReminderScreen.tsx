@@ -6,7 +6,6 @@ import {IconButton} from '../atoms';
 import AnimatedIconButton from '../atoms/AnimatedIconButton';
 import {SET_CURRENT_REMINDER} from '../../config/redux/actions';
 import generateUUID from '../../utils/uuidUtil';
-import remindersReducer from '../../config/redux/reducers';
 
 const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
 

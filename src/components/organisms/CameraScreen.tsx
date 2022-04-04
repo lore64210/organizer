@@ -2,6 +2,7 @@ import {useState, useEffect} from 'react';
 import {View, StyleSheet} from 'react-native';
 import {Camera} from 'expo-camera';
 import { IconButton } from '../atoms';
+import Slider from '@react-native-community/slider';
 
 const styles = StyleSheet.create({
     container: {
@@ -26,12 +27,21 @@ const styles = StyleSheet.create({
     takePictureButton: {
         width: 70,
         height: 70
+    },
+    zoomBar: {
+        left: '55%',
+        bottom: '25%',
+        position: 'absolute',
+        transform: [{rotate: '-90deg'}],
+        width: 200,
+        height: 30,
     }
 });
 
 const CameraScreen = ({navigation}) => {
 
     const [hasPermission, setHasPermission] = useState(null);
+    const [zoom, setZoom] = useState(0);
     const [type, setType] = useState(Camera.Constants.Type.back);
     const [flashMode, setFlashMode] = useState(Camera.Constants.FlashMode.off);
 
@@ -49,33 +59,47 @@ const CameraScreen = ({navigation}) => {
     }
     return (
         <View style={styles.container}>
-            <Camera style={styles.camera} type={type} flashMode={flashMode}>
-                <View style={styles.buttonContainer}>
-                    <IconButton 
-                        containerStyle={styles.button} 
-                        name='flash' 
-                        onPress={() => {
-                            setFlashMode(flashMode === Camera.Constants.FlashMode.on 
-                            ? Camera.Constants.FlashMode.off
-                            : Camera.Constants.FlashMode.on);
-                        }}
-                        color={flashMode === Camera.Constants.FlashMode.off ? 'black' :  "#ECB365"}
+            <Camera style={styles.camera} type={type} flashMode={flashMode} zoom={zoom}>
+                <View style={styles.container}>
+                    <View style={styles.zoomBar}>
+                    <Slider
+                        style={{width: '100%', height: '100%'}}
+                        minimumValue={0}
+                        maximumValue={1}
+                        minimumTrackTintColor='#064663'
+                        maximumTrackTintColor='#041C32'
+                        thumbTintColor='#ECB365'
+                        onValueChange={setZoom}
+                        value={zoom}
                     />
-                    <IconButton 
-                        size={50}
-                        containerStyle={{...styles.button, ...styles.takePictureButton}} 
-                        name='dot-circle-o' 
-                        onPress={() => {}}/>
-                    <IconButton 
-                        containerStyle={styles.button} 
-                        name='refresh' 
-                        onPress={() => {
-                        setType(
-                            type === Camera.Constants.Type.back
-                            ? Camera.Constants.Type.front
-                            : Camera.Constants.Type.back
-                        );
-                    }}/>
+                    </View>
+                    <View style={styles.buttonContainer}>
+                        <IconButton 
+                            containerStyle={styles.button} 
+                            name='flash' 
+                            onPress={() => {
+                                setFlashMode(flashMode === Camera.Constants.FlashMode.on 
+                                ? Camera.Constants.FlashMode.off
+                                : Camera.Constants.FlashMode.on);
+                            }}
+                            color={flashMode === Camera.Constants.FlashMode.off ? 'black' :  "#ECB365"}
+                        />
+                        <IconButton 
+                            size={50}
+                            containerStyle={{...styles.button, ...styles.takePictureButton}} 
+                            name='dot-circle-o' 
+                            onPress={() => {}}/>
+                        <IconButton 
+                            containerStyle={styles.button} 
+                            name='refresh' 
+                            onPress={() => {
+                            setType(
+                                type === Camera.Constants.Type.back
+                                ? Camera.Constants.Type.front
+                                : Camera.Constants.Type.back
+                            );
+                        }}/>
+                    </View>
                 </View>
             </Camera>
     </View>
