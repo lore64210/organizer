@@ -1,10 +1,8 @@
 import {
-    FIND_ALL_REMINDERS,
     CREATE_REMINDER,
     UPDATE_REMINDER,
     DELETE_REMINDER,
     SET_CURRENT_REMINDER,
-    GET_CURRENT_REMINDER,
 } from './actions';
 import {reminder} from '../types';
 

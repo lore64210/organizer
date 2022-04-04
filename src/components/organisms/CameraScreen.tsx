@@ -1,8 +1,11 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import {View, StyleSheet} from 'react-native';
 import {Camera} from 'expo-camera';
 import { IconButton } from '../atoms';
 import Slider from '@react-native-community/slider';
+import {useSelector, useDispatch} from 'react-redux';
+import { SET_CURRENT_REMINDER } from '../../config/redux/actions';
+import generateUUID from '../../utils/uuidUtil';
 
 const styles = StyleSheet.create({
     container: {
@@ -45,6 +48,15 @@ const CameraScreen = ({navigation}) => {
     const [type, setType] = useState(Camera.Constants.Type.back);
     const [flashMode, setFlashMode] = useState(Camera.Constants.FlashMode.off);
 
+    const cameraRef = useRef(null);
+    
+    //@ts-ignore
+    const reminder = useSelector(({remindersReducer: {currentReminder}}) => {
+        return currentReminder;
+    });
+
+    const dispatch = useDispatch();
+    
     useEffect(() => {
         (async () => {
             const { status } = await Camera.requestCameraPermissionsAsync();
@@ -57,9 +69,22 @@ const CameraScreen = ({navigation}) => {
         navigation.goBack();
         return <View />;
     }
+
+    const takePicture = async () => {
+        if(cameraRef.current){
+            const {uri} = await cameraRef.current.takePictureAsync(null);
+            const newImage = {
+                id: generateUUID(),
+                value: uri,
+                position: reminder.itemsImage.length + 1
+            };
+            dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, itemsImage: [...reminder.itemsImage, newImage]}});
+            navigation.goBack();
+        }
+      }
     return (
         <View style={styles.container}>
-            <Camera style={styles.camera} type={type} flashMode={flashMode} zoom={zoom}>
+            <Camera ref={cameraRef} style={styles.camera} type={type} flashMode={flashMode} zoom={zoom}>
                 <View style={styles.container}>
                     <View style={styles.zoomBar}>
                     <Slider
@@ -88,17 +113,19 @@ const CameraScreen = ({navigation}) => {
                             size={50}
                             containerStyle={{...styles.button, ...styles.takePictureButton}} 
                             name='dot-circle-o' 
-                            onPress={() => {}}/>
+                            onPress={takePicture}
+                        />
                         <IconButton 
                             containerStyle={styles.button} 
                             name='refresh' 
                             onPress={() => {
-                            setType(
-                                type === Camera.Constants.Type.back
-                                ? Camera.Constants.Type.front
-                                : Camera.Constants.Type.back
-                            );
-                        }}/>
+                                setType(
+                                    type === Camera.Constants.Type.back
+                                    ? Camera.Constants.Type.front
+                                    : Camera.Constants.Type.back
+                                );
+                            }}
+                        />
                     </View>
                 </View>
             </Camera>

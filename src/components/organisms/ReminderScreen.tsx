@@ -1,5 +1,5 @@
 import {useState, useRef, useEffect} from 'react';
-import {Animated, View, TextInput, StyleSheet} from 'react-native';
+import {Animated} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
 import {Layout, ModalTitle, TextItemsList} from '../molecules';
 import {IconButton} from '../atoms';
@@ -11,8 +11,8 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
     const showButtonsAnimation = useRef(new Animated.Value(0)).current;
 
-     //@ts-ignore
-     const reminder = useSelector(({remindersReducer: {currentReminder}}) => {
+    //@ts-ignore
+    const reminder = useSelector(({remindersReducer: {currentReminder}}) => {
         return currentReminder;
     });
 
@@ -29,6 +29,8 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     const onCameraButtonPress = () => {
         navigation.navigate('CameraScreen')
     }
+
+    console.log(reminder);
 
     const onTitlePress = () => {
         setModalVisible(true);
