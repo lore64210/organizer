@@ -28,13 +28,13 @@ const ImagesItemList = ({items, onPress}) => {
         <>
             {
                 items.length ? (
-                    <View style={{...styles.container, height: (window.height / 3) + 20}}>
+                    <View style={{...styles.container, height: (window.height / 4) + 20}}>
                         <ScrollView horizontal style={styles.listContainer} contentContainerStyle={styles.contentContainerStyle}>
 
                             {
                                 items.map(item => (
                                     <TouchableOpacity key={item.id} onPress={() => onPress(item)}>
-                                        <Image style={{...styles.item, height: window.height / 3, width: window.width / 3}} source={{uri: item.value}}/>
+                                        <Image style={{...styles.item, height: window.height / 4, width: window.width / 4}} source={{uri: item.value}}/>
                                     </TouchableOpacity>
                                 ))
                             }
