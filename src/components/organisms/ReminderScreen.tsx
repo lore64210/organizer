@@ -27,7 +27,8 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     const dispatch = useDispatch();
 
     const onCameraButtonPress = () => {
-        navigation.navigate('CameraScreen')
+        setShowButtons(false);
+        navigation.navigate('CameraScreen');
     }
 
     const onTitlePress = () => {

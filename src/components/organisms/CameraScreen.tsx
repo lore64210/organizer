@@ -78,7 +78,7 @@ const CameraScreen = ({navigation}) => {
                 value: uri,
                 position: reminder.itemsImage.length + 1
             };
-            dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, itemsImage: [...reminder.itemsImage, newImage]}});
+            dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, itemsImage: [newImage, ...reminder.itemsImage]}});
             navigation.goBack();
         }
       }

@@ -15,11 +15,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: 10,
         overflow: 'hidden',
+        paddingHorizontal: 5,
     },
     item: {
         height: '90%',
         width: 100,
-        marginLeft: 10,
+        marginHorizontal: 5,
         borderRadius: 10,
     }
 });
