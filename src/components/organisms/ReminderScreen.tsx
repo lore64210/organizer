@@ -1,7 +1,7 @@
 import {useState, useRef, useEffect} from 'react';
 import {Animated} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
-import {Layout, ModalTitle, TextItemsList} from '../molecules';
+import {Layout, ModalTitle, TextItemList, ImageItemList} from '../molecules';
 import {IconButton} from '../atoms';
 import AnimatedIconButton from '../atoms/AnimatedIconButton';
 import {SET_CURRENT_REMINDER} from '../../config/redux/actions';
@@ -30,8 +30,6 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
         navigation.navigate('CameraScreen')
     }
 
-    console.log(reminder);
-
     const onTitlePress = () => {
         setModalVisible(true);
         setShowButtons(false);
@@ -56,7 +54,8 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
     return (
         <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
-            <TextItemsList actualItemTextId={actualItemTextId} items={reminder.itemsText} changeItemText={changeItemText} />
+            <ImageItemList items={reminder.itemsImage} />
+            <TextItemList actualItemTextId={actualItemTextId} items={reminder.itemsText} changeItemText={changeItemText} />
             <IconButton name={showButtons ? 'minus' : 'plus'} onPress={() => setShowButtons(!showButtons)} containerStyle={{zIndex: 20}} />
             <AnimatedIconButton 
                 name="microphone" 
