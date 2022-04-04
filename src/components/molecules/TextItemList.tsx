@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
     },
     textItemContainer: {
         backgroundColor: "#064663",
-        width: '90%',
+        width: '95%',
         marginVertical: 20,
         borderRadius: 10,
     },

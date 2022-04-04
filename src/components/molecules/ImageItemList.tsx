@@ -1,47 +1,46 @@
-import {View, StyleSheet, Image} from 'react-native';
+import {View, StyleSheet, Image, ScrollView, useWindowDimensions} from 'react-native';
 
 const styles = StyleSheet.create({
     container: {
         marginTop: 20,
-        justifyContent: 'center',
         alignItems: 'center',
-        height: '25%',
+        justifyContent: 'center',
+    },
+    contentContainerStyle: {
+        alignItems: 'center'
     },
     listContainer: {
-        height: '100%',
-        flexDirection: 'row',
         backgroundColor: '#064663',
-        width: '90%',
-        alignItems: 'center',
+        width: '95%',
         borderRadius: 10,
-        overflow: 'hidden',
-        paddingHorizontal: 5,
+        flex: 1,
     },
     item: {
-        height: '90%',
-        width: 100,
         marginHorizontal: 5,
         borderRadius: 10,
     }
 });
 
 const ImagesItemList = ({items}) => {
+    const window = useWindowDimensions();
     return (
         <>
             {
                 items.length ? (
-                    <View style={styles.container}>
-                        <View style={styles.listContainer}>
+                    <View style={{...styles.container, height: (window.height / 3) + 20}}>
+                        <ScrollView horizontal style={styles.listContainer} contentContainerStyle={styles.contentContainerStyle}>
+
                             {
                                 items.map(item => (
-                                    <Image key={item.id} style={styles.item} source={{uri: item.value}} />
+                                    <Image key={item.id} style={{...styles.item, height: window.height / 3, width: window.width / 3}} source={{uri: item.value}} />
                                 ))
                             }
-                        </View>
+                        </ScrollView>
                     </View>
                 ) : <View />
             }
         </>
+        
     );
 }
 
