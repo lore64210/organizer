@@ -89,16 +89,16 @@ const CameraScreen = ({navigation}) => {
             <Camera ref={cameraRef} style={styles.camera} type={type} flashMode={flashMode} zoom={zoom}>
                 <View style={styles.container}>
                     <View style={styles.zoomBar}>
-                    <Slider
-                        style={{width: '100%', height: '100%'}}
-                        minimumValue={0}
-                        maximumValue={1}
-                        minimumTrackTintColor={theme.primaryColor}
-                        maximumTrackTintColor={theme.backgroundColor}
-                        thumbTintColor={theme.textColor}
-                        onValueChange={setZoom}
-                        value={zoom}
-                    />
+                        <Slider
+                            style={{width: '100%', height: '100%'}}
+                            minimumValue={0}
+                            maximumValue={1}
+                            minimumTrackTintColor={theme.primaryColor}
+                            maximumTrackTintColor={theme.backgroundColor}
+                            thumbTintColor={theme.textColor}
+                            onValueChange={setZoom}
+                            value={zoom}
+                        />
                     </View>
                     <View style={styles.buttonContainer}>
                         <IconButton 
