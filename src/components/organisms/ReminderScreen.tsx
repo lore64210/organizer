@@ -1,7 +1,7 @@
 import {useState, useRef, useEffect} from 'react';
 import {Animated} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
-import {Layout, ModalTitle, TextItemList, ImageItemList, ModalImage, ModalAudio} from '../molecules';
+import {Layout, ModalTitle, ItemList, ImageItemList, ModalImage, ModalAudio} from '../molecules';
 import {IconButton} from '../atoms';
 import AnimatedIconButton from '../atoms/AnimatedIconButton';
 import {SET_CURRENT_REMINDER} from '../../config/redux/actions';
@@ -40,20 +40,25 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     }
 
     const addItemText = () => {
-        const newItemText = {
-            id: generateUUID(),
-            value: '',
-            type: 'text',
-            position: reminder.itemsText.length + 1,
-        };
-        dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, itemsText: [...reminder.itemsText, newItemText]}});
+        const newItemText = createItem('', 'text');
         setShowButtons(false);
         setActualItemTextId(newItemText.id);
     }
 
+    const createItem = (value, type) => {
+        const newItem = {
+            id: generateUUID(),
+            value,
+            type,
+            position: reminder.items.length + 1,
+        };
+        dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, items: [...reminder.items, newItem]}});
+        return newItem;
+    }
+
     const changeItemText = (newText, itemId) => {
-        const itemsText = reminder.itemsText.map(item => item.id === itemId ? {...item, value: newText} : item);
-        dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, itemsText}});
+        const items = reminder.items.map(item => item.id === itemId ? {...item, value: newText} : item);
+        dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, items}});
     }
 
     const onImagePress = (item) => {
@@ -66,19 +71,10 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
         setShowButtons(false);
     }
 
-    const saveAudio = audioUri => {
-        const newAudio = {
-            id: generateUUID(),
-            value: audioUri,
-            position: reminder.itemsAudio.length,
-        };
-        dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, itemsAudio: [...reminder.itemsAudio, newAudio]}});
-    }
-
     return (
         <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
             <ImageItemList items={reminder.itemsImage} onPress={onImagePress} />
-            <TextItemList actualItemTextId={actualItemTextId} items={reminder.itemsText} changeItemText={changeItemText} />
+            <ItemList actualItemTextId={actualItemTextId} items={reminder.items} changeItemText={changeItemText} />
             <IconButton name={showButtons ? 'minus' : 'plus'} onPress={() => setShowButtons(!showButtons)} containerStyle={{zIndex: 20}} />
             <AnimatedIconButton 
                 name="microphone" 
@@ -109,7 +105,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 goBack={() => navigation.goBack()}
             />
             <ModalImage item={selectedImage} visible={showModalImage} setVisible={setShowModalImage} />
-            <ModalAudio saveAudio={audioUri => saveAudio(audioUri)} visible={showModalAudio} setVisible={setShowModalAudio} />
+            <ModalAudio saveAudio={(audioUri) => createItem(audioUri, 'audio')} visible={showModalAudio} setVisible={setShowModalAudio} />
         </Layout>
     )
 }

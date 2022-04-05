@@ -1,12 +1,18 @@
+type item = {
+    id: string,
+    value: string,
+    position: number,
+    type: string,
+}
 
 type reminder = {
     id: string,
     title: string,
-    itemsText: string[],
-    itemsAudio: any,
-    itemsImage: any,
+    items: item[],
+    itemsImage: item[],
 }
 
 export {
+    item,
     reminder,
 };

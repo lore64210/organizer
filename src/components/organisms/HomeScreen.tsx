@@ -8,8 +8,7 @@ import uuid from '../../utils/uuidUtil';
 const emptyReminder: reminder = {
     id: '',
     title: '',
-    itemsText: [],
-    itemsAudio: [],
+    items: [],
     itemsImage: []
 };
 

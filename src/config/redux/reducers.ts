@@ -11,22 +11,19 @@ const initialState : {reminders: reminder[], currentReminder: reminder|null} = {
     {
       id: '1',
       title: 'Titulo 1',
-      itemsText: [],
-      itemsAudio: [],
+      items: [],
       itemsImage: []
     },
     {
       id: '2',
       title: 'Titulo 2',
-      itemsText: [],
-      itemsAudio: [],
+      items: [],
       itemsImage: []
     },
     {
       id: '3',
       title: 'Titulo 3',
-      itemsText: [],
-      itemsAudio: [],
+      items: [],
       itemsImage: []
     },
   ],
