@@ -92,7 +92,7 @@ const ModalTitle = ({visible, setVisible, saveTitle, title: reminderTitle, goBac
                     <View style={styles.buttonsContainer}>
                         {
                             !!reminderTitle
-                            ? <IconButton containerStyle={styles.button} name='ban' onPress={onClose} />
+                            ? <IconButton containerStyle={styles.button} name='close' onPress={onClose} />
                             : <IconButton containerStyle={styles.button} name='arrow-left' onPress={onGoBack} />
                         }
                         <IconButton containerStyle={styles.button} name='check' onPress={saveChanges} color={!!title ? '#ECB365' : 'grey'} />
