@@ -1,15 +1,16 @@
 import {useRef, useEffect} from 'react';
 import {View, StyleSheet, TextInput} from 'react-native';
+import theme from '../../config/theme';
 
 const styles = StyleSheet.create({
     itemListContainer: {
         alignItems: 'center',
     },
     textItemContainer: {
-        backgroundColor: "#064663",
+        backgroundColor: theme.primaryColor,
         width: '95%',
         marginVertical: 20,
-        borderRadius: 10,
+        borderRadius: theme.borderRadius,
     },
     textItem: {
         padding: 10,

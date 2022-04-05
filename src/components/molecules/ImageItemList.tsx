@@ -1,5 +1,6 @@
 import {View, StyleSheet, Image, ScrollView, useWindowDimensions} from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import theme from '../../config/theme';
 
 const styles = StyleSheet.create({
     container: {
@@ -11,14 +12,14 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     listContainer: {
-        backgroundColor: '#064663',
+        backgroundColor: theme.primaryColor,
         width: '95%',
-        borderRadius: 10,
+        borderRadius: theme.borderRadius,
         flex: 1,
     },
     item: {
         marginHorizontal: 5,
-        borderRadius: 10,
+        borderRadius: theme.borderRadius,
     }
 });
 

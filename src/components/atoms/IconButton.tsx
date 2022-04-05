@@ -1,15 +1,16 @@
 import {TouchableHighlight, StyleSheet} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import theme from '../../config/theme';
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#064663',
-        borderRadius: 100,
+        backgroundColor: theme.primaryColor,
+        borderRadius: theme.borderRadiusButton,
         position: 'absolute',
         bottom: 20,
         right: 20,
-        width: 50,
-        height: 50,
+        width: theme.buttonSize,
+        height: theme.buttonSize,
         alignItems: 'center',
         justifyContent: 'center',
     },

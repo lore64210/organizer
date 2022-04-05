@@ -21,6 +21,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     const [actualItemTextId, setActualItemTextId] = useState(null);
     const [showModalImage, setShowModalImage] = useState(false)
     const [selectedImage, setSelectedImage] = useState(null);
+    const [isAudioRecording, setIsAudioRecording] = useState(false);
 
     useEffect(() => {
         Animated.timing(showButtonsAnimation, {toValue: 1, duration: 1000, useNativeDriver: true}).start();

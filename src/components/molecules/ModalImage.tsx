@@ -1,4 +1,5 @@
 import {View, Modal, Image, StyleSheet, useWindowDimensions} from 'react-native';
+import theme from '../../config/theme';
 import {IconButton} from '../atoms';
 
 const styles = StyleSheet.create({
@@ -8,17 +9,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalContentContainer: {
-        backgroundColor: '#04293A',
+        backgroundColor: theme.secondaryColor,
         width: '90%',
         justifyContent: 'space-around',
         alignItems: 'center',
-        borderRadius: 12,
+        borderRadius: theme.borderRadius,
     },
     image: {
         width: 100,
         height: 100,
         marginVertical: 20,
-        borderRadius: 10,
+        borderRadius: theme.borderRadius,
     },
     buttonsContainer: {
         flexDirection: 'row',
@@ -27,8 +28,8 @@ const styles = StyleSheet.create({
     },
     button: {
         position: 'relative',
-        backgroundColor: '#064663',
-        borderRadius: 100,
+        backgroundColor: theme.primaryColor,
+        borderRadius: theme.borderRadiusButton,
         width: 40,
         height: 40,
         alignItems: 'center',

@@ -1,14 +1,15 @@
 import {View, Text, StyleSheet} from 'react-native';
+import theme from '../../config/theme';
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#041C32',
+        backgroundColor: theme.backgroundColor,
         alignItems: 'center',
-        borderBottomColor: '#04293A',
+        borderBottomColor: theme.secondaryColor,
         borderBottomWidth: 5,
     },
     title: {
-        color: '#ECB365',
+        color: theme.textColor,
         fontWeight: 'bold',
         fontSize: 20,
         paddingTop: 50,

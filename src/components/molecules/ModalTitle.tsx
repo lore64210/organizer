@@ -1,6 +1,7 @@
 import {useEffect, useRef} from 'react';
 import {useState} from 'react';
 import {View, Modal, Text, StyleSheet, TextInput} from 'react-native';
+import theme from '../../config/theme';
 import {IconButton} from '../atoms';
 
 const styles = StyleSheet.create({
@@ -10,39 +11,35 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalContentContainer: {
-        backgroundColor: '#04293A',
+        backgroundColor: theme.secondaryColor,
         width: '90%',
         height: 200,
         justifyContent: 'space-around',
         alignItems: 'center',
-        borderRadius: 12,
+        borderRadius: theme.borderRadius,
     },
     modalTitle: {
         fontSize: 20,
-        color: '#ECB365',
+        color: theme.textColor,
     },
     input: {
         color: 'white',
-        backgroundColor: '#064663',
+        backgroundColor: theme.primaryColor,
         width: '90%',
         padding: 10,
-        borderRadius: 12,
-        marginBottom: 20,
+        borderRadius: theme.borderRadius,
+        marginBottom: 30,
     },
     buttonsContainer: {
         flexDirection: 'row',
         justifyContent: 'space-around',
         width: '100%',
-        marginBottom: 10,
     },
     button: {
         position: 'relative',
-        backgroundColor: '#064663',
-        borderRadius: 100,
         width: 40,
         height: 40,
-        alignItems: 'center',
-        justifyContent: 'center',
+        left: 0,
     }
 });
 

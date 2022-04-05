@@ -1,10 +1,11 @@
 import {StyleSheet, View} from 'react-native';
+import theme from '../../config/theme';
 import Header from './Header';
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#041C32',
+        backgroundColor: theme.backgroundColor,
     }
 });
 
