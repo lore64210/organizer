@@ -75,7 +75,12 @@ const ModalAudio = ({visible, setVisible, saveAudio}) => {
 
     useEffect(() => {
         const saveSound = async () => {
-            const { sound } = await Audio.Sound.createAsync({uri: audioUri});
+            const onPlaybackStatusUpdate = (playbackStatus) => {
+                if (playbackStatus.didJustFinish) {
+                    setIsAudioPlaying(false);
+                }
+            }
+            const { sound } = await Audio.Sound.createAsync({uri: audioUri}, {}, onPlaybackStatusUpdate);
             setSound(sound);
         }
         audioUri && saveSound();
@@ -130,7 +135,7 @@ const ModalAudio = ({visible, setVisible, saveAudio}) => {
     }
 
     const onPlayButtonPress = () => {
-        audioUri && (!isAudioPlaying ? playAudio() : stopAudio()) 
+        audioUri && !isAudioRecording && (!isAudioPlaying ? playAudio() : stopAudio()) 
     }
 
     const playAudio = async () => {
@@ -158,7 +163,14 @@ const ModalAudio = ({visible, setVisible, saveAudio}) => {
                     <Text style={styles.modalTitle}>{!isAudioRecording ? 'Presione para ' : 'Suelte para dejar de '}grabar:</Text>
                     <View style={styles.audioButtonsContainer}>
                         <IconButton size={30} containerStyle={styles.audioButton} name='microphone' onPressIn={onAudioButtonPressStart} onPressOut={onAudioButtonPressStop} />
-                        {audioUri ? <IconButton size={30} containerStyle={styles.audioButton} name={isAudioPlaying ? 'stop' : 'play'} onPress={onPlayButtonPress} /> : null}
+                        {audioUri 
+                            ? <IconButton 
+                                size={30} 
+                                containerStyle={styles.audioButton} 
+                                name={isAudioPlaying ? 'stop' : 'play'} 
+                                onPress={onPlayButtonPress} 
+                                color={!isAudioRecording ? theme.textColor : 'grey'} /> 
+                            : null}
                     </View>
                     <View style={styles.buttonsContainer}>
                         <IconButton containerStyle={styles.button} name='close' onPress={onClose} />
