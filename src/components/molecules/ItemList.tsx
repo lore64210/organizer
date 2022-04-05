@@ -1,8 +1,10 @@
-import {useRef, useEffect} from 'react';
+import {useRef, useEffect, useState} from 'react';
 import {View, StyleSheet, TextInput} from 'react-native';
 import theme from '../../config/theme';
 import { IconButton } from '../atoms';
 import Slider from '@react-native-community/slider';
+import { Sound } from 'expo-av/build/Audio';
+import { Audio } from 'expo-av';
 
 const styles = StyleSheet.create({
     itemListContainer: {
@@ -36,7 +38,48 @@ const styles = StyleSheet.create({
 
 const ItemList = ({items, actualItemTextId, changeItemText}) => {
 
+    const [currentAudioPlaying, setcurrentAudioPlaying] = useState(null);
+    const [sounds, setSounds] = useState([]);
+
     const textItemsRef = useRef({});
+
+    const onAudioButtonPress = (audioId) => {
+        if (!currentAudioPlaying) {
+            playAudio(audioId);
+        } else if (currentAudioPlaying === audioId) {
+            stopAudio(audioId);
+        }
+    }
+
+    const playAudio = async (audioId) => {
+        setcurrentAudioPlaying(audioId);
+        const [{sound}] = sounds.filter(sound => sound.id === audioId);
+        await sound.playAsync();
+    }
+
+    const stopAudio = async (audioId) => {
+        setcurrentAudioPlaying(null);
+        const [{sound}] = sounds.filter(sound => sound.id === audioId);
+        await sound.stopAsync();
+    }
+
+    useEffect(() => {
+        const newSounds = [];
+        items
+            .filter(i => i.type === 'audio')
+            .forEach(i => {
+                const onPlaybackStatusUpdate = (playbackStatus) => {
+                    if (playbackStatus.didJustFinish) {
+                        setcurrentAudioPlaying(null);
+                    }
+                }
+                (async () => {
+                    const { sound } = await Audio.Sound.createAsync({uri: i.value}, {}, onPlaybackStatusUpdate);
+                    newSounds.push({sound, id: i.id});
+                })();
+            });
+        setSounds(newSounds);
+    }, [items.length]);
 
     useEffect(() => {
         if (textItemsRef.current[actualItemTextId]) {
@@ -63,7 +106,12 @@ const ItemList = ({items, actualItemTextId, changeItemText}) => {
                                 ),
                                 audio: (
                                     <View style={styles.audioItem}>
-                                        <IconButton name='play' containerStyle={styles.audioButton} />
+                                        <IconButton 
+                                            name={currentAudioPlaying === item.id ? 'stop' : 'play'} 
+                                            containerStyle={styles.audioButton} 
+                                            color={!currentAudioPlaying || currentAudioPlaying === item.id ? theme.textColor : 'grey'}
+                                            onPress={() => onAudioButtonPress(item.id)}
+                                        />
                                         <View style={styles.audioSlider}>
                                             <Slider
                                                 style={{width: '100%', height: '100%'}}
