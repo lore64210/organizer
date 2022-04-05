@@ -37,7 +37,7 @@ const TextItemsList = ({items, actualItemTextId, changeItemText}) => {
                             multiline
                             style={styles.textItem} 
                             onChangeText={(newText) => changeItemText(newText, itemText.id)} 
-                            placeholderTextColor='#876b44'
+                            placeholderTextColor={theme.placeholderTextColor}
                             placeholder='Nuevo reminder...'
                         />
                     </View>

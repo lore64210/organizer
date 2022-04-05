@@ -87,7 +87,7 @@ const ModalTitle = ({visible, setVisible, saveTitle, title: reminderTitle, goBac
                         value={title}
                         placeholder="Ingrese un título..."
                         maxLength={30}
-                        placeholderTextColor='#876b44'
+                        placeholderTextColor={theme.placeholderTextColor}
                     />
                     <View style={styles.buttonsContainer}>
                         {
@@ -95,7 +95,7 @@ const ModalTitle = ({visible, setVisible, saveTitle, title: reminderTitle, goBac
                             ? <IconButton containerStyle={styles.button} name='close' onPress={onClose} />
                             : <IconButton containerStyle={styles.button} name='arrow-left' onPress={onGoBack} />
                         }
-                        <IconButton containerStyle={styles.button} name='check' onPress={saveChanges} color={!!title ? '#ECB365' : 'grey'} />
+                        <IconButton containerStyle={styles.button} name='check' onPress={saveChanges} color={!!title ? theme.textColor : 'grey'} />
                     </View>
                 </View>
             </View>

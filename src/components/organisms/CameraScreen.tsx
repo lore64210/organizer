@@ -6,6 +6,7 @@ import Slider from '@react-native-community/slider';
 import {useSelector, useDispatch} from 'react-redux';
 import { SET_CURRENT_REMINDER } from '../../config/redux/actions';
 import generateUUID from '../../utils/uuidUtil';
+import theme from '../../config/theme';
 
 const styles = StyleSheet.create({
     container: {
@@ -91,9 +92,9 @@ const CameraScreen = ({navigation}) => {
                         style={{width: '100%', height: '100%'}}
                         minimumValue={0}
                         maximumValue={1}
-                        minimumTrackTintColor='#064663'
-                        maximumTrackTintColor='#041C32'
-                        thumbTintColor='#ECB365'
+                        minimumTrackTintColor={theme.primaryColor}
+                        maximumTrackTintColor={theme.backgroundColor}
+                        thumbTintColor={theme.textColor}
                         onValueChange={setZoom}
                         value={zoom}
                     />
