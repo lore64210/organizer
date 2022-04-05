@@ -1,7 +1,7 @@
 import {useState, useRef, useEffect} from 'react';
 import {Animated} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
-import {Layout, ModalTitle, TextItemList, ImageItemList, ModalImage} from '../molecules';
+import {Layout, ModalTitle, TextItemList, ImageItemList, ModalImage, ModalAudio} from '../molecules';
 import {IconButton} from '../atoms';
 import AnimatedIconButton from '../atoms/AnimatedIconButton';
 import {SET_CURRENT_REMINDER} from '../../config/redux/actions';
@@ -20,6 +20,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     const [modalVisible, setModalVisible] = useState(!reminder.title);
     const [actualItemTextId, setActualItemTextId] = useState(null);
     const [showModalImage, setShowModalImage] = useState(false)
+    const [showModalAudio, setShowModalAudio] = useState(false)
     const [selectedImage, setSelectedImage] = useState(null);
 
     useEffect(() => {
@@ -60,6 +61,20 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
         setShowModalImage(true);
     }
 
+    const onAudioButtonPress = () => {
+        setShowModalAudio(true);
+        setShowButtons(false);
+    }
+
+    const saveAudio = audioUri => {
+        const newAudio = {
+            id: generateUUID(),
+            value: audioUri,
+            position: reminder.itemsAudio.length,
+        };
+        dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, itemsAudio: [...reminder.itemsAudio, newAudio]}});
+    }
+
     return (
         <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
             <ImageItemList items={reminder.itemsImage} onPress={onImagePress} />
@@ -67,7 +82,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
             <IconButton name={showButtons ? 'minus' : 'plus'} onPress={() => setShowButtons(!showButtons)} containerStyle={{zIndex: 20}} />
             <AnimatedIconButton 
                 name="microphone" 
-                onPress={() => console.log('test')} 
+                onPress={onAudioButtonPress} 
                 position={80} 
                 showButton={showButtons}
                 containerStyle={{zIndex: 9}}
@@ -94,6 +109,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 goBack={() => navigation.goBack()}
             />
             <ModalImage item={selectedImage} visible={showModalImage} setVisible={setShowModalImage} />
+            <ModalAudio saveAudio={audioUri => saveAudio(audioUri)} visible={showModalAudio} setVisible={setShowModalAudio} />
         </Layout>
     )
 }
