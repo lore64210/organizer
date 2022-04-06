@@ -115,13 +115,19 @@ const ItemList = ({items, actualItemTextId, changeItemText}) => {
         return filteredSounds.length ? filteredSounds[0].durationMillis : 1
     }
 
-    const onAudioControlSlideComplete = (newPositionMillis, audioId) => {
+    const onAudioControlSlideComplete = async (newPositionMillis, audioId) => {
+        if (currentAudioPlaying) {
+            const [{sound}] = sounds?.filter(sound => sound.id === audioId);
+            console.log('pausing')
+            await sound.pauseAsync();
+            await sound.playFromPositionAsync(newPositionMillis);
+        }
         setSounds(sounds.map(s => {
             if (s.id === audioId) {
                 return {...s, positionMillis: newPositionMillis};
             }
             return s;
-        }))
+        }));
     }
 
     const getAudioControlValue = (audio) => {
@@ -149,7 +155,7 @@ const ItemList = ({items, actualItemTextId, changeItemText}) => {
                                 audio: (
                                     <View style={styles.audioItem}>
                                         <IconButton 
-                                            name={currentAudioPlaying === item.id ? 'stop' : 'play'} 
+                                            name={currentAudioPlaying === item.id ? 'pause' : 'play'} 
                                             containerStyle={styles.audioButton} 
                                             color={!currentAudioPlaying || currentAudioPlaying === item.id ? theme.textColor : 'grey'}
                                             onPress={() => onAudioButtonPress(item.id)}
