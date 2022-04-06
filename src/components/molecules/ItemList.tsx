@@ -4,6 +4,7 @@ import theme from '../../config/theme';
 import { IconButton } from '../atoms';
 import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
+import { Sound } from 'expo-av/build/Audio';
 
 const styles = StyleSheet.create({
     itemListContainer: {
@@ -38,7 +39,7 @@ const styles = StyleSheet.create({
 const ItemList = ({items, actualItemTextId, changeItemText}) => {
 
     const [currentAudioPlaying, setcurrentAudioPlaying] = useState(null);
-    const [sounds, setSounds] = useState([]);
+    const [sounds, setSounds] = useState<{id: string, sound: Sound, positionMillis: any, durationMillis: any}[]>([]);
 
     const textItemsRef = useRef({});
 
@@ -46,38 +47,61 @@ const ItemList = ({items, actualItemTextId, changeItemText}) => {
         if (!currentAudioPlaying) {
             playAudio(audioId);
         } else if (currentAudioPlaying === audioId) {
-            stopAudio(audioId);
+            pauseAudio(audioId);
         }
     }
 
     const playAudio = async (audioId) => {
-        setcurrentAudioPlaying(audioId);
-        const [{sound}] = sounds.filter(sound => sound.id === audioId);
-        await sound.playAsync();
+        if (sounds?.length) {
+            setcurrentAudioPlaying(audioId);
+            const [{sound, positionMillis}] = sounds.filter(sound => sound.id === audioId);
+            await sound.playFromPositionAsync(positionMillis);
+        }
     }
 
-    const stopAudio = async (audioId) => {
+    const pauseAudio = async (audioId) => {
         setcurrentAudioPlaying(null);
-        const [{sound}] = sounds.filter(sound => sound.id === audioId);
-        await sound.stopAsync();
+        const [{sound}] = sounds?.filter(sound => sound.id === audioId);
+        await sound.pauseAsync();
+    }
+
+    const onPlaybackStatusUpdate = async (playbackStatus, id) => {
+        setSounds((prevSounds) => prevSounds.map(s => {
+            if (s.id === id) {
+                return {
+                    ...s,
+                    positionMillis: playbackStatus.positionMillis,
+                    durationMillis: playbackStatus.durationMillis,
+                }
+            }
+            return s;
+        }));
+        if (playbackStatus.didJustFinish) {
+            setSounds((prevSounds) => prevSounds.map(s => {
+                if (s.id === id) {
+                    return {
+                        ...s,
+                        positionMillis: 0,
+                    }
+                }
+                return s;
+            }));
+            pauseAudio(id);
+        }
     }
 
     useEffect(() => {
-        const newSounds = [];
-        items
+        const newSounds = items
             .filter(i => i.type === 'audio')
-            .forEach(i => {
-                const onPlaybackStatusUpdate = (playbackStatus) => {
-                    if (playbackStatus.didJustFinish) {
-                        setcurrentAudioPlaying(null);
-                    }
-                }
-                (async () => {
-                    const { sound } = await Audio.Sound.createAsync({uri: i.value}, {}, onPlaybackStatusUpdate);
-                    newSounds.push({sound, id: i.id});
-                })();
+            .map(async i => {
+                const getSound = async () => {
+                    const {sound} = await Audio.Sound.createAsync({uri: i.value}, {}, (status) => onPlaybackStatusUpdate(status, i.id));
+                    return sound;
+                };
+                const newSound = await getSound();
+                return {sound: newSound, id: i.id, positionMillis: 0, durationMillis: 1}
             });
-        setSounds(newSounds);
+        Promise.all(newSounds).then(setSounds);
     }, [items.length]);
 
     useEffect(() => {
@@ -85,6 +109,25 @@ const ItemList = ({items, actualItemTextId, changeItemText}) => {
             textItemsRef.current[actualItemTextId].focus();
         }
     }, [actualItemTextId]);
+
+    const getMaximumDurationValue = (audio) => {
+        const filteredSounds = sounds.filter(s => s.id === audio.id);
+        return filteredSounds.length ? filteredSounds[0].durationMillis : 1
+    }
+
+    const onAudioControlSlideComplete = (newPositionMillis, audioId) => {
+        setSounds(sounds.map(s => {
+            if (s.id === audioId) {
+                return {...s, positionMillis: newPositionMillis};
+            }
+            return s;
+        }))
+    }
+
+    const getAudioControlValue = (audio) => {
+        const filteredSounds = sounds.filter(s => s.id === audio.id);
+        return filteredSounds.length ? filteredSounds[0].positionMillis : 0
+    }
 
     return (
         <View style={styles.itemListContainer}>
@@ -115,12 +158,12 @@ const ItemList = ({items, actualItemTextId, changeItemText}) => {
                                             <Slider
                                                 style={{width: '100%', height: '100%'}}
                                                 minimumValue={0}
-                                                maximumValue={1}
-                                                minimumTrackTintColor={theme.primaryColor}
+                                                maximumValue={getMaximumDurationValue(item)}
+                                                minimumTrackTintColor={theme.textColor}
                                                 maximumTrackTintColor={theme.backgroundColor}
                                                 thumbTintColor={theme.textColor}
-                                                //onValueChange={setZoom}
-                                                //value={zoom}
+                                                onSlidingComplete={newPositionMillis => onAudioControlSlideComplete(newPositionMillis, item.id)}
+                                                value={getAudioControlValue(item)}
                                             />
                                         </View>
                                     </View>
