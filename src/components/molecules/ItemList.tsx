@@ -3,7 +3,6 @@ import {View, StyleSheet, TextInput} from 'react-native';
 import theme from '../../config/theme';
 import { IconButton } from '../atoms';
 import Slider from '@react-native-community/slider';
-import { Sound } from 'expo-av/build/Audio';
 import { Audio } from 'expo-av';
 
 const styles = StyleSheet.create({
