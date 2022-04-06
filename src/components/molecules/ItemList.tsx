@@ -86,7 +86,7 @@ const ItemList = ({items, actualItemTextId, changeItemText}) => {
                 }
                 return s;
             }));
-            pauseAudio(id);
+            setcurrentAudioPlaying(null);
         }
     }
 
