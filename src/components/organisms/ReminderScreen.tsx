@@ -6,7 +6,6 @@ import {IconButton} from '../atoms';
 import AnimatedIconButton from '../atoms/AnimatedIconButton';
 import {CREATE_REMINDER, SET_CURRENT_REMINDER, UPDATE_REMINDER} from '../../config/redux/actions';
 import generateUUID from '../../utils/uuidUtil';
-import { ScrollView } from 'react-native-gesture-handler';
 
 const createStyles = (theme, isDarkTheme) => (StyleSheet.create({
     checkButtonPressed: {
@@ -24,6 +23,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     });
     const styles = createStyles(theme, isDarkTheme);
 
+    const dispatch = useDispatch();
 
     const showButtonsAnimation = useRef(new Animated.Value(0)).current;
 
@@ -47,8 +47,6 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     useEffect(() => {
         Animated.timing(showButtonsAnimation, {toValue: 1, duration: 1000, useNativeDriver: true}).start();
     }, [showButtons]);
-
-    const dispatch = useDispatch();
 
     const onCameraButtonPress = () => {
         setShowButtons(false);
@@ -104,18 +102,21 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
         dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, title: newTitle}});
     }
 
+    const orderItemList = (items) => {
+        dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, items}})
+    }
+
     return (
         <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
-            <ScrollView>
-                <ImageItemList items={reminder.itemsImage} onPress={onImagePress} />
-                <ItemList 
-                    actualItemTextId={actualItemTextId} 
-                    items={reminder.items} 
-                    changeItemText={changeItemText} 
-                    checksEnabled={checksEnabled}
-                    changeItemCheck={changeItemCheck}    
-                />
-            </ScrollView>
+            <ImageItemList items={reminder.itemsImage} onPress={onImagePress} />
+            <ItemList 
+                actualItemTextId={actualItemTextId} 
+                items={reminder.items} 
+                changeItemText={changeItemText} 
+                checksEnabled={checksEnabled}
+                changeItemCheck={changeItemCheck}  
+                orderItemList={orderItemList}  
+            />
             <IconButton 
                 name={showButtons ? 'minus' : 'plus'} 
                 onPress={() => setShowButtons(!showButtons)} 

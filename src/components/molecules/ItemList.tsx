@@ -5,6 +5,8 @@ import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
 import { Sound } from 'expo-av/build/Audio';
 import { useSelector } from 'react-redux';
+import { DraxProvider, DraxList } from 'react-native-drax';
+import { item } from '../../config/types';
 
 const createStyles = (theme) => StyleSheet.create({
     itemListContainer: {
@@ -41,7 +43,7 @@ const createStyles = (theme) => StyleSheet.create({
     },
 });
 
-const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, changeItemCheck}) => {
+const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, changeItemCheck, orderItemList}) => {
     //@ts-ignore
     const {theme} = useSelector(({themeReducer}) => {
         return themeReducer;
@@ -63,7 +65,7 @@ const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, chang
                 showChecksAnimation, 
                 {
                     toValue: checksEnabled ?  window.width * 0.86 : window.width * 0.95, 
-                    duration: 1000, 
+                    duration: 250, 
                     useNativeDriver: false,
                 })
             .start();
@@ -165,9 +167,10 @@ const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, chang
     // ----------------------------------------------------------------------------------------
 
     return (
-        <View>
-            {
-                items.map((item) => (
+        <DraxProvider>
+            <DraxList
+                data={items}
+                renderItemContent={({item}) => (
                     <View key={item.id} style={styles.itemListContainer}>
                         <Checkbox 
                             style={styles.checkbox}
@@ -213,9 +216,15 @@ const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, chang
                             }
                         </Animated.View>
                     </View>
-                ))
-            }
-        </View>
+                )}
+                onItemReorder={({ fromIndex, toIndex }) => {
+                    const newData = [...items];
+                    newData.splice(toIndex, 0, newData.splice(fromIndex, 1)[0]);
+                    orderItemList(newData);
+                }}
+                keyExtractor={(item : item) => item.id}
+            />
+        </DraxProvider>
     );
 }
 
