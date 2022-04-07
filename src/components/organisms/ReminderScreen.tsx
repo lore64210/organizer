@@ -7,6 +7,7 @@ import AnimatedIconButton from '../atoms/AnimatedIconButton';
 import {SET_CURRENT_REMINDER} from '../../config/redux/actions';
 import generateUUID from '../../utils/uuidUtil';
 import theme from '../../config/theme';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const styles = StyleSheet.create({
     checkButtonPressed: {
@@ -86,14 +87,16 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
     return (
         <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
-            <ImageItemList items={reminder.itemsImage} onPress={onImagePress} />
-            <ItemList 
-                actualItemTextId={actualItemTextId} 
-                items={reminder.items} 
-                changeItemText={changeItemText} 
-                checksEnabled={checksEnabled}
-                changeItemCheck={changeItemCheck}    
-            />
+            <ScrollView>
+                <ImageItemList items={reminder.itemsImage} onPress={onImagePress} />
+                <ItemList 
+                    actualItemTextId={actualItemTextId} 
+                    items={reminder.items} 
+                    changeItemText={changeItemText} 
+                    checksEnabled={checksEnabled}
+                    changeItemCheck={changeItemCheck}    
+                />
+            </ScrollView>
             <IconButton name={showButtons ? 'minus' : 'plus'} onPress={() => setShowButtons(!showButtons)} containerStyle={{zIndex: 20}} />
             <AnimatedIconButton 
                 name="microphone" 

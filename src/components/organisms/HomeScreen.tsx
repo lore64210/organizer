@@ -4,6 +4,7 @@ import {reminder} from '../../config/types';
 import {IconButton} from '../atoms';
 import {HomeItem, Layout} from '../molecules';
 import uuid from '../../utils/uuidUtil';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const emptyReminder: reminder = {
     id: '',
@@ -28,11 +29,13 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
     return (
         <Layout headerProps={{title: 'Reminders'}}>
-            {
-                reminders.map(reminder => (
-                    <HomeItem key={reminder.id} item={reminder} onItemPress={() => onPress(reminder)}/>
-                ))
-            }
+            <ScrollView>
+                {
+                    reminders.map(reminder => (
+                        <HomeItem key={reminder.id} item={reminder} onItemPress={() => onPress(reminder)}/>
+                    ))
+                }
+            </ScrollView>
             <IconButton name='plus' onPress={() => onPress({...emptyReminder, id: uuid()})} />
         </Layout>
     )
