@@ -14,6 +14,8 @@ const styles = StyleSheet.create({
         bottom: 20,
         alignItems: 'center',
         justifyContent: 'center',
+        borderWidth: 2,
+        borderColor: theme.backgroundColor,
     },
     icon: {
         fontSize: 20,

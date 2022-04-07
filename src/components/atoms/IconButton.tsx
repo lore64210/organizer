@@ -6,6 +6,8 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: theme.primaryColor,
         borderRadius: theme.borderRadiusButton,
+        borderWidth: 2,
+        borderColor: theme.backgroundColor,
         position: 'absolute',
         bottom: 20,
         right: 20,
