@@ -1,7 +1,7 @@
 import {View, Text, StyleSheet} from 'react-native';
 import { IconButton } from '../atoms';
 import {useSelector, useDispatch} from 'react-redux';
-import {CHANGE_THEME} from '../../config/redux/actions';
+import {CHANGE_THEME, START_THEME_ANIMATION} from '../../config/redux/actions';
 
 const createStyles = (theme, isDarkTheme) => (StyleSheet.create({
     container: {
@@ -37,7 +37,8 @@ export default ({title, onTitlePress = () => {}}) => {
     const styles = createStyles(theme, isDarkTheme);
 
     const changeTheme = () => {
-        dispatch({type: CHANGE_THEME, payload: !isDarkTheme})
+        dispatch({type: START_THEME_ANIMATION, payload: true})
+        setTimeout(() => {dispatch({type: CHANGE_THEME, payload: !isDarkTheme})}, 225);
     }
 
     return (

@@ -1,4 +1,5 @@
-import {StyleSheet, View} from 'react-native';
+import {useEffect, useRef} from 'react';
+import {StyleSheet, Animated} from 'react-native';
 import Header from './Header';
 import { useSelector } from 'react-redux';
 
@@ -10,17 +11,43 @@ const createStyles = (theme) => StyleSheet.create({
 });
 
 const Layout = ({children, headerProps}) => {
+
+    const opacityAnimation = useRef(new Animated.Value(1)).current;
+
     //@ts-ignore
-    const {theme} = useSelector(({themeReducer}) => {
+    const {theme, startThemeAnimation} = useSelector(({themeReducer}) => {
         return themeReducer;
     });
     const styles = createStyles(theme);
     
+    useEffect(() => {
+        if (startThemeAnimation) {
+            Animated.sequence([
+                Animated.timing(
+                    opacityAnimation, 
+                    {
+                        toValue: 0, 
+                        duration: 200, 
+                        useNativeDriver: false
+                    }
+                ),
+                Animated.timing(
+                    opacityAnimation, 
+                    {
+                        toValue: 1, 
+                        duration: 200, 
+                        useNativeDriver: false
+                    }
+                ),
+            ]).start();
+        }
+    }, [startThemeAnimation]);
+
     return (
-        <View style={styles.container}>
+        <Animated.View style={{...styles.container, opacity: opacityAnimation}}>
             <Header {...headerProps} />
             {children}
-        </View>
+        </Animated.View>
     );
 }
 
