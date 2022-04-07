@@ -4,7 +4,7 @@ import {useSelector, useDispatch} from 'react-redux';
 import {Layout, ModalTitle, ItemList, ImageItemList, ModalImage, ModalAudio} from '../molecules';
 import {IconButton} from '../atoms';
 import AnimatedIconButton from '../atoms/AnimatedIconButton';
-import {SET_CURRENT_REMINDER} from '../../config/redux/actions';
+import {CREATE_REMINDER, SET_CURRENT_REMINDER, UPDATE_REMINDER} from '../../config/redux/actions';
 import generateUUID from '../../utils/uuidUtil';
 import theme from '../../config/theme';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -23,6 +23,10 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     const reminder = useSelector(({remindersReducer: {currentReminder}}) => {
         return currentReminder;
     });
+
+    useEffect(() => {
+        dispatch({type: UPDATE_REMINDER, payload: reminder});
+    }, [reminder]);
 
     const [showButtons, setShowButtons] = useState(false);
     const [modalVisible, setModalVisible] = useState(!reminder.title);
@@ -85,6 +89,13 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
         setShowButtons(false);
     }
 
+    const saveTitle = newTitle => {
+        if (!reminder.title) {
+            dispatch({type: CREATE_REMINDER, payload: reminder});
+        }
+        dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, title: newTitle}});
+    }
+
     return (
         <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
             <ScrollView>
@@ -130,7 +141,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
             <ModalTitle
                 visible={modalVisible}
                 setVisible={setModalVisible}
-                saveTitle={newTitle => dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, title: newTitle}})}
+                saveTitle={saveTitle}
                 title={reminder.title}
                 goBack={() => navigation.goBack()}
             />

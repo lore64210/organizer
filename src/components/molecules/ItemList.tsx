@@ -140,7 +140,6 @@ const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, chang
     const onAudioControlSlideComplete = async (newPositionMillis, audioId) => {
         if (currentAudioPlaying) {
             const [{sound}] = sounds?.filter(sound => sound.id === audioId);
-            console.log('pausing')
             await sound.pauseAsync();
             await sound.playFromPositionAsync(newPositionMillis);
         }

@@ -68,7 +68,6 @@ const ModalAudio = ({visible, setVisible, saveAudio}) => {
     useEffect(() => {
         return sound
             ? () => {
-                console.log('Unloading Sound');
                 sound.unloadAsync(); }
             : undefined;
     }, [sound]);
@@ -123,7 +122,6 @@ const ModalAudio = ({visible, setVisible, saveAudio}) => {
         const uri = recording.getURI();
         setAudioUri(uri);
         setIsAudioRecording(false);
-        console.log('Recording stopped and stored at', uri);
     }
 
     const onAudioButtonPressStart = () => {
