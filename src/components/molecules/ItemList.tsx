@@ -1,18 +1,23 @@
 import {useRef, useEffect, useState} from 'react';
-import {View, StyleSheet, TextInput} from 'react-native';
+import {View, StyleSheet, TextInput, Animated, useWindowDimensions} from 'react-native';
 import theme from '../../config/theme';
-import { IconButton } from '../atoms';
+import { IconButton, Checkbox } from '../atoms';
 import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
 import { Sound } from 'expo-av/build/Audio';
 
 const styles = StyleSheet.create({
     itemListContainer: {
-        alignItems: 'center',
+        alignItems: 'flex-end',
+        marginRight: '2.5%',
+    },
+    checkbox: {
+        position: 'absolute',
+        left: '2.5%',
+        top: 35,
     },
     itemContainer: {
         backgroundColor: theme.primaryColor,
-        width: '95%',
         marginVertical: 20,
         borderRadius: theme.borderRadius,
     },
@@ -36,12 +41,27 @@ const styles = StyleSheet.create({
     },
 });
 
-const ItemList = ({items, actualItemTextId, changeItemText}) => {
+const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, changeItemCheck}) => {
 
     const [currentAudioPlaying, setcurrentAudioPlaying] = useState(null);
     const [sounds, setSounds] = useState<{id: string, sound: Sound, positionMillis: any, durationMillis: any}[]>([]);
 
     const textItemsRef = useRef({});
+    const showChecksAnimation = useRef(new Animated.Value(20)).current;
+
+    const window = useWindowDimensions();
+
+    useEffect(() => {
+        Animated
+            .timing(
+                showChecksAnimation, 
+                {
+                    toValue: checksEnabled ?  window.width * 0.86 : window.width * 0.95, 
+                    duration: 500, 
+                    useNativeDriver: false
+                })
+            .start();
+    }, [checksEnabled]);
 
     const onAudioButtonPress = (audioId) => {
         if (!currentAudioPlaying) {
@@ -136,46 +156,53 @@ const ItemList = ({items, actualItemTextId, changeItemText}) => {
     }
 
     return (
-        <View style={styles.itemListContainer}>
+        <View>
             {
                 items.map((item) => (
-                    <View key={item.id} style={styles.itemContainer}>
-                        {
+                    <View style={styles.itemListContainer}>
+                        <Checkbox 
+                            style={styles.checkbox}
+                            isChecked={item.checked} 
+                            onPress={(checked) => changeItemCheck(checked, item.id)}
+                        />
+                        <Animated.View key={item.id} style={{...styles.itemContainer, width: showChecksAnimation}}>
                             {
-                                text: (
-                                    <TextInput 
-                                        ref={input => textItemsRef.current[item.id] = input}
-                                        multiline
-                                        style={styles.textItem} 
-                                        onChangeText={newText => changeItemText(newText, item.id)} 
-                                        placeholderTextColor={theme.placeholderTextColor}
-                                        placeholder='Nuevo reminder...'
-                                    />
-                                ),
-                                audio: (
-                                    <View style={styles.audioItem}>
-                                        <IconButton 
-                                            name={currentAudioPlaying === item.id ? 'pause' : 'play'} 
-                                            containerStyle={styles.audioButton} 
-                                            color={!currentAudioPlaying || currentAudioPlaying === item.id ? theme.textColor : 'grey'}
-                                            onPress={() => onAudioButtonPress(item.id)}
+                                {
+                                    text: (
+                                        <TextInput 
+                                            ref={input => textItemsRef.current[item.id] = input}
+                                            multiline
+                                            style={styles.textItem} 
+                                            onChangeText={newText => changeItemText(newText, item.id)} 
+                                            placeholderTextColor={theme.placeholderTextColor}
+                                            placeholder='Nuevo reminder...'
                                         />
-                                        <View style={styles.audioSlider}>
-                                            <Slider
-                                                style={{width: '100%', height: '100%'}}
-                                                minimumValue={0}
-                                                maximumValue={getMaximumDurationValue(item)}
-                                                minimumTrackTintColor={theme.textColor}
-                                                maximumTrackTintColor={theme.backgroundColor}
-                                                thumbTintColor={theme.textColor}
-                                                onSlidingComplete={newPositionMillis => onAudioControlSlideComplete(newPositionMillis, item.id)}
-                                                value={getAudioControlValue(item)}
+                                    ),
+                                    audio: (
+                                        <View style={styles.audioItem}>
+                                            <IconButton 
+                                                name={currentAudioPlaying === item.id ? 'pause' : 'play'} 
+                                                containerStyle={styles.audioButton} 
+                                                color={!currentAudioPlaying || currentAudioPlaying === item.id ? theme.textColor : 'grey'}
+                                                onPress={() => onAudioButtonPress(item.id)}
                                             />
+                                            <View style={styles.audioSlider}>
+                                                <Slider
+                                                    style={{width: '100%', height: '100%'}}
+                                                    minimumValue={0}
+                                                    maximumValue={getMaximumDurationValue(item)}
+                                                    minimumTrackTintColor={theme.textColor}
+                                                    maximumTrackTintColor={theme.backgroundColor}
+                                                    thumbTintColor={theme.textColor}
+                                                    onSlidingComplete={newPositionMillis => onAudioControlSlideComplete(newPositionMillis, item.id)}
+                                                    value={getAudioControlValue(item)}
+                                                />
+                                            </View>
                                         </View>
-                                    </View>
-                                )
-                            }[item.type]
-                        }
+                                    )
+                                }[item.type]
+                            }
+                        </Animated.View>
                     </View>
                 ))
             }

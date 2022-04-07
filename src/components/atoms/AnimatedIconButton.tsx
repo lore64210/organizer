@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
     }
 });
 
-export default ({name, color = "#ECB365", size = 30, onPress, style = {}, containerStyle = {}, position = 20, showButton}) => {
+export default ({name, color = theme.textColor, size = 30, onPress, style = {}, containerStyle = {}, position = 20, showButton}) => {
     const showButtonsAnimation = useRef(new Animated.Value(20)).current;
 
     useEffect(() => {

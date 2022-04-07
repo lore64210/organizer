@@ -75,13 +75,15 @@ const ModalTitle = ({visible, setVisible, saveTitle, title: reminderTitle, goBac
             animationType='fade'
             transparent={true}
             visible={visible}
-            onShow={() => inputRef.current.focus()}
+            onShow={() => {
+                inputRef.current.focus();
+            }}
         >
             <View style={styles.modalContainer}>
                 <View style={styles.modalContentContainer}>
                     <Text style={styles.modalTitle}>Título del recordatorio:</Text>
                     <TextInput 
-                        ref={(input) => inputRef.current = input}
+                        ref={inputRef}
                         style={styles.input}
                         onChangeText={setTitle}
                         value={title}

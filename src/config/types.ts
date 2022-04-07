@@ -3,6 +3,7 @@ type item = {
     value: string,
     position: number,
     type: string,
+    checked: boolean,
 }
 
 type reminder = {

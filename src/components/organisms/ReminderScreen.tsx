@@ -1,11 +1,18 @@
 import {useState, useRef, useEffect} from 'react';
-import {Animated} from 'react-native';
+import {Animated, StyleSheet} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
 import {Layout, ModalTitle, ItemList, ImageItemList, ModalImage, ModalAudio} from '../molecules';
 import {IconButton} from '../atoms';
 import AnimatedIconButton from '../atoms/AnimatedIconButton';
 import {SET_CURRENT_REMINDER} from '../../config/redux/actions';
 import generateUUID from '../../utils/uuidUtil';
+import theme from '../../config/theme';
+
+const styles = StyleSheet.create({
+    checkButtonPressed: {
+        backgroundColor: theme.textColor,
+    },
+});
 
 const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
@@ -22,6 +29,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     const [showModalImage, setShowModalImage] = useState(false)
     const [showModalAudio, setShowModalAudio] = useState(false)
     const [selectedImage, setSelectedImage] = useState(null);
+    const [checksEnabled, setChecksEnabled] = useState(false);
 
     useEffect(() => {
         Animated.timing(showButtonsAnimation, {toValue: 1, duration: 1000, useNativeDriver: true}).start();
@@ -61,6 +69,11 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
         dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, items}});
     }
 
+    const changeItemCheck = (checked, itemId) => {
+        const items = reminder.items.map(item => item.id === itemId ? {...item, checked} : item);
+        dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, items}});
+    }
+
     const onImagePress = (item) => {
         setSelectedImage(item);
         setShowModalImage(true);
@@ -74,7 +87,13 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     return (
         <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
             <ImageItemList items={reminder.itemsImage} onPress={onImagePress} />
-            <ItemList actualItemTextId={actualItemTextId} items={reminder.items} changeItemText={changeItemText} />
+            <ItemList 
+                actualItemTextId={actualItemTextId} 
+                items={reminder.items} 
+                changeItemText={changeItemText} 
+                checksEnabled={checksEnabled}
+                changeItemCheck={changeItemCheck}    
+            />
             <IconButton name={showButtons ? 'minus' : 'plus'} onPress={() => setShowButtons(!showButtons)} containerStyle={{zIndex: 20}} />
             <AnimatedIconButton 
                 name="microphone" 
@@ -96,6 +115,14 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 position={200} 
                 showButton={showButtons}
                 containerStyle={{zIndex: 7}}
+            />
+            <AnimatedIconButton 
+                name="list-alt" 
+                onPress={() => setChecksEnabled((previousChecksEnabled) => !previousChecksEnabled)} 
+                position={260} 
+                showButton={showButtons}
+                color={checksEnabled ? theme.primaryColor : theme.textColor}
+                containerStyle={{zIndex: 6, ...(checksEnabled ? styles.checkButtonPressed : {})}}
             />
             <ModalTitle
                 visible={modalVisible}
