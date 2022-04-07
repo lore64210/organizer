@@ -5,6 +5,7 @@ import {
     SET_CURRENT_REMINDER,
     CHANGE_THEME,
     START_THEME_ANIMATION,
+    SET_ORDERED_REMINDERS,
 } from './actions';
 import {reminder, theme as themeType} from '../types';
 import { darkTheme, ligthTheme } from '../theme';
@@ -42,20 +43,31 @@ const initialState : {
   startThemeAnimation: false,
 };
 
-function remindersReducer(state = initialState, action: {type: string, payload: reminder}) {
+function remindersReducer(state = initialState, action: {type: string, payload: reminder | reminder[]}) {
   const {payload, type} = action;
   const {reminders} = state;
-  switch (type) {
-    case CREATE_REMINDER:
-        return {...state, reminders: (!reminders ? [payload] : [...reminders, payload])};
-    case UPDATE_REMINDER:
-        return {...state, reminders: reminders.map(r => r.id === payload.id ? payload : r)};
-    case DELETE_REMINDER:
-        return {...state, reminders: reminders.filter(r => r.id !== payload.id)};
-    case SET_CURRENT_REMINDER:
-        return {...state, currentReminder: payload};
-    default:
-      return {...state};
+  if (!Array.isArray(payload)) {
+    switch (type) {
+      case CREATE_REMINDER:
+          return {...state, reminders: (!reminders ? [payload] : [...reminders, payload])};
+      case UPDATE_REMINDER:
+          return {...state, reminders: reminders.map(r => r.id === payload.id ? payload : r)};
+      case DELETE_REMINDER:
+          return {...state, reminders: reminders.filter(r => r.id !== payload.id)};
+      case SET_CURRENT_REMINDER:
+          return {...state, currentReminder: payload};
+      case SET_ORDERED_REMINDERS:
+          return {...state, reminders: payload};
+      default:
+        return {...state};
+    }
+  } else {
+    switch (type) {
+      case SET_ORDERED_REMINDERS:
+          return {...state, reminders: payload};
+      default:
+          return {...state};
+    }
   }
 }
 
