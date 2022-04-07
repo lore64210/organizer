@@ -159,13 +159,13 @@ const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, chang
         <View>
             {
                 items.map((item) => (
-                    <View style={styles.itemListContainer}>
+                    <View key={item.id} style={styles.itemListContainer}>
                         <Checkbox 
                             style={styles.checkbox}
                             isChecked={item.checked} 
                             onPress={(checked) => changeItemCheck(checked, item.id)}
                         />
-                        <Animated.View key={item.id} style={{...styles.itemContainer, width: showChecksAnimation}}>
+                        <Animated.View style={{...styles.itemContainer, width: showChecksAnimation}}>
                             {
                                 {
                                     text: (
