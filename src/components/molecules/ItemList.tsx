@@ -22,6 +22,7 @@ const createStyles = (theme) => StyleSheet.create({
         backgroundColor: theme.primaryColor,
         marginVertical: 20,
         borderRadius: theme.borderRadius,
+        flexDirection: 'row',
     },
     textItem: {
         padding: 10,
@@ -40,6 +41,12 @@ const createStyles = (theme) => StyleSheet.create({
     audioSlider: {
         height: 10,
         width: '80%'
+    },
+    reorderIcon: {
+        position: 'relative',
+        top: 0,
+        left: 0,
+        width: 30,
     },
 });
 
@@ -178,6 +185,7 @@ const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, chang
                             onPress={(checked) => changeItemCheck(checked, item.id)}
                         />
                         <Animated.View style={{...styles.itemContainer, width: showChecksAnimation}}>
+                            <IconButton name='reorder' containerStyle={styles.reorderIcon} size={15} />
                             {
                                 {
                                     text: (
