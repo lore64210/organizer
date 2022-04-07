@@ -63,6 +63,28 @@ const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, chang
             .start();
     }, [checksEnabled]);
 
+    // ------------- LOGICA PARA AUDIOS ----------------------------------------------------------------------
+    
+    useEffect(() => {
+        if (textItemsRef.current[actualItemTextId]) {
+            textItemsRef.current[actualItemTextId].focus();
+        }
+    }, [actualItemTextId]);
+
+    useEffect(() => {
+        const newSounds = items
+            .filter(i => i.type === 'audio')
+            .map(async i => {
+                const getSound = async () => {
+                    const {sound} = await Audio.Sound.createAsync({uri: i.value}, {}, (status) => onPlaybackStatusUpdate(status, i.id));
+                    return sound;
+                };
+                const newSound = await getSound();
+                return {sound: newSound, id: i.id, positionMillis: 0, durationMillis: 1}
+            });
+        Promise.all(newSounds).then(setSounds);
+    }, [items.length]);
+
     const onAudioButtonPress = (audioId) => {
         if (!currentAudioPlaying) {
             playAudio(audioId);
@@ -109,27 +131,7 @@ const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, chang
             setcurrentAudioPlaying(null);
         }
     }
-
-    useEffect(() => {
-        const newSounds = items
-            .filter(i => i.type === 'audio')
-            .map(async i => {
-                const getSound = async () => {
-                    const {sound} = await Audio.Sound.createAsync({uri: i.value}, {}, (status) => onPlaybackStatusUpdate(status, i.id));
-                    return sound;
-                };
-                const newSound = await getSound();
-                return {sound: newSound, id: i.id, positionMillis: 0, durationMillis: 1}
-            });
-        Promise.all(newSounds).then(setSounds);
-    }, [items.length]);
-
-    useEffect(() => {
-        if (textItemsRef.current[actualItemTextId]) {
-            textItemsRef.current[actualItemTextId].focus();
-        }
-    }, [actualItemTextId]);
-
+    
     const getMaximumDurationValue = (audio) => {
         const filteredSounds = sounds.filter(s => s.id === audio.id);
         return filteredSounds.length ? filteredSounds[0].durationMillis : 1
@@ -154,6 +156,8 @@ const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, chang
         const filteredSounds = sounds.filter(s => s.id === audio.id);
         return filteredSounds.length ? filteredSounds[0].positionMillis : 0
     }
+
+    // ----------------------------------------------------------------------------------------
 
     return (
         <View>
