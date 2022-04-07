@@ -1,10 +1,10 @@
 import {useEffect, useRef} from 'react';
 import {useState} from 'react';
 import {View, Modal, Text, StyleSheet, TextInput} from 'react-native';
-import theme from '../../config/theme';
 import {IconButton} from '../atoms';
+import { useSelector } from 'react-redux';
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -44,6 +44,11 @@ const styles = StyleSheet.create({
 });
 
 const ModalTitle = ({visible, setVisible, saveTitle, title: reminderTitle, goBack}) => {
+    //@ts-ignore
+    const {theme} = useSelector(({themeReducer}) => {
+        return themeReducer;
+    });
+    const styles = createStyles(theme);
 
     const inputRef = useRef<TextInput>(null);
 

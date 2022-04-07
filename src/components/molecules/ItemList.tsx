@@ -1,12 +1,12 @@
 import {useRef, useEffect, useState} from 'react';
 import {View, StyleSheet, TextInput, Animated, useWindowDimensions} from 'react-native';
-import theme from '../../config/theme';
 import { IconButton, Checkbox } from '../atoms';
 import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
 import { Sound } from 'expo-av/build/Audio';
+import { useSelector } from 'react-redux';
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     itemListContainer: {
         alignItems: 'flex-end',
         marginRight: '2.5%',
@@ -42,14 +42,20 @@ const styles = StyleSheet.create({
 });
 
 const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, changeItemCheck}) => {
-
+    //@ts-ignore
+    const {theme} = useSelector(({themeReducer}) => {
+        return themeReducer;
+    });
+    const styles = createStyles(theme);
+    
     const [currentAudioPlaying, setcurrentAudioPlaying] = useState(null);
     const [sounds, setSounds] = useState<{id: string, sound: Sound, positionMillis: any, durationMillis: any}[]>([]);
+    
+    const window = useWindowDimensions();
 
     const textItemsRef = useRef({});
-    const showChecksAnimation = useRef(new Animated.Value(20)).current;
-
-    const window = useWindowDimensions();
+    
+    const showChecksAnimation = useRef(new Animated.Value(window.width * 0.95)).current;
 
     useEffect(() => {
         Animated
@@ -57,8 +63,8 @@ const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, chang
                 showChecksAnimation, 
                 {
                     toValue: checksEnabled ?  window.width * 0.86 : window.width * 0.95, 
-                    duration: 500, 
-                    useNativeDriver: false
+                    duration: 1000, 
+                    useNativeDriver: false,
                 })
             .start();
     }, [checksEnabled]);

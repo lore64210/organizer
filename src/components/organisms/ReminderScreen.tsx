@@ -6,16 +6,24 @@ import {IconButton} from '../atoms';
 import AnimatedIconButton from '../atoms/AnimatedIconButton';
 import {CREATE_REMINDER, SET_CURRENT_REMINDER, UPDATE_REMINDER} from '../../config/redux/actions';
 import generateUUID from '../../utils/uuidUtil';
-import theme from '../../config/theme';
 import { ScrollView } from 'react-native-gesture-handler';
 
-const styles = StyleSheet.create({
+const createStyles = (theme, isDarkTheme) => (StyleSheet.create({
     checkButtonPressed: {
-        backgroundColor: theme.textColor,
+        backgroundColor: isDarkTheme ? theme.textColor : theme.primaryColor,
     },
-});
+    button: {
+        borderWidth: 2,
+    }
+}));
 
 const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
+    //@ts-ignore
+    const {theme, isDarkTheme} = useSelector(({themeReducer}) => {
+        return themeReducer;
+    });
+    const styles = createStyles(theme, isDarkTheme);
+
 
     const showButtonsAnimation = useRef(new Animated.Value(0)).current;
 
@@ -108,7 +116,11 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                     changeItemCheck={changeItemCheck}    
                 />
             </ScrollView>
-            <IconButton name={showButtons ? 'minus' : 'plus'} onPress={() => setShowButtons(!showButtons)} containerStyle={{zIndex: 20}} />
+            <IconButton 
+                name={showButtons ? 'minus' : 'plus'} 
+                onPress={() => setShowButtons(!showButtons)} 
+                containerStyle={{...styles.button, zIndex: 20}} 
+            />
             <AnimatedIconButton 
                 name="microphone" 
                 onPress={onAudioButtonPress} 
@@ -135,7 +147,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 onPress={() => setChecksEnabled((previousChecksEnabled) => !previousChecksEnabled)} 
                 position={260} 
                 showButton={showButtons}
-                color={checksEnabled ? theme.primaryColor : theme.textColor}
+                color={checksEnabled ? (isDarkTheme ? theme.primaryColor : theme.secondaryColor) : theme.textColor}
                 containerStyle={{zIndex: 6, ...(checksEnabled ? styles.checkButtonPressed : {})}}
             />
             <ModalTitle

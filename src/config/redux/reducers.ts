@@ -3,10 +3,12 @@ import {
     UPDATE_REMINDER,
     DELETE_REMINDER,
     SET_CURRENT_REMINDER,
+    CHANGE_THEME,
 } from './actions';
-import {reminder} from '../types';
+import {reminder, theme as themeType} from '../types';
+import { darkTheme, ligthTheme } from '../theme';
 
-const initialState : {reminders: reminder[], currentReminder: reminder|null} = {
+const initialState : {reminders: reminder[], currentReminder: reminder|null, theme: themeType, isDarkTheme: boolean} = {
   reminders: [
     {
       id: '1',
@@ -28,6 +30,8 @@ const initialState : {reminders: reminder[], currentReminder: reminder|null} = {
     },
   ],
   currentReminder: null,
+  theme: {...darkTheme},
+  isDarkTheme: true,
 };
 
 function remindersReducer(state = initialState, action: {type: string, payload: reminder}) {
@@ -47,4 +51,18 @@ function remindersReducer(state = initialState, action: {type: string, payload: 
   }
 }
 
-export default remindersReducer;
+function themeReducer(state = initialState, action: {type: string, payload: boolean}) {
+  const {payload, type} = action;
+  switch(type) {
+    case CHANGE_THEME:
+      return {...state, isDarkTheme: payload, theme: payload ? darkTheme : ligthTheme};
+    default: 
+      return {...state};
+  }
+}
+
+
+export {
+  remindersReducer,
+  themeReducer,
+};

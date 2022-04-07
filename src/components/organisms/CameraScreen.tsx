@@ -6,9 +6,8 @@ import Slider from '@react-native-community/slider';
 import {useSelector, useDispatch} from 'react-redux';
 import { SET_CURRENT_REMINDER } from '../../config/redux/actions';
 import generateUUID from '../../utils/uuidUtil';
-import theme from '../../config/theme';
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
     },
@@ -26,7 +25,7 @@ const styles = StyleSheet.create({
     },
     button: {
         position: 'relative',
-        right: 0
+        right: 0,
     },
     takePictureButton: {
         width: 70,
@@ -43,6 +42,11 @@ const styles = StyleSheet.create({
 });
 
 const CameraScreen = ({navigation}) => {
+    //@ts-ignore
+    const {theme} = useSelector(({themeReducer}) => {
+        return themeReducer;
+    });
+    const styles = createStyles(theme);
 
     const [hasPermission, setHasPermission] = useState(null);
     const [zoom, setZoom] = useState(0);
@@ -109,7 +113,7 @@ const CameraScreen = ({navigation}) => {
                                 ? Camera.Constants.FlashMode.off
                                 : Camera.Constants.FlashMode.on);
                             }}
-                            color={flashMode === Camera.Constants.FlashMode.off ? 'black' :  "#ECB365"}
+                            color={flashMode === Camera.Constants.FlashMode.off ? theme.secondaryColor :  theme.textColor}
                         />
                         <IconButton 
                             size={50}

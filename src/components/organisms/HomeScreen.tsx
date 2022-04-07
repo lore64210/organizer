@@ -4,7 +4,13 @@ import {reminder} from '../../config/types';
 import {IconButton} from '../atoms';
 import {HomeItem, Layout} from '../molecules';
 import uuid from '../../utils/uuidUtil';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView, StyleSheet } from 'react-native';
+
+const createStyles = (theme) => StyleSheet.create({
+    button: {
+        borderWidth: 2,
+    }
+})
 
 const emptyReminder: reminder = {
     id: '',
@@ -14,6 +20,8 @@ const emptyReminder: reminder = {
 };
 
 const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
+
+    const styles = createStyles({});
 
     //@ts-ignore
     const reminders = useSelector(({remindersReducer: {reminders}}) => {
@@ -36,7 +44,7 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
                     ))
                 }
             </ScrollView>
-            <IconButton name='plus' onPress={() => onPress({...emptyReminder, id: uuid()})} />
+            <IconButton containerStyle={styles.button} name='plus' onPress={() => onPress({...emptyReminder, id: uuid()})} />
         </Layout>
     )
 }

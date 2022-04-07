@@ -1,10 +1,15 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import { CameraScreen, HomeScreen, ReminderScreen } from '../organisms';
 import { NavigationContainer } from '@react-navigation/native';
-import theme from '../../config/theme';
 const {Navigator, Screen} = createStackNavigator();
+import { useSelector } from 'react-redux';
 
 const StackNavigator = () => {
+  //@ts-ignore
+  const {theme} = useSelector(({themeReducer}) => {
+    return themeReducer;
+  });
+
   return (
     <>
       {/*@ts-ignore*/}

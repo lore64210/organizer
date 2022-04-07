@@ -1,8 +1,8 @@
 import {View, Modal, Image, StyleSheet, useWindowDimensions} from 'react-native';
-import theme from '../../config/theme';
 import {IconButton} from '../atoms';
+import { useSelector } from 'react-redux';
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -40,6 +40,11 @@ const styles = StyleSheet.create({
 });
 
 const ModalImage = ({visible, setVisible, item}) => {
+    //@ts-ignore
+    const {theme} = useSelector(({themeReducer}) => {
+        return themeReducer;
+    });
+    const styles = createStyles(theme);
 
     const dimensions = useWindowDimensions();
 

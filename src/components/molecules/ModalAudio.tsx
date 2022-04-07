@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { View, Modal, Text, StyleSheet } from 'react-native';
 import { IconButton } from '../atoms';
-import theme from '../../config/theme';
 import { Audio } from 'expo-av';
 import { Recording, Sound } from 'expo-av/build/Audio';
+import { useSelector } from 'react-redux';
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -58,6 +58,11 @@ const styles = StyleSheet.create({
 });
 
 const ModalAudio = ({visible, setVisible, saveAudio}) => {
+    //@ts-ignore
+    const {theme} = useSelector(({themeReducer}) => {
+        return themeReducer;
+    });
+    const styles = createStyles(theme);
 
     const [isAudioRecording, setIsAudioRecording] = useState(false);
     const [isAudioPlaying, setIsAudioPlaying] = useState(false);

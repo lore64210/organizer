@@ -1,8 +1,8 @@
 import {StyleSheet, Text} from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
-import theme from '../../config/theme';
+import { useSelector } from 'react-redux';
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     container: {
         backgroundColor: theme.primaryColor,
         marginVertical: 15,
@@ -18,6 +18,12 @@ const styles = StyleSheet.create({
 })
 
 export default ({item, onItemPress}) => {
+    //@ts-ignore
+    const {theme} = useSelector(({themeReducer}) => {
+        return themeReducer;
+    });
+    const styles = createStyles(theme);
+    
     return (
         <TouchableOpacity onPress={onItemPress} style={styles.container}>
             <Text style={styles.title}>{item.title}</Text>

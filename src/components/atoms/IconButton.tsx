@@ -1,12 +1,11 @@
 import {TouchableHighlight, StyleSheet} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import theme from '../../config/theme';
+import { useSelector } from 'react-redux';
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     container: {
         backgroundColor: theme.primaryColor,
         borderRadius: theme.borderRadiusButton,
-        borderWidth: 2,
         borderColor: theme.backgroundColor,
         position: 'absolute',
         bottom: 20,
@@ -28,6 +27,12 @@ const IconButton : React.FC<{
     style?: any, 
     containerStyle?: any
 }> = (props) => {
+
+    //@ts-ignore
+    const {theme} = useSelector(({themeReducer}) => {
+        return themeReducer;
+    });
+    const styles = createStyles(theme);
     
     const {
         name, 

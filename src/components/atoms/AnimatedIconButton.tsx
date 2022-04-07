@@ -1,9 +1,9 @@
 import {useRef, useEffect} from 'react';
 import {TouchableOpacity, Animated, StyleSheet} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import theme from '../../config/theme';
+import { useSelector } from 'react-redux';
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     container: {
         backgroundColor: theme.primaryColor,
         borderRadius: theme.borderRadiusButton,
@@ -22,7 +22,22 @@ const styles = StyleSheet.create({
     }
 });
 
-export default ({name, color = theme.textColor, size = 30, onPress, style = {}, containerStyle = {}, position = 20, showButton}) => {
+export default (props) => {
+    //@ts-ignore
+    const {theme} = useSelector(({themeReducer}) => {
+        return themeReducer;
+    });
+    const styles = createStyles(theme);
+
+    const {
+        name,
+        color = theme.textColor,
+        size = 30, 
+        onPress, style = {}, 
+        containerStyle = {}, 
+        position = 20, showButton
+    } = props;
+    
     const showButtonsAnimation = useRef(new Animated.Value(20)).current;
 
     useEffect(() => {

@@ -13,7 +13,19 @@ type reminder = {
     itemsImage: item[],
 }
 
+type theme = {
+    textColor: string,
+    placeholderTextColor: string,
+    backgroundColor: string,
+    primaryColor: string,
+    secondaryColor: string,
+    buttonSize: number,
+    borderRadius: number,
+    borderRadiusButton: number,
+}
+
 export {
     item,
     reminder,
+    theme,
 };

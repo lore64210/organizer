@@ -1,26 +1,54 @@
 import {View, Text, StyleSheet} from 'react-native';
-import theme from '../../config/theme';
+import { IconButton } from '../atoms';
+import {useSelector, useDispatch} from 'react-redux';
+import {CHANGE_THEME} from '../../config/redux/actions';
 
-const styles = StyleSheet.create({
+const createStyles = (theme, isDarkTheme) => (StyleSheet.create({
     container: {
         backgroundColor: theme.backgroundColor,
         alignItems: 'center',
-        borderBottomColor: theme.secondaryColor,
+        borderBottomColor: isDarkTheme ? theme.secondaryColor : theme.primaryColor,
         borderBottomWidth: 5,
     },
     title: {
-        color: theme.textColor,
+        color: isDarkTheme ? theme.textColor : theme.primaryColor,
         fontWeight: 'bold',
         fontSize: 20,
         paddingTop: 50,
         paddingBottom: 5,
     },
-});
+    themeButton: {
+        bottom: 0,
+        backgroundColor: theme.backgroundColor,
+        width: 40,
+        height: 40,
+    }
+}));
 
 export default ({title, onTitlePress = () => {}}) => {
+
+    const dispatch = useDispatch();
+
+    //@ts-ignore
+    const {isDarkTheme, theme} = useSelector(({themeReducer}) => {
+        return themeReducer;
+    });
+
+    const styles = createStyles(theme, isDarkTheme);
+
+    const changeTheme = () => {
+        dispatch({type: CHANGE_THEME, payload: !isDarkTheme})
+    }
+
     return (
         <View style={styles.container}>
-            <Text onPress={onTitlePress}  style={styles.title}>{title}</Text>
+            <Text onPress={onTitlePress} style={styles.title}>{title}</Text>
+            <IconButton 
+                onPress={changeTheme} 
+                name={isDarkTheme ? 'moon-o' : 'sun-o'} 
+                containerStyle={styles.themeButton}
+                color={isDarkTheme ? theme.textColor : theme.primaryColor}
+            />
         </View>
     )
 }

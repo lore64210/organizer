@@ -1,8 +1,8 @@
 import {View, StyleSheet, Image, ScrollView, useWindowDimensions} from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import theme from '../../config/theme';
+import { useSelector } from 'react-redux';
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     container: {
         marginTop: 20,
         alignItems: 'center',
@@ -25,6 +25,12 @@ const styles = StyleSheet.create({
 
 const ImagesItemList = ({items, onPress}) => {
     const window = useWindowDimensions();
+    //@ts-ignore
+    const {theme} = useSelector(({themeReducer}) => {
+        return themeReducer;
+    });
+    const styles = createStyles(theme);
+    
     return (
         <>
             {
@@ -44,7 +50,6 @@ const ImagesItemList = ({items, onPress}) => {
                 ) : <View />
             }
         </>
-        
     );
 }
 

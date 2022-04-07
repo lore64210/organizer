@@ -1,10 +1,10 @@
 import {StyleSheet, TouchableHighlight, View} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import theme from '../../config/theme';
+import { useSelector } from 'react-redux';
 
-const styles = StyleSheet.create({
+const createStyles = (theme, isDarkTheme) => StyleSheet.create({
     container: {
-        backgroundColor: theme.textColor,
+        backgroundColor: isDarkTheme ? theme.textColor : theme.primaryColor,
         borderRadius: 5,
         zIndex: -5,
     },
@@ -17,8 +17,13 @@ const styles = StyleSheet.create({
 });
 
 const Checkbox = ({isChecked, onPress, style = {}}) => {
-    return (
-             
+    //@ts-ignore
+    const {theme, isDarkTheme} = useSelector(({themeReducer}) => {
+        return themeReducer;
+    });
+    const styles = createStyles(theme, isDarkTheme);
+    
+    return (            
         <TouchableHighlight 
             onPressIn={() => onPress(!isChecked)} 
             style={{...styles.container, ...style}} 
@@ -26,7 +31,7 @@ const Checkbox = ({isChecked, onPress, style = {}}) => {
         >
             {
                 isChecked 
-                    ? <FontAwesome name='check' color={theme.primaryColor} size={20}/>
+                    ? <FontAwesome name='check' color={isDarkTheme ? theme.primaryColor : theme.textColor} size={20}/>
                     : <View style={styles.emptyCheckbox} />
             }
         </TouchableHighlight>

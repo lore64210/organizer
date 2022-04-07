@@ -1,19 +1,27 @@
 import {StyleSheet, View} from 'react-native';
-import theme from '../../config/theme';
 import Header from './Header';
+import { useSelector } from 'react-redux';
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: theme.backgroundColor,
     }
 });
 
-const Layout = ({children, headerProps}) => (
-    <View style={styles.container}>
-        <Header {...headerProps} />
-        {children}
-    </View>
-);
+const Layout = ({children, headerProps}) => {
+    //@ts-ignore
+    const {theme} = useSelector(({themeReducer}) => {
+        return themeReducer;
+    });
+    const styles = createStyles(theme);
+    
+    return (
+        <View style={styles.container}>
+            <Header {...headerProps} />
+            {children}
+        </View>
+    );
+}
 
 export default Layout;
