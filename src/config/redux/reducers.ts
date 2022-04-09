@@ -22,19 +22,19 @@ const initialState : {
       id: '1',
       title: 'Titulo 1',
       items: [],
-      itemsImage: []
+      imageItems: []
     },
     {
       id: '2',
       title: 'Titulo 2',
       items: [],
-      itemsImage: []
+      imageItems: []
     },
     {
       id: '3',
       title: 'Titulo 3',
       items: [],
-      itemsImage: []
+      imageItems: []
     },
   ],
   currentReminder: null,

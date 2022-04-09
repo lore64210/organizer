@@ -10,7 +10,7 @@ type reminder = {
     id: string,
     title: string,
     items: item[],
-    itemsImage: item[],
+    imageItems: item[],
 }
 
 type theme = {

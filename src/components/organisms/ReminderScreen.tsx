@@ -1,19 +1,32 @@
-import {useState, useRef, useEffect} from 'react';
-import {Animated, StyleSheet} from 'react-native';
+import {useState, useEffect} from 'react';
+import {View, StyleSheet, useWindowDimensions} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
 import {Layout, ModalTitle, ItemList, ImageItemList, ModalImage, ModalAudio} from '../molecules';
 import {IconButton} from '../atoms';
 import AnimatedIconButton from '../atoms/AnimatedIconButton';
-import {CREATE_REMINDER, SET_CURRENT_REMINDER, UPDATE_REMINDER} from '../../config/redux/actions';
+import {CREATE_REMINDER, DELETE_REMINDER, SET_CURRENT_REMINDER, UPDATE_REMINDER} from '../../config/redux/actions';
 import generateUUID from '../../utils/uuidUtil';
 
-const createStyles = (theme, isDarkTheme) => (StyleSheet.create({
+const createStyles = (theme, isDarkTheme, window) => (StyleSheet.create({
     checkButtonPressed: {
         backgroundColor: isDarkTheme ? theme.textColor : theme.primaryColor,
     },
     button: {
         borderWidth: 2,
-    }
+    },
+    deleteButton: {
+        backgroundColor: 'red',
+        left: window.width / 2 - 25,
+        right: 0,
+        width: '100%',
+        height: '100%',
+    },
+    deleteButtonContainer: {
+        width: 50,
+        height: 50,
+        position: 'absolute',
+        bottom: 0,
+    },
 }));
 
 const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
@@ -21,11 +34,11 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     const {theme, isDarkTheme} = useSelector(({themeReducer}) => {
         return themeReducer;
     });
-    const styles = createStyles(theme, isDarkTheme);
+
+    const window = useWindowDimensions();
+    const styles = createStyles(theme, isDarkTheme, window);
 
     const dispatch = useDispatch();
-
-    const showButtonsAnimation = useRef(new Animated.Value(0)).current;
 
     //@ts-ignore
     const reminder = useSelector(({remindersReducer: {currentReminder}}) => {
@@ -43,10 +56,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     const [showModalAudio, setShowModalAudio] = useState(false)
     const [selectedImage, setSelectedImage] = useState(null);
     const [checksEnabled, setChecksEnabled] = useState(false);
-
-    useEffect(() => {
-        Animated.timing(showButtonsAnimation, {toValue: 1, duration: 1000, useNativeDriver: true}).start();
-    }, [showButtons]);
+    const [showDeleteButton, setShowDeleteButton] = useState(false);
 
     const onCameraButtonPress = () => {
         setShowButtons(false);
@@ -106,17 +116,55 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
         dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, items}})
     }
 
+    const orderImages = (imageItems) => {
+        dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, imageItems}})
+    }
+
+    const onItemDragEnd = (e, itemListName) => {
+        const {dragAbsolutePosition, item} = e;
+        let {x: itemPositionX, y: itemPositionY} = dragAbsolutePosition;
+        itemPositionY = reminder.imageItems.length ? itemPositionY + window.height / 4 + 20 : itemPositionY;
+        console.log(itemPositionY)
+        if (itemPositionY < window.height - 75 
+            && itemPositionY > window.height - 175
+            && itemPositionX < window.width / 2 + 75
+            && itemPositionX > window.width / 2 - 25) {
+                dispatch({
+                    type: SET_CURRENT_REMINDER, 
+                    payload: {...reminder, [itemListName] : reminder[itemListName].filter(i => i.id !== item.id)}
+                });
+        }
+        setShowDeleteButton(false);
+    }
+
+    const onItemDragStart = () => {
+        setShowDeleteButton(true);
+    }
+
     return (
         <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
-            <ImageItemList items={reminder.itemsImage} onPress={onImagePress} />
+            <ImageItemList onItemDragStart={onItemDragStart} onItemDragEnd={(e) => onItemDragEnd(e, 'imageItems')} items={reminder.imageItems} onPress={onImagePress} orderImages={orderImages} />
             <ItemList 
                 actualItemTextId={actualItemTextId} 
                 items={reminder.items} 
                 changeItemText={changeItemText} 
                 checksEnabled={checksEnabled}
                 changeItemCheck={changeItemCheck}  
-                orderItemList={orderItemList}  
+                orderItemList={orderItemList}
+                onItemDragStart={onItemDragStart}
+                onItemDragEnd={(e) => onItemDragEnd(e, 'items')}
             />
+            <View style={styles.deleteButtonContainer}>
+                <AnimatedIconButton 
+                    name='trash' 
+                    containerStyle={styles.deleteButton} 
+                    showButton={showDeleteButton}
+                    position={20}
+                    initialPosition={-100}
+                    color={theme.backgroundColor}
+                    disableTouchable
+                />
+            </View>
             <IconButton 
                 name={showButtons ? 'minus' : 'plus'} 
                 onPress={() => setShowButtons(!showButtons)} 

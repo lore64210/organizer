@@ -50,7 +50,7 @@ const createStyles = (theme) => StyleSheet.create({
     },
 });
 
-const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, changeItemCheck, orderItemList}) => {
+const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, changeItemCheck, orderItemList, onItemDragEnd, onItemDragStart}) => {
     //@ts-ignore
     const {theme} = useSelector(({themeReducer}) => {
         return themeReducer;
@@ -176,6 +176,10 @@ const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, chang
     return (
         <DraxProvider>
             <DraxList
+                style={{flex: 1}}
+                keyboardDismissMode='on-drag'
+                onItemDragEnd={onItemDragEnd}
+                onItemDragStart={onItemDragStart}
                 data={items}
                 renderItemContent={({item}) => (
                     <View key={item.id} style={styles.itemListContainer}>

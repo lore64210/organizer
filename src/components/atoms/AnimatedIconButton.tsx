@@ -1,5 +1,5 @@
 import {useRef, useEffect} from 'react';
-import {TouchableOpacity, Animated, StyleSheet} from 'react-native';
+import {View, TouchableOpacity, Animated, StyleSheet} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 
@@ -11,7 +11,6 @@ const createStyles = (theme) => StyleSheet.create({
         right: 20,
         width: theme.buttonSize,
         height: theme.buttonSize,
-        bottom: 20,
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 2,
@@ -35,17 +34,20 @@ export default (props) => {
         size = 30, 
         onPress, style = {}, 
         containerStyle = {}, 
-        position = 20, showButton
+        position = 20,
+        initialPosition = 20,
+        showButton,
+        disableTouchable = false,
     } = props;
     
-    const showButtonsAnimation = useRef(new Animated.Value(20)).current;
+    const showButtonsAnimation = useRef(new Animated.Value(initialPosition)).current;
 
     useEffect(() => {
         Animated
             .timing(
                 showButtonsAnimation, 
                 {
-                    toValue: showButton ? position : 20, 
+                    toValue: showButton ? position : initialPosition, 
                     duration: 500, 
                     useNativeDriver: false
                 })
@@ -54,9 +56,17 @@ export default (props) => {
 
     return (
         <Animated.View style={{...styles.container, ...containerStyle, bottom: showButtonsAnimation}}>
-            <TouchableOpacity onPress={onPress}>
-                <FontAwesome style={{...styles.icon, ...style}} name={name} color={color} size={size}/>
-            </TouchableOpacity>
+            {
+                disableTouchable ? (
+                    <View>
+                        <FontAwesome style={{...styles.icon, ...style}} name={name} color={color} size={size}/>
+                    </View>
+                ) : (
+                    <TouchableOpacity onPress={onPress}>
+                        <FontAwesome style={{...styles.icon, ...style}} name={name} color={color} size={size}/>
+                    </TouchableOpacity>
+                )
+            }
         </Animated.View>
     )
 }
