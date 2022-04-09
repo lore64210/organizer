@@ -37,7 +37,6 @@ export default (props) => {
         position = 20,
         initialPosition = 20,
         showButton,
-        disableTouchable = false,
         horizontal = false,
     } = props;
     
@@ -61,17 +60,9 @@ export default (props) => {
 
     return (
         <Animated.View style={containerStyleAux}>
-            {
-                disableTouchable ? (
-                    <View>
-                        <FontAwesome style={{...styles.icon, ...style}} name={name} color={color} size={size}/>
-                    </View>
-                ) : (
-                    <TouchableOpacity onPress={onPress}>
-                        <FontAwesome style={{...styles.icon, ...style}} name={name} color={color} size={size}/>
-                    </TouchableOpacity>
-                )
-            }
+            <TouchableOpacity onPress={onPress}>
+                <FontAwesome style={{...styles.icon, ...style}} name={name} color={color} size={size}/>
+            </TouchableOpacity>
         </Animated.View>
     )
 }

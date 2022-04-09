@@ -16,8 +16,7 @@ const createStyles = (theme, window) => StyleSheet.create({
         flex: 1,
     },
     deleteButton: {
-        backgroundColor: 'red',
-        left: window.width / 2 - 25,
+        backgroundColor: theme.deleteButtonColor,
         right: 0,
         width: '100%',
         height: '100%',
@@ -26,6 +25,7 @@ const createStyles = (theme, window) => StyleSheet.create({
         width: 50,
         height: 50,
         position: 'absolute',
+        left: window.width / 2 - 25,
         bottom: 0,
     },
 })
@@ -39,11 +39,11 @@ const emptyReminder: reminder = {
 
 const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
     //@ts-ignore
-    const {theme, isDarkTheme} = useSelector(({themeReducer}) => {
+    const {theme} = useSelector(({themeReducer}) => {
         return themeReducer;
     });
     const window = useWindowDimensions();
-    const styles = createStyles({}, window);
+    const styles = createStyles(theme, window);
 
     //@ts-ignore
     const reminders = useSelector(({remindersReducer: {reminders}}) => {
@@ -97,7 +97,6 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
                         position={20}
                         initialPosition={-100}
                         color={theme.backgroundColor}
-                        disableTouchable
                     />
                 </View>
             </DraxProvider>

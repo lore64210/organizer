@@ -8,6 +8,7 @@ const darkTheme = {
     buttonSize: 50,
     borderRadius: 12,
     borderRadiusButton: 100,
+    deleteButtonColor: '#A61C21',
 }
 
 const ligthTheme = {
@@ -20,6 +21,7 @@ const ligthTheme = {
     buttonSize: 50,
     borderRadius: 12,
     borderRadiusButton: 100,
+    deleteButtonColor: '#D53E43',
 }
 
 export {

@@ -27,9 +27,10 @@ const createStyles = (theme, window) => StyleSheet.create({
         width: window.width / 4,
     },
     deleteButton: {
-        backgroundColor: 'red',
+        backgroundColor: theme.deleteButtonColor,
         width: '100%',
         height: '100%',
+        borderWidth: 0,
     },
     deleteButtonContainer: {
         width: 50,
