@@ -38,6 +38,7 @@ export default (props) => {
         initialPosition = 20,
         showButton,
         disableTouchable = false,
+        horizontal = false,
     } = props;
     
     const showButtonsAnimation = useRef(new Animated.Value(initialPosition)).current;
@@ -54,8 +55,12 @@ export default (props) => {
             .start();
     }, [showButton]);
 
+    const containerStyleAux = !horizontal 
+        ? {...styles.container, ...containerStyle, bottom: showButtonsAnimation}
+        : {...styles.container, ...containerStyle, left: showButtonsAnimation}
+
     return (
-        <Animated.View style={{...styles.container, ...containerStyle, bottom: showButtonsAnimation}}>
+        <Animated.View style={containerStyleAux}>
             {
                 disableTouchable ? (
                     <View>

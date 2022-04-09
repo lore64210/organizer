@@ -1,9 +1,10 @@
+import {useState} from 'react';
 import {View, StyleSheet, Image, useWindowDimensions} from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
-import { DraxProvider, DraxList, DraxView } from 'react-native-drax';
+import { DraxProvider, DraxList } from 'react-native-drax';
 import { item } from '../../config/types';
-import { IconButton } from '../atoms';
+import { AnimatedIconButton, IconButton } from '../atoms';
 
 const createStyles = (theme, window) => StyleSheet.create({
     container: {
@@ -26,17 +27,32 @@ const createStyles = (theme, window) => StyleSheet.create({
         width: window.width / 4,
     },
     deleteButton: {
-        backgroundColor: 'red'
-    }
+        backgroundColor: 'red',
+        width: '100%',
+        height: '100%',
+    },
+    deleteButtonContainer: {
+        width: 50,
+        height: 50,
+        position: 'absolute',
+        bottom: '10%',
+    },
 });
 
-const ImagesItemList = ({items, onPress, orderImages, onItemDragEnd, onItemDragStart}) => {
+const ImagesItemList = ({items, onPress, orderImages, onItemDragEnd}) => {
     const window = useWindowDimensions();
     //@ts-ignore
     const {theme} = useSelector(({themeReducer}) => {
         return themeReducer;
     });
     const styles = createStyles(theme, window);
+
+    const [showDeleteImageButton, setShowDeleteImageButton] = useState(false);
+
+    const onDragEnd = (e) => {
+        onItemDragEnd(e);
+        setShowDeleteImageButton(false);
+    }
     
     return (
         <>
@@ -46,10 +62,11 @@ const ImagesItemList = ({items, onPress, orderImages, onItemDragEnd, onItemDragS
                         <View style={styles.listContainer}>
                             <DraxProvider>
                                 <DraxList
+                                    lockItemDragsToMainAxis
                                     keyboardDismissMode='on-drag'
                                     horizontal
-                                    onItemDragEnd={onItemDragEnd}
-                                    onItemDragStart={onItemDragStart}
+                                    onItemDragEnd={onDragEnd}
+                                    onItemDragStart={() => setShowDeleteImageButton(true)}
                                     data={items}
                                     renderItemContent={({item}) => (
                                         <TouchableOpacity onPress={() => onPress(item)}>
@@ -64,6 +81,18 @@ const ImagesItemList = ({items, onPress, orderImages, onItemDragEnd, onItemDragS
                                     keyExtractor={(item : item) => item.id}
                                 />
                             </DraxProvider>
+                        </View>
+                        <View style={styles.deleteButtonContainer}>
+                            <AnimatedIconButton 
+                                name='trash' 
+                                containerStyle={styles.deleteButton} 
+                                showButton={showDeleteImageButton}
+                                position={window.width - 210}
+                                initialPosition={window.width}
+                                color={theme.backgroundColor}
+                                disableTouchable
+                                horizontal
+                            />
                         </View>
                     </View>
                 ) : <View />

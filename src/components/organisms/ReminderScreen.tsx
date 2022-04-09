@@ -120,30 +120,40 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
         dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, imageItems}})
     }
 
-    const onItemDragEnd = (e, itemListName) => {
+    const onItemDragEnd = (e) => {
         const {dragAbsolutePosition, item} = e;
         let {x: itemPositionX, y: itemPositionY} = dragAbsolutePosition;
         itemPositionY = reminder.imageItems.length ? itemPositionY + window.height / 4 + 20 : itemPositionY;
-        console.log(itemPositionY)
         if (itemPositionY < window.height - 75 
             && itemPositionY > window.height - 175
             && itemPositionX < window.width / 2 + 75
             && itemPositionX > window.width / 2 - 25) {
                 dispatch({
                     type: SET_CURRENT_REMINDER, 
-                    payload: {...reminder, [itemListName] : reminder[itemListName].filter(i => i.id !== item.id)}
+                    payload: {...reminder, items : reminder.items.filter(i => i.id !== item.id)}
                 });
         }
         setShowDeleteButton(false);
     }
 
+    const onImageItemDragEnd = (e) => {
+        const {dragAbsolutePosition, item} = e;
+        let {x: itemPositionX} = dragAbsolutePosition;
+        if (itemPositionX > window.width - 50) {
+                dispatch({
+                    type: SET_CURRENT_REMINDER, 
+                    payload: {...reminder, imageItems : reminder.imageItems.filter(i => i.id !== item.id)}
+                });
+        }
+    }
+
     const onItemDragStart = () => {
         setShowDeleteButton(true);
     }
-
+    
     return (
         <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
-            <ImageItemList onItemDragStart={onItemDragStart} onItemDragEnd={(e) => onItemDragEnd(e, 'imageItems')} items={reminder.imageItems} onPress={onImagePress} orderImages={orderImages} />
+            <ImageItemList onItemDragEnd={onImageItemDragEnd} items={reminder.imageItems} onPress={onImagePress} orderImages={orderImages} />
             <ItemList 
                 actualItemTextId={actualItemTextId} 
                 items={reminder.items} 
@@ -152,7 +162,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 changeItemCheck={changeItemCheck}  
                 orderItemList={orderItemList}
                 onItemDragStart={onItemDragStart}
-                onItemDragEnd={(e) => onItemDragEnd(e, 'items')}
+                onItemDragEnd={(e) => onItemDragEnd(e)}
             />
             <View style={styles.deleteButtonContainer}>
                 <AnimatedIconButton 
