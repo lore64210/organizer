@@ -4,8 +4,9 @@ import {useSelector, useDispatch} from 'react-redux';
 import {Layout, ModalTitle, ItemList, ImageItemList, ModalImage, ModalAudio} from '../molecules';
 import {IconButton} from '../atoms';
 import AnimatedIconButton from '../atoms/AnimatedIconButton';
-import {CREATE_REMINDER, DELETE_REMINDER, SET_CURRENT_REMINDER, UPDATE_REMINDER} from '../../config/redux/actions';
+import {CREATE_REMINDER, SET_CURRENT_REMINDER, UPDATE_REMINDER} from '../../config/redux/actions';
 import generateUUID from '../../utils/uuidUtil';
+import {deleteAsync} from 'expo-file-system';
 
 const createStyles = (theme, isDarkTheme, window) => (StyleSheet.create({
     checkButtonPressed: {
@@ -128,6 +129,9 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
             && itemPositionY > window.height - 175
             && itemPositionX < window.width / 2 + 75
             && itemPositionX > window.width / 2 - 25) {
+                if (item.type === 'audio') {
+                    deleteAsync(item.value, {idempotent: true});
+                }
                 dispatch({
                     type: SET_CURRENT_REMINDER, 
                     payload: {...reminder, items : reminder.items.filter(i => i.id !== item.id)}
@@ -140,6 +144,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
         const {dragAbsolutePosition, item} = e;
         let {x: itemPositionX} = dragAbsolutePosition;
         if (itemPositionX > window.width - 50) {
+                deleteAsync(item.value, {idempotent: true});
                 dispatch({
                     type: SET_CURRENT_REMINDER, 
                     payload: {...reminder, imageItems : reminder.imageItems.filter(i => i.id !== item.id)}

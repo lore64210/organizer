@@ -7,6 +7,7 @@ import {HomeItem, Layout} from '../molecules';
 import uuid from '../../utils/uuidUtil';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { DraxProvider, DraxList } from 'react-native-drax';
+import {deleteAsync} from 'expo-file-system';
 
 const createStyles = (theme, window) => StyleSheet.create({
     button: {
@@ -66,6 +67,14 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
             && itemPositionY > window.height - 175
             && itemPositionX < window.width / 2 + 75
             && itemPositionX > window.width / 2 - 25) {
+                item.items.forEach(i => {
+                    if (i.type === 'audio') {
+                        deleteAsync(i.value, {idempotent: true})
+                    }
+                });
+                item.imageItems.forEach(i => {
+                    deleteAsync(i.value, {idempotent: true});
+                });
                 dispatch({type: DELETE_REMINDER, payload: item});
         }
         setShowDeleteButton(false);
