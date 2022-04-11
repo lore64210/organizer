@@ -11,6 +11,7 @@ type reminder = {
     title: string,
     items: item[],
     imageItems: item[],
+    hide: boolean,
 }
 
 type theme = {

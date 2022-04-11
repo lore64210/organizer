@@ -1,4 +1,5 @@
-import {StyleSheet, Text} from 'react-native';
+import {useRef, useEffect} from 'react';
+import {StyleSheet, Text, Animated} from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
 
@@ -23,10 +24,24 @@ export default ({item, onItemPress}) => {
         return themeReducer;
     });
     const styles = createStyles(theme);
-    
+
+    const heightAnimationRef = useRef(new Animated.Value(100)).current;
+
+    useEffect(() => {
+        if (item.hide) {
+            Animated.timing(heightAnimationRef, {
+                toValue: 0,
+                duration: 500,
+                useNativeDriver: false,
+            }).start()
+        }
+    }, [item]);
+
     return (
-        <TouchableOpacity onPress={onItemPress} style={styles.container}>
-            <Text style={styles.title}>{item.title}</Text>
-        </TouchableOpacity>
-    )
+        <Animated.View style={{minHeight: 50, height: heightAnimationRef}}>
+            <TouchableOpacity onPress={onItemPress} style={styles.container}>
+                <Text style={styles.title}>{item.title}</Text>
+            </TouchableOpacity>
+        </Animated.View>
+    );
 }

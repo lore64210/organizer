@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import {DELETE_REMINDER, SET_CURRENT_REMINDER, SET_ORDERED_REMINDERS} from '../../config/redux/actions';
+import {DELETE_REMINDER, SET_CURRENT_REMINDER, SET_ORDERED_REMINDERS, UPDATE_REMINDER} from '../../config/redux/actions';
 import {reminder} from '../../config/types';
 import {AnimatedIconButton, IconButton} from '../atoms';
 import {HomeItem, Layout} from '../molecules';
@@ -35,7 +35,8 @@ const emptyReminder: reminder = {
     id: '',
     title: '',
     items: [],
-    imageItems: []
+    imageItems: [],
+    hide: false
 };
 
 const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
@@ -67,15 +68,18 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
             && itemPositionY > window.height - 175
             && itemPositionX < window.width / 2 + 75
             && itemPositionX > window.width / 2 - 25) {
-                item.items.forEach(i => {
-                    if (i.type === 'audio') {
-                        deleteAsync(i.value, {idempotent: true})
-                    }
-                });
-                item.imageItems.forEach(i => {
-                    deleteAsync(i.value, {idempotent: true});
-                });
-                dispatch({type: DELETE_REMINDER, payload: item});
+                dispatch({type: UPDATE_REMINDER, payload: {...item, hide: true}});
+                setTimeout(() => {
+                    item.items.forEach(i => {
+                        if (i.type === 'audio') {
+                            deleteAsync(i.value, {idempotent: true})
+                        }
+                    });
+                    item.imageItems.forEach(i => {
+                        deleteAsync(i.value, {idempotent: true});
+                    });
+                    dispatch({type: DELETE_REMINDER, payload: item});
+                }, 1500)
         }
         setShowDeleteButton(false);
     }
@@ -101,7 +105,7 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 <View style={styles.deleteButtonContainer}>
                     <AnimatedIconButton 
                         name='trash' 
-                        containerStyle={styles.deleteButton} 
+                        containerStyle={styles.deleteButton}
                         showButton={showDeleteButton}
                         position={20}
                         initialPosition={-100}
