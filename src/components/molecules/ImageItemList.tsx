@@ -52,6 +52,7 @@ const ImagesItemList = ({items, onPress, orderImages, onItemDragEnd}) => {
     const [showDeleteImageButton, setShowDeleteImageButton] = useState(false);
     const [imageToDelete, setImageToDelete] = useState('');
     const [imagesWidth, setImagesWidth] = useState({});
+    const [imagesOpacity, setImagesOpacity] = useState({});
 
     const onDragEnd = (e) => {
         const {dragAbsolutePosition} = e;
@@ -65,23 +66,35 @@ const ImagesItemList = ({items, onPress, orderImages, onItemDragEnd}) => {
 
     useEffect(() => {
         let newImagesWidth = {};
+        let newImagesOpacity = {};
         items
-            .map((i) => ({val: new Animated.Value(window.width / 4 + 10), key: i.id}))
+            .map((i) => ({
+                valueOpacity: new Animated.Value(1),
+                valueHeight: new Animated.Value(window.width / 4 + 10), 
+                key: i.id
+            }))
             .forEach(i => {
                 newImagesWidth = {
                     ...newImagesWidth,
-                    [i.key]: i.val
+                    [i.key]: i.valueHeight
+                }
+                newImagesOpacity = {
+                    ...newImagesOpacity,
+                    [i.key]: i.valueOpacity,
                 }
             });
-        console.log({newImagesWidth})
         setImagesWidth({...newImagesWidth})                
+        setImagesOpacity({...newImagesOpacity})                
     }, [items]);
 
     useEffect(() => {
-        console.log({imageToDelete, imagesWidth})
-        if(imageToDelete && imagesWidth[imageToDelete]) {
-            console.log('asadasd')
+        if(imageToDelete && imagesWidth[imageToDelete] && imagesOpacity[imageToDelete]) {
             Animated.timing(imagesWidth[imageToDelete], {
+                useNativeDriver: false, 
+                toValue: 0, 
+                duration: 750
+            }).start();
+            Animated.timing(imagesOpacity[imageToDelete], {
                 useNativeDriver: false, 
                 toValue: 0, 
                 duration: 750
@@ -104,7 +117,7 @@ const ImagesItemList = ({items, onPress, orderImages, onItemDragEnd}) => {
                                     onItemDragStart={() => setShowDeleteImageButton(true)}
                                     data={items}
                                     renderItemContent={({item}) => (
-                                        <Animated.View style={{width: imagesWidth[item.id]}}>
+                                        <Animated.View style={{width: imagesWidth[item.id], opacity: imagesOpacity[item.id]}}>
                                             <TouchableOpacity onPress={() => onPress(item)}>
                                                 <Image style={styles.item} source={{uri: item.value}}/>
                                             </TouchableOpacity>

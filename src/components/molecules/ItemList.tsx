@@ -50,7 +50,17 @@ const createStyles = (theme) => StyleSheet.create({
     },
 });
 
-const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, changeItemCheck, orderItemList, onItemDragEnd, onItemDragStart}) => {
+const ItemList = ({
+    items, 
+    actualItemTextId, 
+    changeItemText, 
+    checksEnabled, 
+    changeItemCheck, 
+    orderItemList, 
+    onItemDragEnd, 
+    onItemDragStart,
+    reminderHasImages,
+}) => {
     //@ts-ignore
     const {theme} = useSelector(({themeReducer}) => {
         return themeReducer;
@@ -59,7 +69,10 @@ const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, chang
     
     const [currentAudioPlaying, setcurrentAudioPlaying] = useState(null);
     const [sounds, setSounds] = useState<{id: string, sound: Sound, positionMillis: any, durationMillis: any}[]>([]);
-    
+    const [itemsHeight, setItemsHeight] = useState({});
+    const [itemsOpacity, setItemsOpacity] = useState({});
+    const [itemToDelete, setItemToDelete] = useState('');
+
     const window = useWindowDimensions();
 
     const textItemsRef = useRef({});
@@ -77,6 +90,48 @@ const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, chang
                 })
             .start();
     }, [checksEnabled]);
+
+    useEffect(() => {
+        let newItemsHeight = {};
+        let newItemsOpacity = {};
+        items
+            .map(i => ({key: [i.id], valueHeight: new Animated.Value(100), valueOpacity: new Animated.Value(1)}))
+            .forEach(i => {
+                newItemsHeight = {...newItemsHeight, [i.key]: i.valueHeight};
+                newItemsOpacity = {...newItemsOpacity, [i.key]: i.valueOpacity};
+            });
+        setItemsHeight(newItemsHeight);
+        setItemsOpacity(newItemsOpacity);
+    }, [items.length]);
+
+    useEffect(() => {
+        if (itemToDelete && itemsHeight[itemToDelete] && itemsOpacity[itemToDelete]) {
+            Animated.timing(itemsHeight[itemToDelete], {
+                toValue: 0,
+                useNativeDriver: false,
+                duration: 750,
+            }).start();
+            Animated.timing(itemsOpacity[itemToDelete], {
+                toValue: 0,
+                useNativeDriver: false,
+                duration: 750,
+            }).start();
+        }
+    }, [itemToDelete]);
+
+    const handleOnItemDragEnd = (e) => {
+        const {dragAbsolutePosition} = e;
+        let {x: itemPositionX, y: itemPositionY} = dragAbsolutePosition;
+        console.log(reminderHasImages)
+        itemPositionY = reminderHasImages ? itemPositionY + window.height / 4 + 20 : itemPositionY;
+        if (itemPositionY < window.height - 75 
+            && itemPositionY > window.height - 175
+            && itemPositionX < window.width / 2 + 75
+            && itemPositionX > window.width / 2 - 25) {
+                setTimeout(() => onItemDragEnd(e), 800);
+                setItemToDelete(e.item.id);
+            }
+    }
 
     // ------------- LOGICA PARA AUDIOS ----------------------------------------------------------------------
     
@@ -178,54 +233,62 @@ const ItemList = ({items, actualItemTextId, changeItemText, checksEnabled, chang
             <DraxList
                 style={{flex: 1}}
                 keyboardDismissMode='on-drag'
-                onItemDragEnd={onItemDragEnd}
+                onItemDragEnd={handleOnItemDragEnd}
                 onItemDragStart={onItemDragStart}
                 data={items}
                 renderItemContent={({item}) => (
-                    <View key={item.id} style={styles.itemListContainer}>
-                        <Checkbox 
-                            style={styles.checkbox}
-                            isChecked={item.checked} 
-                            onPress={(checked) => changeItemCheck(checked, item.id)}
-                        />
-                        <Animated.View style={{...styles.itemContainer, width: showChecksAnimation}}>
-                            <IconButton name='reorder' containerStyle={styles.reorderIcon} size={15} />
-                            {
+                    <View key={item.id}>
+                        <Animated.View 
+                            style={{
+                                ...styles.itemListContainer, 
+                                opacity: itemsOpacity[item.id], 
+                                height: itemToDelete === item.id ? itemsHeight[item.id] : 'auto',
+                            }}
+                        >
+                            <Checkbox 
+                                style={styles.checkbox}
+                                isChecked={item.checked} 
+                                onPress={(checked) => changeItemCheck(checked, item.id)}
+                            />
+                            <Animated.View style={{...styles.itemContainer, width: showChecksAnimation}}>
+                                <IconButton name='reorder' containerStyle={styles.reorderIcon} size={15} />
                                 {
-                                    text: (
-                                        <TextInput 
-                                            ref={input => textItemsRef.current[item.id] = input}
-                                            multiline
-                                            style={styles.textItem} 
-                                            onChangeText={newText => changeItemText(newText, item.id)} 
-                                            placeholderTextColor={theme.placeholderTextColor}
-                                            placeholder='Nuevo reminder...'
-                                        />
-                                    ),
-                                    audio: (
-                                        <View style={styles.audioItem}>
-                                            <IconButton 
-                                                name={currentAudioPlaying === item.id ? 'pause' : 'play'} 
-                                                containerStyle={styles.audioButton} 
-                                                color={!currentAudioPlaying || currentAudioPlaying === item.id ? theme.textColor : 'grey'}
-                                                onPress={() => onAudioButtonPress(item.id)}
+                                    {
+                                        text: (
+                                            <TextInput 
+                                                ref={input => textItemsRef.current[item.id] = input}
+                                                multiline
+                                                style={styles.textItem} 
+                                                onChangeText={newText => changeItemText(newText, item.id)} 
+                                                placeholderTextColor={theme.placeholderTextColor}
+                                                placeholder='Nuevo reminder...'
                                             />
-                                            <View style={styles.audioSlider}>
-                                                <Slider
-                                                    style={{width: '100%', height: '100%'}}
-                                                    minimumValue={0}
-                                                    maximumValue={getMaximumDurationValue(item)}
-                                                    minimumTrackTintColor={theme.textColor}
-                                                    maximumTrackTintColor={theme.backgroundColor}
-                                                    thumbTintColor={theme.textColor}
-                                                    onSlidingComplete={newPositionMillis => onAudioControlSlideComplete(newPositionMillis, item.id)}
-                                                    value={getAudioControlValue(item)}
+                                        ),
+                                        audio: (
+                                            <View style={styles.audioItem}>
+                                                <IconButton 
+                                                    name={currentAudioPlaying === item.id ? 'pause' : 'play'} 
+                                                    containerStyle={styles.audioButton} 
+                                                    color={!currentAudioPlaying || currentAudioPlaying === item.id ? theme.textColor : 'grey'}
+                                                    onPress={() => onAudioButtonPress(item.id)}
                                                 />
+                                                <View style={styles.audioSlider}>
+                                                    <Slider
+                                                        style={{width: '100%', height: '100%'}}
+                                                        minimumValue={0}
+                                                        maximumValue={getMaximumDurationValue(item)}
+                                                        minimumTrackTintColor={theme.textColor}
+                                                        maximumTrackTintColor={theme.backgroundColor}
+                                                        thumbTintColor={theme.textColor}
+                                                        onSlidingComplete={newPositionMillis => onAudioControlSlideComplete(newPositionMillis, item.id)}
+                                                        value={getAudioControlValue(item)}
+                                                    />
+                                                </View>
                                             </View>
-                                        </View>
-                                    )
-                                }[item.type]
-                            }
+                                        )
+                                    }[item.type]
+                                }
+                            </Animated.View>
                         </Animated.View>
                     </View>
                 )}

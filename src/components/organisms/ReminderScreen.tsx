@@ -122,21 +122,14 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     }
 
     const onItemDragEnd = (e) => {
-        const {dragAbsolutePosition, item} = e;
-        let {x: itemPositionX, y: itemPositionY} = dragAbsolutePosition;
-        itemPositionY = reminder.imageItems.length ? itemPositionY + window.height / 4 + 20 : itemPositionY;
-        if (itemPositionY < window.height - 75 
-            && itemPositionY > window.height - 175
-            && itemPositionX < window.width / 2 + 75
-            && itemPositionX > window.width / 2 - 25) {
-                if (item.type === 'audio') {
-                    deleteAsync(item.value, {idempotent: true});
-                }
-                dispatch({
-                    type: SET_CURRENT_REMINDER, 
-                    payload: {...reminder, items : reminder.items.filter(i => i.id !== item.id)}
-                });
+        const {item} = e;
+        if (item.type === 'audio') {
+            deleteAsync(item.value, {idempotent: true});
         }
+        dispatch({
+            type: SET_CURRENT_REMINDER, 
+            payload: {...reminder, items : reminder.items.filter(i => i.id !== item.id)}
+        });
         setShowDeleteButton(false);
     }
 
@@ -169,7 +162,8 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 changeItemCheck={changeItemCheck}  
                 orderItemList={orderItemList}
                 onItemDragStart={onItemDragStart}
-                onItemDragEnd={(e) => onItemDragEnd(e)}
+                onItemDragEnd={onItemDragEnd}
+                reminderHasImages={!!reminder.imageItems.length}
             />
             <View style={styles.deleteButtonContainer}>
                 <AnimatedIconButton 

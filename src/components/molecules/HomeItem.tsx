@@ -26,6 +26,7 @@ export default ({item, onItemPress}) => {
     const styles = createStyles(theme);
 
     const heightAnimationRef = useRef(new Animated.Value(100)).current;
+    const opacityAnimationRef = useRef(new Animated.Value(1)).current;
 
     useEffect(() => {
         if (item.hide) {
@@ -33,12 +34,17 @@ export default ({item, onItemPress}) => {
                 toValue: 0,
                 duration: 500,
                 useNativeDriver: false,
-            }).start()
+            }).start();
+            Animated.timing(opacityAnimationRef, {
+                toValue: 0,
+                duration: 500,
+                useNativeDriver: false,
+            }).start();
         }
     }, [item]);
 
     return (
-        <Animated.View style={{minHeight: 50, height: heightAnimationRef}}>
+        <Animated.View style={{minHeight: 50, height: heightAnimationRef, opacity: opacityAnimationRef}}>
             <TouchableOpacity onPress={onItemPress} style={styles.container}>
                 <Text style={styles.title}>{item.title}</Text>
             </TouchableOpacity>
