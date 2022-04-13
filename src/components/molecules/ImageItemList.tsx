@@ -1,10 +1,11 @@
-import {useState} from 'react';
-import {View, StyleSheet, Image, useWindowDimensions} from 'react-native';
+import {useState, useEffect, useRef} from 'react';
+import {View, StyleSheet, Image, useWindowDimensions, Animated} from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { DraxProvider, DraxList } from 'react-native-drax';
 import { item } from '../../config/types';
-import { AnimatedIconButton, IconButton } from '../atoms';
+import { AnimatedIconButton } from '../atoms';
+import { SET_CURRENT_REMINDER, UPDATE_REMINDER } from '../../config/redux/actions';
 
 const createStyles = (theme, window) => StyleSheet.create({
     container: {
@@ -49,11 +50,44 @@ const ImagesItemList = ({items, onPress, orderImages, onItemDragEnd}) => {
     const styles = createStyles(theme, window);
 
     const [showDeleteImageButton, setShowDeleteImageButton] = useState(false);
+    const [imageToDelete, setImageToDelete] = useState('');
+    const [imagesWidth, setImagesWidth] = useState({});
 
     const onDragEnd = (e) => {
-        onItemDragEnd(e);
+        const {dragAbsolutePosition} = e;
+        let {x: itemPositionX} = dragAbsolutePosition;
+        if (itemPositionX > window.width - 50) {
+            setTimeout(() => onItemDragEnd(e), 800);
+            setImageToDelete(e.item.id);
+        }
         setShowDeleteImageButton(false);
     }
+
+    useEffect(() => {
+        let newImagesWidth = {};
+        items
+            .map((i) => ({val: new Animated.Value(window.width / 4 + 10), key: i.id}))
+            .forEach(i => {
+                newImagesWidth = {
+                    ...newImagesWidth,
+                    [i.key]: i.val
+                }
+            });
+        console.log({newImagesWidth})
+        setImagesWidth({...newImagesWidth})                
+    }, [items]);
+
+    useEffect(() => {
+        console.log({imageToDelete, imagesWidth})
+        if(imageToDelete && imagesWidth[imageToDelete]) {
+            console.log('asadasd')
+            Animated.timing(imagesWidth[imageToDelete], {
+                useNativeDriver: false, 
+                toValue: 0, 
+                duration: 750
+            }).start();
+        }
+    }, [imageToDelete]);
     
     return (
         <>
@@ -70,9 +104,11 @@ const ImagesItemList = ({items, onPress, orderImages, onItemDragEnd}) => {
                                     onItemDragStart={() => setShowDeleteImageButton(true)}
                                     data={items}
                                     renderItemContent={({item}) => (
-                                        <TouchableOpacity onPress={() => onPress(item)}>
-                                            <Image style={styles.item} source={{uri: item.value}}/>
-                                        </TouchableOpacity>
+                                        <Animated.View style={{width: imagesWidth[item.id]}}>
+                                            <TouchableOpacity onPress={() => onPress(item)}>
+                                                <Image style={styles.item} source={{uri: item.value}}/>
+                                            </TouchableOpacity>
+                                        </Animated.View>
                                     )}
                                     onItemReorder={({ fromIndex, toIndex }) => {
                                         const newData = [...items];

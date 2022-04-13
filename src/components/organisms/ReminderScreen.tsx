@@ -141,15 +141,12 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     }
 
     const onImageItemDragEnd = (e) => {
-        const {dragAbsolutePosition, item} = e;
-        let {x: itemPositionX} = dragAbsolutePosition;
-        if (itemPositionX > window.width - 50) {
-                deleteAsync(item.value, {idempotent: true});
-                dispatch({
-                    type: SET_CURRENT_REMINDER, 
-                    payload: {...reminder, imageItems : reminder.imageItems.filter(i => i.id !== item.id)}
-                });
-        }
+        const {item} = e;
+        deleteAsync(item.value, {idempotent: true});
+        dispatch({
+            type: SET_CURRENT_REMINDER, 
+            payload: {...reminder, imageItems : reminder.imageItems.filter(i => i.id !== item.id)}
+        });
     }
 
     const onItemDragStart = () => {
@@ -158,7 +155,12 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     
     return (
         <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
-            <ImageItemList onItemDragEnd={onImageItemDragEnd} items={reminder.imageItems} onPress={onImagePress} orderImages={orderImages} />
+            <ImageItemList 
+                onItemDragEnd={onImageItemDragEnd} 
+                items={reminder.imageItems} 
+                onPress={onImagePress} 
+                orderImages={orderImages} 
+            />
             <ItemList 
                 actualItemTextId={actualItemTextId} 
                 items={reminder.items} 
