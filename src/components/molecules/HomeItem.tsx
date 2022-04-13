@@ -25,7 +25,7 @@ export default ({item, onItemPress}) => {
     });
     const styles = createStyles(theme);
 
-    const heightAnimationRef = useRef(new Animated.Value(100)).current;
+    const heightAnimationRef = useRef(new Animated.Value(75)).current;
     const opacityAnimationRef = useRef(new Animated.Value(1)).current;
 
     useEffect(() => {
@@ -44,7 +44,7 @@ export default ({item, onItemPress}) => {
     }, [item]);
 
     return (
-        <Animated.View style={{minHeight: 50, height: heightAnimationRef, opacity: opacityAnimationRef}}>
+        <Animated.View style={{height: heightAnimationRef, opacity: opacityAnimationRef}}>
             <TouchableOpacity onPress={onItemPress} style={styles.container}>
                 <Text style={styles.title}>{item.title}</Text>
             </TouchableOpacity>
