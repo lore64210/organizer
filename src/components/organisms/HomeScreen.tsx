@@ -85,7 +85,7 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
     }
 
     return (
-        <Layout headerProps={{title: 'Reminders'}}>
+        <Layout headerProps={{title: 'Organizer'}}>
             <DraxProvider>
                 <DraxList
                     style={styles.draxListContainer}
