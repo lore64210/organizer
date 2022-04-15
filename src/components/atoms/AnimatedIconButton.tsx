@@ -48,7 +48,7 @@ export default (props) => {
                 showButtonsAnimation, 
                 {
                     toValue: showButton ? position : initialPosition, 
-                    duration: 500, 
+                    duration: 300, 
                     useNativeDriver: false
                 })
             .start();
