@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {View, StyleSheet, useWindowDimensions} from 'react-native';
+import {View, StyleSheet, useWindowDimensions, Keyboard} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
 import {Layout, ModalTitle, ItemList, ImageItemList, ModalImage, ModalAudio} from '../molecules';
 import {IconButton} from '../atoms';
@@ -143,6 +143,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     }
 
     const onItemDragStart = () => {
+        Keyboard.dismiss();
         setShowDeleteButton(true);
     }
 
@@ -150,6 +151,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
         let permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
         if (permissionResult.granted) {
+            //@ts-ignore
             const {uri} = await ImagePicker.launchImageLibraryAsync();
             if (uri) {
                 const newImage = {
