@@ -122,7 +122,6 @@ const ItemList = ({
     const handleOnItemDragEnd = (e) => {
         const {dragAbsolutePosition} = e;
         let {x: itemPositionX, y: itemPositionY} = dragAbsolutePosition;
-        console.log(reminderHasImages)
         itemPositionY = reminderHasImages ? itemPositionY + window.height / 4 + 20 : itemPositionY;
         if (itemPositionY < window.height - 75 
             && itemPositionY > window.height - 175
@@ -262,6 +261,7 @@ const ItemList = ({
                                                 onChangeText={newText => changeItemText(newText, item.id)} 
                                                 placeholderTextColor={theme.placeholderTextColor}
                                                 placeholder='Nuevo reminder...'
+                                                value={item.value}
                                             />
                                         ),
                                         audio: (

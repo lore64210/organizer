@@ -1,13 +1,13 @@
-import {useState, useEffect, useRef} from 'react';
-import {View, StyleSheet} from 'react-native';
+import {useState, useRef, useEffect} from 'react';
+import {View, StyleSheet, useWindowDimensions} from 'react-native';
 import {Camera} from 'expo-camera';
-import { IconButton } from '../atoms';
+import { IconButton, AnimatedIconButton } from '../atoms';
 import Slider from '@react-native-community/slider';
 import {useSelector, useDispatch} from 'react-redux';
 import { SET_CURRENT_REMINDER } from '../../config/redux/actions';
 import generateUUID from '../../utils/uuidUtil';
 
-const createStyles = (theme) => StyleSheet.create({
+const createStyles = (theme, window) => StyleSheet.create({
     container: {
         flex: 1,
     },
@@ -38,20 +38,30 @@ const createStyles = (theme) => StyleSheet.create({
         transform: [{rotate: '-90deg'}],
         width: 200,
         height: 30,
-    }
+    },
+    codeButton: {
+        zIndex: 0,
+        left: window.width / 2 - 25,
+        borderWidth: 0,
+    },
 });
 
 const CameraScreen = ({navigation}) => {
+
+    const window = useWindowDimensions();
+
     //@ts-ignore
     const {theme} = useSelector(({themeReducer}) => {
         return themeReducer;
     });
-    const styles = createStyles(theme);
+    const styles = createStyles(theme, window);
 
     const [hasPermission, setHasPermission] = useState(null);
     const [zoom, setZoom] = useState(0);
     const [type, setType] = useState(Camera.Constants.Type.back);
     const [flashMode, setFlashMode] = useState(Camera.Constants.FlashMode.off);
+    const [dataScanned, setDataScanned] = useState(null);
+    const [dataScannedIcon, setDataScannedIcon] = useState('qrcode');
 
     const cameraRef = useRef(null);
     
@@ -65,7 +75,7 @@ const CameraScreen = ({navigation}) => {
     useEffect(() => {
         (async () => {
             const { status } = await Camera.requestCameraPermissionsAsync();
-        setHasPermission(status === 'granted');
+            setHasPermission(status === 'granted');
         })();
         return () => {}
     }, []);
@@ -88,10 +98,35 @@ const CameraScreen = ({navigation}) => {
             dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, imageItems: [newImage, ...reminder.imageItems]}});
             navigation.goBack();
         }
-      }
+    }
+    
+    const handleBarCodeScanned = ({ type, data }) => {
+        setDataScannedIcon(type ==  256 ? 'qrcode' : 'barcode');
+        setDataScanned(data);
+    }
+
+    const onCodeScannedButtonPress = () => {
+        const newItem = {
+            id: generateUUID(),
+            value: dataScanned,
+            type: 'text',
+            position: reminder.items.length + 1,
+            hidden: false,
+        };
+        dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, items: [...reminder.items, newItem]}});
+        navigation.goBack();
+    }
+
     return (
         <View style={styles.container}>
-            <Camera ref={cameraRef} style={styles.camera} type={type} flashMode={flashMode} zoom={zoom}>
+            <Camera 
+                onBarCodeScanned={handleBarCodeScanned}
+                ref={cameraRef} 
+                style={styles.camera} 
+                type={type} 
+                flashMode={flashMode} 
+                zoom={zoom}
+            >
                 <View style={styles.container}>
                     <View style={styles.zoomBar}>
                         <Slider
@@ -115,6 +150,13 @@ const CameraScreen = ({navigation}) => {
                                 : Camera.Constants.FlashMode.on);
                             }}
                             color={flashMode === Camera.Constants.FlashMode.off ? theme.secondaryColor :  theme.textColor}
+                        />
+                        <AnimatedIconButton 
+                            name={dataScannedIcon} 
+                            onPress={onCodeScannedButtonPress} 
+                            position={110} 
+                            showButton={!!dataScanned}
+                            containerStyle={styles.codeButton}
                         />
                         <IconButton 
                             size={50}
