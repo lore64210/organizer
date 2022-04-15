@@ -52,7 +52,7 @@ function remindersReducer(state = initialState, action: {type: string, payload: 
   if (!Array.isArray(payload)) {
     switch (type) {
       case CREATE_REMINDER:
-          return {...state, reminders: (!reminders ? [payload] : [...reminders, payload])};
+          return {...state, reminders: (!reminders ? [payload] : [payload, ...reminders])};
       case UPDATE_REMINDER:
           return {...state, reminders: reminders.map(r => r.id === payload.id ? payload : r)};
       case DELETE_REMINDER:
