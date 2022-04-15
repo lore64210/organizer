@@ -7,6 +7,7 @@ import AnimatedIconButton from '../atoms/AnimatedIconButton';
 import {CREATE_REMINDER, SET_CURRENT_REMINDER, UPDATE_REMINDER} from '../../config/redux/actions';
 import generateUUID from '../../utils/uuidUtil';
 import {deleteAsync} from 'expo-file-system';
+import * as ImagePicker from 'expo-image-picker';
 
 const createStyles = (theme, isDarkTheme, window) => (StyleSheet.create({
     checkButtonPressed: {
@@ -144,6 +145,25 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     const onItemDragStart = () => {
         setShowDeleteButton(true);
     }
+
+    const openImagePicker = async () => {
+        let permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+        if (permissionResult.granted) {
+            const {uri} = await ImagePicker.launchImageLibraryAsync();
+            if (uri) {
+                const newImage = {
+                    id: generateUUID(),
+                    value: uri,
+                    type: 'image',
+                    position: reminder.imageItems.length + 1,
+                    hidden: false,
+                };
+                dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, imageItems: [newImage, ...reminder.imageItems]}});
+            }
+        }
+    
+    }
     
     return (
         <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
@@ -209,6 +229,13 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 showButton={showButtons}
                 color={checksEnabled ? (isDarkTheme ? theme.primaryColor : theme.secondaryColor) : theme.textColor}
                 containerStyle={{zIndex: 6, ...(checksEnabled ? styles.checkButtonPressed : {})}}
+            />
+            <AnimatedIconButton 
+                name="image" 
+                onPress={openImagePicker} 
+                position={320} 
+                showButton={showButtons}
+                containerStyle={{zIndex: 5}}
             />
             <ModalTitle
                 visible={modalVisible}
