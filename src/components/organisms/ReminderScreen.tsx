@@ -82,7 +82,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
             type,
             position: reminder.items.length + 1,
         };
-        dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, items: [...reminder.items, newItem]}});
+        dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, items: [newItem, ...reminder.items]}});
         return newItem;
     }
 
