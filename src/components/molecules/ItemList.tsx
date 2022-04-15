@@ -60,6 +60,7 @@ const ItemList = ({
     onItemDragEnd, 
     onItemDragStart,
     reminderHasImages,
+    setShowDeleteButton,
 }) => {
     //@ts-ignore
     const {theme} = useSelector(({themeReducer}) => {
@@ -129,7 +130,8 @@ const ItemList = ({
             && itemPositionX > window.width / 2 - 25) {
                 setTimeout(() => onItemDragEnd(e), 800);
                 setItemToDelete(e.item.id);
-            }
+        }
+        setShowDeleteButton(false);
     }
 
     // ------------- LOGICA PARA AUDIOS ----------------------------------------------------------------------

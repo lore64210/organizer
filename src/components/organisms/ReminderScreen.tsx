@@ -130,7 +130,6 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
             type: SET_CURRENT_REMINDER, 
             payload: {...reminder, items : reminder.items.filter(i => i.id !== item.id)}
         });
-        setShowDeleteButton(false);
     }
 
     const onImageItemDragEnd = (e) => {
@@ -164,6 +163,8 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 onItemDragStart={onItemDragStart}
                 onItemDragEnd={onItemDragEnd}
                 reminderHasImages={!!reminder.imageItems.length}
+                setShowDeleteButton={setShowDeleteButton}
+
             />
             <View style={styles.deleteButtonContainer}>
                 <AnimatedIconButton 
