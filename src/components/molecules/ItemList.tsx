@@ -1,5 +1,5 @@
 import {useRef, useEffect, useState} from 'react';
-import {View, StyleSheet, TextInput, Animated, useWindowDimensions} from 'react-native';
+import {View, StyleSheet, TextInput, Animated, useWindowDimensions, KeyboardAvoidingView} from 'react-native';
 import { IconButton, Checkbox } from '../atoms';
 import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
@@ -134,13 +134,14 @@ const ItemList = ({
         setShowDeleteButton(false);
     }
 
-    // ------------- LOGICA PARA AUDIOS ----------------------------------------------------------------------
-    
     useEffect(() => {
         if (textItemsRef.current[actualItemTextId]) {
             textItemsRef.current[actualItemTextId].focus();
         }
     }, [actualItemTextId]);
+
+
+    // ------------- LOGICA PARA AUDIOS ----------------------------------------------------------------------
 
     useEffect(() => {
         const newSounds = items
@@ -230,78 +231,82 @@ const ItemList = ({
     // ----------------------------------------------------------------------------------------
 
     return (
-        <DraxProvider>
-            <DraxList
-                style={{flex: 1}}
-                keyboardDismissMode='on-drag'
-                onItemDragEnd={handleOnItemDragEnd}
-                onItemDragStart={onItemDragStart}
-                data={items}
-                renderItemContent={({item}) => (
-                    <View key={item.id}>
-                        <Animated.View 
-                            style={{
-                                ...styles.itemListContainer, 
-                                opacity: itemsOpacity[item.id], 
-                                height: itemToDelete === item.id ? itemsHeight[item.id] : 'auto',
-                            }}
-                        >
-                            <Checkbox 
-                                style={styles.checkbox}
-                                isChecked={item.checked} 
-                                onPress={(checked) => changeItemCheck(checked, item.id)}
-                            />
-                            <Animated.View style={{...styles.itemContainer, width: showChecksAnimation}}>
-                                <IconButton name='reorder' containerStyle={styles.reorderIcon} size={15} />
-                                {
+        <KeyboardAvoidingView style={{flex: 1}}>
+            <DraxProvider>
+                <DraxList
+                    removeClippedSubviews={false}
+                    keyboardDismissMode='on-drag'
+                    onItemDragEnd={handleOnItemDragEnd}
+                    onItemDragStart={onItemDragStart}
+                    data={items}
+                    scrollToOverflowEnabled
+                    renderItemContent={({item}) => (
+                        <View key={item.id}>
+                            <Animated.View 
+                                style={{
+                                    ...styles.itemListContainer, 
+                                    opacity: itemsOpacity[item.id], 
+                                    height: itemToDelete === item.id ? itemsHeight[item.id] : 'auto',
+                                }}
+                            >
+                                <Checkbox 
+                                    style={styles.checkbox}
+                                    isChecked={item.checked} 
+                                    onPress={(checked) => changeItemCheck(checked, item.id)}
+                                />
+                                <Animated.View style={{...styles.itemContainer, width: showChecksAnimation}}>
+                                    <IconButton name='reorder' containerStyle={styles.reorderIcon} size={15} />
                                     {
-                                        text: (
-                                            <TextInput 
-                                                ref={input => textItemsRef.current[item.id] = input}
-                                                multiline
-                                                style={styles.textItem} 
-                                                onChangeText={newText => changeItemText(newText, item.id)} 
-                                                placeholderTextColor={theme.placeholderTextColor}
-                                                placeholder='Nuevo reminder...'
-                                                value={item.value}
-                                            />
-                                        ),
-                                        audio: (
-                                            <View style={styles.audioItem}>
-                                                <IconButton 
-                                                    name={currentAudioPlaying === item.id ? 'pause' : 'play'} 
-                                                    containerStyle={styles.audioButton} 
-                                                    color={!currentAudioPlaying || currentAudioPlaying === item.id ? theme.textColor : 'grey'}
-                                                    onPress={() => onAudioButtonPress(item.id)}
+                                        {
+                                            text: (
+                                                <TextInput 
+                                                    ref={input => textItemsRef.current[item.id] = input}
+                                                    multiline
+                                                    style={styles.textItem} 
+                                                    onChangeText={newText => changeItemText(newText, item.id)} 
+                                                    placeholderTextColor={theme.placeholderTextColor}
+                                                    placeholder='Nuevo reminder...'
+                                                    value={item.value}
                                                 />
-                                                <View style={styles.audioSlider}>
-                                                    <Slider
-                                                        style={{width: '100%', height: '100%'}}
-                                                        minimumValue={0}
-                                                        maximumValue={getMaximumDurationValue(item)}
-                                                        minimumTrackTintColor={theme.textColor}
-                                                        maximumTrackTintColor={theme.backgroundColor}
-                                                        thumbTintColor={theme.textColor}
-                                                        onSlidingComplete={newPositionMillis => onAudioControlSlideComplete(newPositionMillis, item.id)}
-                                                        value={getAudioControlValue(item)}
+                                            ),
+                                            audio: (
+                                                <View style={styles.audioItem}>
+                                                    <IconButton 
+                                                        name={currentAudioPlaying === item.id ? 'pause' : 'play'} 
+                                                        containerStyle={styles.audioButton} 
+                                                        color={!currentAudioPlaying || currentAudioPlaying === item.id ? theme.textColor : 'grey'}
+                                                        onPress={() => onAudioButtonPress(item.id)}
                                                     />
+                                                    <View style={styles.audioSlider}>
+                                                        <Slider
+                                                            style={{width: '100%', height: '100%'}}
+                                                            minimumValue={0}
+                                                            maximumValue={getMaximumDurationValue(item)}
+                                                            minimumTrackTintColor={theme.textColor}
+                                                            maximumTrackTintColor={theme.backgroundColor}
+                                                            thumbTintColor={theme.textColor}
+                                                            onSlidingComplete={newPositionMillis => onAudioControlSlideComplete(newPositionMillis, item.id)}
+                                                            value={getAudioControlValue(item)}
+                                                        />
+                                                    </View>
                                                 </View>
-                                            </View>
-                                        )
-                                    }[item.type]
-                                }
+                                            )
+                                        }[item.type]
+                                    }
+                                </Animated.View>
                             </Animated.View>
-                        </Animated.View>
-                    </View>
-                )}
-                onItemReorder={({ fromIndex, toIndex }) => {
-                    const newData = [...items];
-                    newData.splice(toIndex, 0, newData.splice(fromIndex, 1)[0]);
-                    orderItemList(newData);
-                }}
-                keyExtractor={(item : item) => item.id}
-            />
-        </DraxProvider>
+                        </View>
+                    )}
+                    onItemReorder={({ fromIndex, toIndex }) => {
+                        const newData = [...items];
+                        newData.splice(toIndex, 0, newData.splice(fromIndex, 1)[0]);
+                        orderItemList(newData);
+                    }}
+                    keyExtractor={(item : item) => item.id}
+                />
+            </DraxProvider>
+        </KeyboardAvoidingView>
+
     );
 }
 
