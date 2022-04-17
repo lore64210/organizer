@@ -1,5 +1,5 @@
 import {useRef, useEffect, useState} from 'react';
-import {View, StyleSheet, TextInput, Animated, useWindowDimensions, KeyboardAvoidingView} from 'react-native';
+import {View, StyleSheet, TextInput, Animated, useWindowDimensions, KeyboardAvoidingView, Linking} from 'react-native';
 import { IconButton, Checkbox } from '../atoms';
 import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
@@ -140,6 +140,12 @@ const ItemList = ({
         }
     }, [actualItemTextId]);
 
+    const handleOnInputPressOut = async (value) => {
+        const supported = await Linking.canOpenURL(value);
+        if (supported) {
+            Linking.openURL(value)
+        }
+    }
 
     // ------------- LOGICA PARA AUDIOS ----------------------------------------------------------------------
 
@@ -234,6 +240,7 @@ const ItemList = ({
         <KeyboardAvoidingView style={{flex: 1}}>
             <DraxProvider>
                 <DraxList
+                    contentContainerStyle={{marginBottom: window.height}}
                     removeClippedSubviews={false}
                     keyboardDismissMode='on-drag'
                     onItemDragEnd={handleOnItemDragEnd}
@@ -267,6 +274,7 @@ const ItemList = ({
                                                     placeholderTextColor={theme.placeholderTextColor}
                                                     placeholder='Nuevo reminder...'
                                                     value={item.value}
+                                                    onPressOut={() => handleOnInputPressOut(item)}
                                                 />
                                             ),
                                             audio: (

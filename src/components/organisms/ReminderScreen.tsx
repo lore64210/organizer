@@ -196,6 +196,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                     position={20}
                     initialPosition={-100}
                     color={theme.backgroundColor}
+                    onPress={() => setShowDeleteButton(false)}
                 />
             </View>
             <IconButton 
