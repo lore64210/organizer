@@ -1,5 +1,5 @@
 import {useRef, useEffect, useState} from 'react';
-import {View, StyleSheet, TextInput, Animated, useWindowDimensions, KeyboardAvoidingView, Linking} from 'react-native';
+import {View, StyleSheet, TextInput, Animated, useWindowDimensions, KeyboardAvoidingView, Linking, Text} from 'react-native';
 import { IconButton, Checkbox } from '../atoms';
 import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
@@ -7,6 +7,7 @@ import { Sound } from 'expo-av/build/Audio';
 import { useSelector } from 'react-redux';
 import { DraxProvider, DraxList } from 'react-native-drax';
 import { item } from '../../config/types';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const createStyles = (theme) => StyleSheet.create({
     itemListContainer: {
@@ -48,6 +49,19 @@ const createStyles = (theme) => StyleSheet.create({
         left: 0,
         width: 30,
     },
+    reminderItemContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 70,
+    },
+    reminderItem: {
+        color: theme.textColor
+    },
+    clockIcon: {
+        position: 'relative',
+        left: 0,
+        bottom: 0,
+    }
 });
 
 const ItemList = ({
@@ -61,6 +75,8 @@ const ItemList = ({
     onItemDragStart,
     reminderHasImages,
     setShowDeleteButton,
+    setCurrentAlarmSelected,
+    setModalTitleReminderVisible,
 }) => {
     //@ts-ignore
     const {theme} = useSelector(({themeReducer}) => {
@@ -145,6 +161,23 @@ const ItemList = ({
         if (supported) {
             Linking.openURL(value)
         }
+    }
+
+    const calculateIconColor = (date) => {
+        const now = new Date().toISOString().split('T')[0];
+        console.log({date, now});
+        if (date < now) {
+            return theme.deleteButtonColor;
+        } else if (date > now) {
+            return 'green';
+        } else {
+            return theme.textColor;
+        }
+    }
+
+    const handleOnReminderPress = (itemId) => {
+        setCurrentAlarmSelected(itemId);
+        setModalTitleReminderVisible(true);
     }
 
     // ------------- LOGICA PARA AUDIOS ----------------------------------------------------------------------
@@ -265,6 +298,24 @@ const ItemList = ({
                                     <IconButton name='reorder' containerStyle={styles.reorderIcon} size={15} />
                                     {
                                         {
+                                            reminder: (
+                                                <TouchableOpacity onPress={() => handleOnReminderPress(item.id)} style={styles.reminderItemContainer}>
+                                                    <IconButton 
+                                                        name='clock-o'
+                                                        //@ts-ignore
+                                                        color={calculateIconColor(item.value.date)}
+                                                        containerStyle={styles.clockIcon}
+                                                    />
+                                                    <View>
+                                                        {/*@ts-ignore*/}
+                                                        <Text style={{...styles.reminderItem, fontWeight: 'bold'}}>{item.value.title}</Text>
+                                                        <Text style={styles.reminderItem}>
+                                                            {/*@ts-ignore*/}
+                                                            Fecha: {item.value.date?.split('T')[0].split('-').reverse().map((i, indx) => indx !== 0 ? '/' + i : i)} {item.value.time?.split('T')[1].substring(0, 5)}hs
+                                                        </Text>
+                                                    </View>
+                                                </TouchableOpacity>
+                                            ),
                                             text: (
                                                 <TextInput 
                                                     ref={input => textItemsRef.current[item.id] = input}
@@ -272,8 +323,9 @@ const ItemList = ({
                                                     style={styles.textItem} 
                                                     onChangeText={newText => changeItemText(newText, item.id)} 
                                                     placeholderTextColor={theme.placeholderTextColor}
-                                                    placeholder='Nuevo reminder...'
-                                                    value={item.value}
+                                                    placeholder='Nuevo item...'
+                                                    /*@ts-ignore*/
+                                                    value={item.value.toString()}
                                                     onPressOut={() => handleOnInputPressOut(item)}
                                                 />
                                             ),

@@ -43,7 +43,7 @@ const createStyles = (theme) => StyleSheet.create({
     }
 });
 
-const ModalTitle = ({visible, setVisible, saveTitle, title: reminderTitle, goBack}) => {
+const ModalTitle = ({visible, setVisible, saveTitle, title: reminderTitle, goBack, cancelButton = false}) => {
     //@ts-ignore
     const {theme} = useSelector(({themeReducer}) => {
         return themeReducer;
@@ -98,9 +98,17 @@ const ModalTitle = ({visible, setVisible, saveTitle, title: reminderTitle, goBac
                     />
                     <View style={styles.buttonsContainer}>
                         {
-                            !!reminderTitle
+                            cancelButton
                             ? <IconButton containerStyle={styles.button} name='close' onPress={onClose} />
-                            : <IconButton containerStyle={styles.button} name='arrow-left' onPress={onGoBack} />
+                            : (
+                                <>
+                                    {
+                                        !!reminderTitle
+                                        ? <IconButton containerStyle={styles.button} name='close' onPress={onClose} />
+                                        : <IconButton containerStyle={styles.button} name='arrow-left' onPress={onGoBack} />
+                                    }
+                                </>
+                            )
                         }
                         <IconButton containerStyle={styles.button} name='check' onPress={saveChanges} color={!!title ? theme.textColor : 'grey'} />
                     </View>

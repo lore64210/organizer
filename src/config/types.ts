@@ -1,7 +1,12 @@
+type reminderValue = {
+    date: string, 
+    time: string, 
+    title: string
+}
+
 type item = {
     id: string,
-    value: string,
-    position: number,
+    value: reminderValue | string,
     type: string,
     checked: boolean,
 }

@@ -8,6 +8,7 @@ import {CREATE_REMINDER, SET_CURRENT_REMINDER, UPDATE_REMINDER} from '../../conf
 import generateUUID from '../../utils/uuidUtil';
 import {deleteAsync} from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
+import RNDateTimePicker from '@react-native-community/datetimepicker'
 
 const createStyles = (theme, isDarkTheme, window) => (StyleSheet.create({
     checkButtonPressed: {
@@ -59,6 +60,13 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [checksEnabled, setChecksEnabled] = useState(false);
     const [showDeleteButton, setShowDeleteButton] = useState(false);
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [showTimePicker, setShowTimePicker] = useState(false);
+    const [datePicked, setDatePicked] = useState(new Date());
+    const [timePicked, setTimePicked] = useState(new Date());
+    const [reminderTitle, setReminderTitle] = useState('');
+    const [modalTitleReminderVisible, setModalTitleReminderVisible] = useState(false);
+    const [currentAlarmSelected, setCurrentAlarmSelected] = useState('');
 
     const onCameraButtonPress = () => {
         setShowButtons(false);
@@ -81,7 +89,6 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
             id: generateUUID(),
             value,
             type,
-            position: reminder.items.length + 1,
         };
         dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, items: [newItem, ...reminder.items]}});
         return newItem;
@@ -158,15 +165,73 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                     id: generateUUID(),
                     value: uri,
                     type: 'image',
-                    position: reminder.imageItems.length + 1,
-                    hidden: false,
                 };
                 dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, imageItems: [newImage, ...reminder.imageItems]}});
             }
         }
-    
     }
-    
+
+    const handleOnDatePick = (event, value) => {
+        setShowDatePicker(false);
+        if (event.type === 'set') {
+            setDatePicked(value);
+            setShowTimePicker(true);
+        } else {
+            setReminderTitle('');
+            setCurrentAlarmSelected('');
+        }
+    }
+
+    const handleOnTimePick = (event, value) => {
+        setShowTimePicker(false);
+        if (event.type === 'set') {
+
+            value.setHours(value.getHours() - (new Date().getTimezoneOffset() / 60));
+            const time = value.toISOString();
+            const newItem = {
+                id: currentAlarmSelected ? currentAlarmSelected : generateUUID(),
+                type: 'reminder',
+                value: {
+                    date: datePicked.toISOString(),
+                    time,
+                    title: reminderTitle,
+                },
+            }
+            if (currentAlarmSelected) {
+                dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, items: reminder.items.map(i => i.id === currentAlarmSelected ? newItem : i)}})
+            } else {
+                dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, items: [newItem, ...reminder.items]}})
+            }
+        }
+        setReminderTitle('');
+        setCurrentAlarmSelected('');
+    }   
+
+    const saveReminderTitle = (newReminderTitle) => {
+        setReminderTitle(newReminderTitle);
+        setModalTitleReminderVisible(false);
+        setShowDatePicker(true);
+    }
+
+    useEffect(() => {
+        if (currentAlarmSelected) {
+            const currentAlarm = reminder.items.filter(i => i.id === currentAlarmSelected)[0];
+            setReminderTitle(currentAlarm.value.title);
+            setDatePicked(new Date(currentAlarm.value.date));
+            setTimePicked(new Date(currentAlarm.value.time));
+        } else {
+            setReminderTitle('');
+            setDatePicked(new Date());
+            setTimePicked(new Date());
+        }
+    }, [currentAlarmSelected]);
+
+    const handleCancelReminderTitle = () => {
+        setReminderTitle('');
+        setModalTitleReminderVisible(false);
+        setCurrentAlarmSelected('');
+    }
+
     return (
         <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
             <ImageItemList 
@@ -186,6 +251,8 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 onItemDragEnd={onItemDragEnd}
                 reminderHasImages={!!reminder.imageItems.length}
                 setShowDeleteButton={setShowDeleteButton}
+                setCurrentAlarmSelected={setCurrentAlarmSelected}
+                setModalTitleReminderVisible={setModalTitleReminderVisible}
 
             />
             <View style={styles.deleteButtonContainer}>
@@ -205,40 +272,47 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 containerStyle={{...styles.button, zIndex: 20}} 
             />
             <AnimatedIconButton 
-                name="microphone" 
-                onPress={onAudioButtonPress} 
+                name="pencil" 
+                onPress={addItemText} 
                 position={80} 
                 showButton={showButtons}
                 containerStyle={{zIndex: 9}}
             />
             <AnimatedIconButton 
-                name="camera" 
-                onPress={onCameraButtonPress} 
+                name="microphone" 
+                onPress={onAudioButtonPress} 
                 position={140} 
                 showButton={showButtons}
                 containerStyle={{zIndex: 8}}
             />
             <AnimatedIconButton 
-                name="pencil" 
-                onPress={addItemText} 
+                name="camera" 
+                onPress={onCameraButtonPress} 
                 position={200} 
                 showButton={showButtons}
                 containerStyle={{zIndex: 7}}
             />
             <AnimatedIconButton 
-                name="list-alt" 
-                onPress={() => setChecksEnabled((previousChecksEnabled) => !previousChecksEnabled)} 
-                position={260} 
-                showButton={showButtons}
-                color={checksEnabled ? (isDarkTheme ? theme.primaryColor : theme.secondaryColor) : theme.textColor}
-                containerStyle={{zIndex: 6, ...(checksEnabled ? styles.checkButtonPressed : {})}}
-            />
-            <AnimatedIconButton 
                 name="image" 
                 onPress={openImagePicker} 
+                position={260} 
+                showButton={showButtons}
+                containerStyle={{zIndex: 6}}
+            />
+            <AnimatedIconButton 
+                name="calendar" 
+                onPress={() => setModalTitleReminderVisible(true)} 
                 position={320} 
                 showButton={showButtons}
                 containerStyle={{zIndex: 5}}
+            />
+            <AnimatedIconButton 
+                name="list-alt" 
+                onPress={() => setChecksEnabled((previousChecksEnabled) => !previousChecksEnabled)} 
+                position={380} 
+                showButton={showButtons}
+                color={checksEnabled ? (isDarkTheme ? theme.primaryColor : theme.secondaryColor) : theme.textColor}
+                containerStyle={{zIndex: 6, ...(checksEnabled ? styles.checkButtonPressed : {})}}
             />
             <ModalTitle
                 visible={modalVisible}
@@ -247,8 +321,35 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 title={reminder.title}
                 goBack={() => navigation.goBack()}
             />
+            <ModalTitle
+                visible={modalTitleReminderVisible}
+                setVisible={setModalTitleReminderVisible}
+                saveTitle={saveReminderTitle}
+                title={reminderTitle}
+                cancelButton
+                goBack={() => handleCancelReminderTitle()}
+            />
             <ModalImage item={selectedImage} visible={showModalImage} setVisible={setShowModalImage} />
             <ModalAudio saveAudio={(audioUri) => createItem(audioUri, 'audio')} visible={showModalAudio} setVisible={setShowModalAudio} />
+            {
+                showDatePicker && 
+                    <RNDateTimePicker 
+                        onChange={handleOnDatePick} 
+                        mode="date" 
+                        display='calendar' 
+                        value={datePicked} 
+                    />
+            }
+            {
+                showTimePicker && 
+                    <RNDateTimePicker 
+                        onChange={handleOnTimePick} 
+                        mode="time" 
+                        display='clock' 
+                        value={timePicked} 
+                    />
+            }
+
         </Layout>
     )
 }
