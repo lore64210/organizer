@@ -74,7 +74,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [datePicked, setDatePicked] = useState(new Date());
-    const [reminderTitle, setReminderTitle] = useState('');
+    const [alarmTitle, setAlarmTitle] = useState('');
     const [modalAlarmTitleVisible, setModalAlarmTitleVisible] = useState(false);
     const [currentAlarmSelected, setCurrentAlarmSelected] = useState('');
 
@@ -204,7 +204,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
             setDatePicked(value);
             setShowTimePicker(true);
         } else {
-            setReminderTitle('');
+            setAlarmTitle('');
             setCurrentAlarmSelected('');
         }
     }
@@ -216,11 +216,11 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
             const date = datePicked.toISOString();
             const alarmDateWithoutOffset = new Date(date.split('T')[0] + 'T' + time.split('T')[1]);
             const alarmDate = new Date(alarmDateWithoutOffset.getTime() - new Date().getTimezoneOffset() * 60 * 1000);
-            const notificationId = await schedulePushNotification(reminderTitle, alarmDateWithoutOffset.setSeconds(0));
+            const notificationId = await schedulePushNotification(alarmTitle, alarmDateWithoutOffset.setSeconds(0));
             const newItem = {
                 id: currentAlarmSelected ? currentAlarmSelected : generateUUID(),
                 type: 'alarm',
-                value: {date: alarmDate.toISOString(), title: reminderTitle, notificationId},
+                value: {date: alarmDate.toISOString(), title: alarmTitle, notificationId},
             };
             if (currentAlarmSelected) {
                 cancelNotification(reminder.items.filter(i => i.id === currentAlarmSelected)[0].value.notificationId); 
@@ -229,12 +229,12 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, items: [newItem, ...reminder.items]}})
             }
         }
-        setReminderTitle('');
+        setAlarmTitle('');
         setCurrentAlarmSelected('');
     }   
 
-    const saveReminderTitle = (newReminderTitle) => {
-        setReminderTitle(newReminderTitle);
+    const saveAlarmTitle = (newAlarmTitle) => {
+        setAlarmTitle(newAlarmTitle);
         setModalAlarmTitleVisible(false);
         setShowDatePicker(true);
     }
@@ -242,16 +242,16 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     useEffect(() => {
         if (currentAlarmSelected) {
             const currentAlarm = reminder.items.filter(i => i.id === currentAlarmSelected)[0];
-            setReminderTitle(currentAlarm.value.title);
+            setAlarmTitle(currentAlarm.value.title);
             setDatePicked(new Date(new Date(currentAlarm.value.date).getTime() + new Date().getTimezoneOffset() * 60 * 1000));
         } else {
-            setReminderTitle('');
+            setAlarmTitle('');
             setDatePicked(new Date());
         }
     }, [currentAlarmSelected]);
 
-    const handleCancelReminderTitle = () => {
-        setReminderTitle('');
+    const handleCancelAlarmTitle = () => {
+        setAlarmTitle('');
         setModalAlarmTitleVisible(false);
         setCurrentAlarmSelected('');
     }
@@ -364,11 +364,11 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
             <ModalTitle
                 visible={modalAlarmTitleVisible}
                 setVisible={setModalAlarmTitleVisible}
-                saveTitle={saveReminderTitle}
-                title={reminderTitle}
+                saveTitle={saveAlarmTitle}
+                title={alarmTitle}
                 modalTitle={i18n.t('alarmTitle')}
                 cancelButton
-                goBack={() => handleCancelReminderTitle()}
+                goBack={() => handleCancelAlarmTitle()}
             />
             <ModalImage item={selectedImage} visible={showModalImage} setVisible={setShowModalImage} />
             <ModalAudio saveAudio={(audioUri) => createItem(audioUri, 'audio')} visible={showModalAudio} setVisible={setShowModalAudio} />
