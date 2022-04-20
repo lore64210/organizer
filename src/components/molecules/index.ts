@@ -1,4 +1,3 @@
-export {default as DeleteModal} from './DeleteModal';
 export {default as Header} from './Header';
 export {default as HomeItem} from './HomeItem';
 export {default as ModalTitle} from './ModalTitle';

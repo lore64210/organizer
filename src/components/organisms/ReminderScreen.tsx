@@ -10,6 +10,7 @@ import {deleteAsync} from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import RNDateTimePicker from '@react-native-community/datetimepicker'
 import { cancelNotification, schedulePushNotification } from '../atoms/Notification';
+import i18n from 'i18n-js';
 
 const createStyles = (theme, isDarkTheme, window) => (StyleSheet.create({
     checkButtonPressed: {
@@ -80,6 +81,11 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     const onCameraButtonPress = () => {
         setShowButtons(false);
         navigation.navigate('CameraScreen');
+    }
+
+    const onShowButtonsPress = () => {
+        Keyboard.dismiss();
+        setShowButtons(!showButtons);
     }
 
     const onCalendarButtonPress = () => {
@@ -284,7 +290,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                                 ? <Image style={{width: 100, height: 100}} source={require('../../../assets/adaptive-icon.png')} />
                                 : <Image style={{width: 100, height: 100}} source={require('../../../assets/adaptive-icon-light.png')} />
                         }
-                        <Text style={styles.emptyListText}>No hay ningun contenido para mostrar</Text>
+                        <Text style={styles.emptyListText}>{i18n.t('noContentToShow')}</Text>
                     </View>
                 )
             }
@@ -302,7 +308,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
             </View>
             <IconButton 
                 name={showButtons ? 'minus' : 'plus'} 
-                onPress={() => setShowButtons(!showButtons)} 
+                onPress={onShowButtonsPress} 
                 containerStyle={{...styles.button, zIndex: 20}} 
             />
             <AnimatedIconButton 
@@ -360,6 +366,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 setVisible={setModalAlarmTitleVisible}
                 saveTitle={saveReminderTitle}
                 title={reminderTitle}
+                modalTitle={i18n.t('alarmTitle')}
                 cancelButton
                 goBack={() => handleCancelReminderTitle()}
             />

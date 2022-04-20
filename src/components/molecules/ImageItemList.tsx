@@ -119,6 +119,7 @@ const ImagesItemList = ({items, onPress, orderImages, onItemDragEnd}) => {
                                     renderItemContent={({item}) => (
                                         <Animated.View style={{width: imagesWidth[item.id], opacity: imagesOpacity[item.id]}}>
                                             <TouchableOpacity onPress={() => onPress(item)}>
+                                                {/*@ts-ignore */}
                                                 <Image style={styles.item} source={{uri: item.value}}/>
                                             </TouchableOpacity>
                                         </Animated.View>

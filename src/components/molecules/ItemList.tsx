@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import { DraxProvider, DraxList } from 'react-native-drax';
 import { item } from '../../config/types';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import i18n from 'i18n-js';
 
 const createStyles = (theme) => StyleSheet.create({
     itemListContainer: {
@@ -310,7 +311,7 @@ const ItemList = ({
                                                         <Text style={{...styles.reminderItem, fontWeight: 'bold'}}>{item.value.title}</Text>
                                                         <Text style={styles.reminderItem}>
                                                             {/*@ts-ignore*/}
-                                                            Fecha: {item.value.date?.split('T')[0].split('-').reverse().map((i, indx) => indx !== 0 ? '/' + i : i)} {item.value.date?.split('T')[1].substring(0, 5)}hs
+                                                            {i18n.t('date')} {item.value.date?.split('T')[0].split('-').reverse().map((i, indx) => indx !== 0 ? '/' + i : i)} {item.value.date?.split('T')[1].substring(0, 5)}hs
                                                         </Text>
                                                     </View>
                                                 </TouchableOpacity>
@@ -322,7 +323,7 @@ const ItemList = ({
                                                     style={styles.textItem} 
                                                     onChangeText={newText => changeItemText(newText, item.id)} 
                                                     placeholderTextColor={theme.placeholderTextColor}
-                                                    placeholder='Nuevo item...'
+                                                    placeholder={i18n.t('newItemPlaceholder')}
                                                     /*@ts-ignore*/
                                                     value={item.value.toString()}
                                                     onPressOut={() => handleOnInputPressOut(item)}

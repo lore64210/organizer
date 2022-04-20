@@ -4,6 +4,7 @@ import { IconButton } from '../atoms';
 import { Audio } from 'expo-av';
 import { Recording, Sound } from 'expo-av/build/Audio';
 import { useSelector } from 'react-redux';
+import i18n from 'i18n-js';
 
 const createStyles = (theme) => StyleSheet.create({
     modalContainer: {
@@ -163,7 +164,7 @@ const ModalAudio = ({visible, setVisible, saveAudio}) => {
         >
             <View style={styles.modalContainer}>
                 <View style={styles.modalContentContainer}>
-                    <Text style={styles.modalTitle}>{!isAudioRecording ? 'Presione para ' : 'Suelte para dejar de '}grabar:</Text>
+                    <Text style={styles.modalTitle}>{!isAudioRecording ? i18n.t('pressToStartRecording') : i18n.t('releaseToStopRecording')}:</Text>
                     <View style={styles.audioButtonsContainer}>
                         <IconButton size={30} containerStyle={styles.audioButton} name='microphone' onPressIn={onAudioButtonPressStart} onPressOut={onAudioButtonPressStop} />
                         {audioUri 

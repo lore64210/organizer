@@ -3,6 +3,7 @@ import {useState} from 'react';
 import {View, Modal, Text, StyleSheet, TextInput} from 'react-native';
 import {IconButton} from '../atoms';
 import { useSelector } from 'react-redux';
+import i18n from 'i18n-js';
 
 const createStyles = (theme) => StyleSheet.create({
     modalContainer: {
@@ -43,7 +44,7 @@ const createStyles = (theme) => StyleSheet.create({
     }
 });
 
-const ModalTitle = ({visible, setVisible, saveTitle, title: reminderTitle, goBack, cancelButton = false}) => {
+const ModalTitle = ({visible, setVisible, saveTitle, title: reminderTitle, goBack, cancelButton = false, modalTitle = i18n.t('organizerTitle')}) => {
     //@ts-ignore
     const {theme} = useSelector(({themeReducer}) => {
         return themeReducer;
@@ -86,13 +87,13 @@ const ModalTitle = ({visible, setVisible, saveTitle, title: reminderTitle, goBac
         >
             <View style={styles.modalContainer}>
                 <View style={styles.modalContentContainer}>
-                    <Text style={styles.modalTitle}>Título del recordatorio:</Text>
+                    <Text style={styles.modalTitle}>{modalTitle}</Text>
                     <TextInput 
                         ref={inputRef}
                         style={styles.input}
                         onChangeText={setTitle}
                         value={title}
-                        placeholder="Ingrese un título..."
+                        placeholder={i18n.t('insertTitle')}
                         maxLength={30}
                         placeholderTextColor={theme.placeholderTextColor}
                     />

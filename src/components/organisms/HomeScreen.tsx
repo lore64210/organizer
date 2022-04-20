@@ -8,6 +8,7 @@ import uuid from '../../utils/uuidUtil';
 import { View, StyleSheet, useWindowDimensions, Text, Image } from 'react-native';
 import { DraxProvider, DraxList } from 'react-native-drax';
 import {deleteAsync} from 'expo-file-system';
+import i18n from 'i18n-js';
 
 const createStyles = (theme, window, isDarkTheme) => StyleSheet.create({
     button: {
@@ -131,7 +132,7 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
                                 ? <Image style={{width: 100, height: 100}} source={require('../../../assets/adaptive-icon.png')} />
                                 : <Image style={{width: 100, height: 100}} source={require('../../../assets/adaptive-icon-light.png')} />
                         }
-                        <Text style={styles.emptyListText}>No hay ningun item para mostrar</Text>
+                        <Text style={styles.emptyListText}>{i18n.t('noItemsToShow')}</Text>
                     </View>
                 )
             }
