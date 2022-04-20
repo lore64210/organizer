@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {View, StyleSheet, useWindowDimensions, Keyboard} from 'react-native';
+import {View, StyleSheet, useWindowDimensions, Keyboard, Text, Image} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
 import {Layout, ModalTitle, ItemList, ImageItemList, ModalImage, ModalAudio} from '../molecules';
 import {IconButton} from '../atoms';
@@ -10,7 +10,6 @@ import {deleteAsync} from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import RNDateTimePicker from '@react-native-community/datetimepicker'
 import { cancelNotification, schedulePushNotification } from '../atoms/Notification';
-import { NativeModules } from 'react-native'
 
 const createStyles = (theme, isDarkTheme, window) => (StyleSheet.create({
     checkButtonPressed: {
@@ -32,6 +31,14 @@ const createStyles = (theme, isDarkTheme, window) => (StyleSheet.create({
         position: 'absolute',
         bottom: 0,
     },
+    emptyListContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emptyListText: {
+        color: theme.textColor,
+    }
 }));
 
 const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
@@ -244,27 +251,39 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
     return (
         <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
-            <ImageItemList 
-                onItemDragEnd={onImageItemDragEnd} 
-                items={reminder.imageItems} 
-                onPress={onImagePress} 
-                orderImages={orderImages} 
-            />
-            <ItemList 
-                actualItemTextId={actualItemTextId} 
-                items={reminder.items} 
-                changeItemText={changeItemText} 
-                checksEnabled={checksEnabled}
-                changeItemCheck={changeItemCheck}  
-                orderItemList={orderItemList}
-                onItemDragStart={onItemDragStart}
-                onItemDragEnd={onItemDragEnd}
-                reminderHasImages={!!reminder.imageItems.length}
-                setShowDeleteButton={setShowDeleteButton}
-                setCurrentAlarmSelected={setCurrentAlarmSelected}
-                setModalAlarmTitleVisible={setModalAlarmTitleVisible}
+            {
+                reminder.imageItems.length || reminder.items.length ? (
+                    <>
+                        <ImageItemList 
+                            onItemDragEnd={onImageItemDragEnd} 
+                            items={reminder.imageItems} 
+                            onPress={onImagePress} 
+                            orderImages={orderImages} 
+                        />
+                        <ItemList 
+                            actualItemTextId={actualItemTextId} 
+                            items={reminder.items} 
+                            changeItemText={changeItemText} 
+                            checksEnabled={checksEnabled}
+                            changeItemCheck={changeItemCheck}  
+                            orderItemList={orderItemList}
+                            onItemDragStart={onItemDragStart}
+                            onItemDragEnd={onItemDragEnd}
+                            reminderHasImages={!!reminder.imageItems.length}
+                            setShowDeleteButton={setShowDeleteButton}
+                            setCurrentAlarmSelected={setCurrentAlarmSelected}
+                            setModalAlarmTitleVisible={setModalAlarmTitleVisible}
 
-            />
+                        />
+                    </>
+                ) :(
+                    <View style={styles.emptyListContainer}>
+                        <Image style={{width: 100, height: 100}} source={require('../../../assets/adaptive-icon.png')} />
+                        <Text style={styles.emptyListText}>No hay ningun contenido para mostrar</Text>
+                    </View>
+                )
+            }
+            
             <View style={styles.deleteButtonContainer}>
                 <AnimatedIconButton 
                     name='trash' 

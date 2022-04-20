@@ -5,7 +5,7 @@ import {reminder} from '../../config/types';
 import {AnimatedIconButton, IconButton} from '../atoms';
 import {HomeItem, Layout} from '../molecules';
 import uuid from '../../utils/uuidUtil';
-import { View, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, useWindowDimensions, Text, Image } from 'react-native';
 import { DraxProvider, DraxList } from 'react-native-drax';
 import {deleteAsync} from 'expo-file-system';
 
@@ -29,6 +29,14 @@ const createStyles = (theme, window) => StyleSheet.create({
         left: window.width / 2 - 25,
         bottom: 0,
     },
+    emptyListContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emptyListText: {
+        color: theme.textColor,
+    }
 })
 
 const emptyReminder: reminder = {
@@ -86,33 +94,42 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
     return (
         <Layout headerProps={{title: 'Organizer'}}>
-            <DraxProvider>
-                <DraxList
-                    style={styles.draxListContainer}
-                    data={reminders}
-                    onItemDragStart={() => setShowDeleteButton(true)}
-                    onItemDragEnd={onItemDragEnd}
-                    renderItemContent={({ item: reminder } : { item : reminder }) => (
-                        <HomeItem key={reminder.id} item={reminder} onItemPress={() => onPress(reminder)} />
-                    )}
-                    onItemReorder={({ fromIndex, toIndex }) => {
-                        const newData = [...reminders];
-                        newData.splice(toIndex, 0, newData.splice(fromIndex, 1)[0]);
-                        dispatch({type: SET_ORDERED_REMINDERS, payload: newData})
-                    }}
-                    keyExtractor={(item : reminder) => item.id}
-                />
-                <View style={styles.deleteButtonContainer}>
-                    <AnimatedIconButton 
-                        name='trash' 
-                        containerStyle={styles.deleteButton}
-                        showButton={showDeleteButton}
-                        position={20}
-                        initialPosition={-100}
-                        color={theme.backgroundColor}
-                    />
-                </View>
-            </DraxProvider>
+            {
+                reminders?.length ? (
+                    <DraxProvider>
+                        <DraxList
+                            style={styles.draxListContainer}
+                            data={reminders}
+                            onItemDragStart={() => setShowDeleteButton(true)}
+                            onItemDragEnd={onItemDragEnd}
+                            renderItemContent={({ item: reminder } : { item : reminder }) => (
+                                <HomeItem key={reminder.id} item={reminder} onItemPress={() => onPress(reminder)} />
+                            )}
+                            onItemReorder={({ fromIndex, toIndex }) => {
+                                const newData = [...reminders];
+                                newData.splice(toIndex, 0, newData.splice(fromIndex, 1)[0]);
+                                dispatch({type: SET_ORDERED_REMINDERS, payload: newData})
+                            }}
+                            keyExtractor={(item : reminder) => item.id}
+                        />
+                        <View style={styles.deleteButtonContainer}>
+                            <AnimatedIconButton 
+                                name='trash' 
+                                containerStyle={styles.deleteButton}
+                                showButton={showDeleteButton}
+                                position={20}
+                                initialPosition={-100}
+                                color={theme.backgroundColor}
+                            />
+                        </View>
+                    </DraxProvider>
+                ) : (
+                    <View style={styles.emptyListContainer}>
+                        <Image style={{width: 100, height: 100}} source={require('../../../assets/adaptive-icon.png')} />
+                        <Text style={styles.emptyListText}>No hay ningun item para mostrar</Text>
+                    </View>
+                )
+            }
             <IconButton containerStyle={styles.button} name='plus' onPress={() => onPress({...emptyReminder, id: uuid(), position: reminders.length + 1})} />
         </Layout>
     )
