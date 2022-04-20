@@ -12,7 +12,7 @@ const createStyles = (theme, isDarkTheme) => (StyleSheet.create({
     },
     title: {
         color: isDarkTheme ? theme.textColor : theme.primaryColor,
-        fontSize: 20,
+        fontSize: 18,
         paddingTop: 50,
         paddingBottom: 5,
         fontFamily: 'Montserrat_700Bold', 

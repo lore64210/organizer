@@ -97,7 +97,7 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
     }
 
     return (
-        <Layout headerProps={{title: 'Organizer'}}>
+        <Layout headerProps={{title: 'O R G A N I Z E R'}}>
             {
                 reminders?.length ? (
                     <DraxProvider>

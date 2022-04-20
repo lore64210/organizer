@@ -27,7 +27,7 @@ const Layout = ({children, headerProps}) => {
                 backgroundColor, 
                 {
                     toValue: isDarkTheme ? 0 : 1, 
-                    duration: 2000 , 
+                    duration: 3000 , 
                     useNativeDriver: false
                 }
             ).start();
