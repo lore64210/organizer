@@ -66,12 +66,22 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [datePicked, setDatePicked] = useState(new Date());
     const [reminderTitle, setReminderTitle] = useState('');
-    const [modalTitleReminderVisible, setModalTitleReminderVisible] = useState(false);
+    const [modalAlarmTitleVisible, setModalAlarmTitleVisible] = useState(false);
     const [currentAlarmSelected, setCurrentAlarmSelected] = useState('');
 
     const onCameraButtonPress = () => {
         setShowButtons(false);
         navigation.navigate('CameraScreen');
+    }
+
+    const onCalendarButtonPress = () => {
+        setModalAlarmTitleVisible(true);
+        setShowButtons(false);
+    }
+
+    const onGaleryButtonPress = () => {
+        openImagePicker();
+        setShowButtons(false);
     }
 
     const onTitlePress = () => {
@@ -211,7 +221,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
     const saveReminderTitle = (newReminderTitle) => {
         setReminderTitle(newReminderTitle);
-        setModalTitleReminderVisible(false);
+        setModalAlarmTitleVisible(false);
         setShowDatePicker(true);
     }
 
@@ -228,7 +238,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
 
     const handleCancelReminderTitle = () => {
         setReminderTitle('');
-        setModalTitleReminderVisible(false);
+        setModalAlarmTitleVisible(false);
         setCurrentAlarmSelected('');
     }
 
@@ -252,7 +262,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 reminderHasImages={!!reminder.imageItems.length}
                 setShowDeleteButton={setShowDeleteButton}
                 setCurrentAlarmSelected={setCurrentAlarmSelected}
-                setModalTitleReminderVisible={setModalTitleReminderVisible}
+                setModalAlarmTitleVisible={setModalAlarmTitleVisible}
 
             />
             <View style={styles.deleteButtonContainer}>
@@ -294,14 +304,14 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
             />
             <AnimatedIconButton 
                 name="image" 
-                onPress={openImagePicker} 
+                onPress={onGaleryButtonPress} 
                 position={260} 
                 showButton={showButtons}
                 containerStyle={{zIndex: 6}}
             />
             <AnimatedIconButton 
                 name="calendar" 
-                onPress={() => setModalTitleReminderVisible(true)} 
+                onPress={onCalendarButtonPress} 
                 position={320} 
                 showButton={showButtons}
                 containerStyle={{zIndex: 5}}
@@ -322,8 +332,8 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                 goBack={() => navigation.goBack()}
             />
             <ModalTitle
-                visible={modalTitleReminderVisible}
-                setVisible={setModalTitleReminderVisible}
+                visible={modalAlarmTitleVisible}
+                setVisible={setModalAlarmTitleVisible}
                 saveTitle={saveReminderTitle}
                 title={reminderTitle}
                 cancelButton

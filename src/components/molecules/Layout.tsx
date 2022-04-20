@@ -7,7 +7,6 @@ import { darkTheme, ligthTheme } from '../../config/theme';
 const createStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: theme.backgroundColor,
     }
 });
 
@@ -20,7 +19,7 @@ const Layout = ({children, headerProps}) => {
         return themeReducer;
     });
     const styles = createStyles(theme);
-    const [backgroundColor] = useState(new Animated.Value(0));
+    const [backgroundColor] = useState(new Animated.Value(1));
     
     useEffect(() => {
         if (startThemeAnimation) {

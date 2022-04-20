@@ -76,7 +76,7 @@ const ItemList = ({
     reminderHasImages,
     setShowDeleteButton,
     setCurrentAlarmSelected,
-    setModalTitleReminderVisible,
+    setModalAlarmTitleVisible,
 }) => {
     //@ts-ignore
     const {theme} = useSelector(({themeReducer}) => {
@@ -176,7 +176,7 @@ const ItemList = ({
 
     const handleOnReminderPress = (itemId) => {
         setCurrentAlarmSelected(itemId);
-        setModalTitleReminderVisible(true);
+        setModalAlarmTitleVisible(true);
     }
 
     // ------------- LOGICA PARA AUDIOS ----------------------------------------------------------------------
