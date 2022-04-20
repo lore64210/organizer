@@ -17,29 +17,7 @@ const initialState : {
     isDarkTheme: boolean, 
     startThemeAnimation: boolean
   } = {
-  reminders: [
-    {
-      id: '1',
-      title: 'Titulo 1',
-      items: [],
-      imageItems: [],
-      hide: false,
-    },
-    {
-      id: '2',
-      title: 'Titulo 2',
-      items: [],
-      imageItems: [],
-      hide: false,
-    },
-    {
-      id: '3',
-      title: 'Titulo 3',
-      items: [],
-      imageItems: [],
-      hide: false,
-    },
-  ],
+  reminders: [],
   currentReminder: null,
   theme: {...darkTheme},
   isDarkTheme: true,
