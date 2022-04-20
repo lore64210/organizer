@@ -33,11 +33,12 @@ const createStyles = (theme, isDarkTheme, window) => (StyleSheet.create({
     },
     emptyListContainer: {
         flex: 1,
+        backgroundColor: theme.backgroundColor,
         justifyContent: 'center',
         alignItems: 'center',
     },
     emptyListText: {
-        color: theme.textColor,
+        color: isDarkTheme ? theme.textColor : theme.primaryColor,
     }
 }));
 
@@ -278,7 +279,11 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                     </>
                 ) :(
                     <View style={styles.emptyListContainer}>
-                        <Image style={{width: 100, height: 100}} source={require('../../../assets/adaptive-icon.png')} />
+                        {
+                            isDarkTheme 
+                                ? <Image style={{width: 100, height: 100}} source={require('../../../assets/adaptive-icon.png')} />
+                                : <Image style={{width: 100, height: 100}} source={require('../../../assets/adaptive-icon-light.png')} />
+                        }
                         <Text style={styles.emptyListText}>No hay ningun contenido para mostrar</Text>
                     </View>
                 )

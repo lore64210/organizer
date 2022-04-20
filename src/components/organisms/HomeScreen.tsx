@@ -9,7 +9,7 @@ import { View, StyleSheet, useWindowDimensions, Text, Image } from 'react-native
 import { DraxProvider, DraxList } from 'react-native-drax';
 import {deleteAsync} from 'expo-file-system';
 
-const createStyles = (theme, window) => StyleSheet.create({
+const createStyles = (theme, window, isDarkTheme) => StyleSheet.create({
     button: {
         borderWidth: 2,
     },
@@ -31,11 +31,12 @@ const createStyles = (theme, window) => StyleSheet.create({
     },
     emptyListContainer: {
         flex: 1,
+        backgroundColor: theme.backgroundColor,
         justifyContent: 'center',
         alignItems: 'center',
     },
     emptyListText: {
-        color: theme.textColor,
+        color: isDarkTheme ? theme.textColor : theme.primaryColor,
     }
 })
 
@@ -49,11 +50,11 @@ const emptyReminder: reminder = {
 
 const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
     //@ts-ignore
-    const {theme} = useSelector(({themeReducer}) => {
+    const {theme, isDarkTheme} = useSelector(({themeReducer}) => {
         return themeReducer;
     });
     const window = useWindowDimensions();
-    const styles = createStyles(theme, window);
+    const styles = createStyles(theme, window, isDarkTheme);
 
     //@ts-ignore
     const reminders = useSelector(({remindersReducer: {reminders}}) => {
@@ -125,7 +126,11 @@ const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
                     </DraxProvider>
                 ) : (
                     <View style={styles.emptyListContainer}>
-                        <Image style={{width: 100, height: 100}} source={require('../../../assets/adaptive-icon.png')} />
+                        {
+                            isDarkTheme 
+                                ? <Image style={{width: 100, height: 100}} source={require('../../../assets/adaptive-icon.png')} />
+                                : <Image style={{width: 100, height: 100}} source={require('../../../assets/adaptive-icon-light.png')} />
+                        }
                         <Text style={styles.emptyListText}>No hay ningun item para mostrar</Text>
                     </View>
                 )
