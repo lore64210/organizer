@@ -23,6 +23,7 @@ const createStyles = (theme) => StyleSheet.create({
     modalTitle: {
         fontSize: 20,
         color: theme.textColor,
+        fontFamily: 'Montserrat_400Regular',
     },
     input: {
         color: 'white',

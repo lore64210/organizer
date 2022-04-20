@@ -13,6 +13,10 @@ import { cancelNotification, schedulePushNotification } from '../atoms/Notificat
 import i18n from 'i18n-js';
 
 const createStyles = (theme, isDarkTheme, window) => (StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: theme.backgroundColor,
+    },
     checkButtonPressed: {
         backgroundColor: isDarkTheme ? theme.textColor : theme.primaryColor,
     },
@@ -40,6 +44,7 @@ const createStyles = (theme, isDarkTheme, window) => (StyleSheet.create({
     },
     emptyListText: {
         color: isDarkTheme ? theme.textColor : theme.primaryColor,
+        fontFamily: 'Montserrat_400Regular',
     }
 }));
 
@@ -260,7 +265,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
         <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
             {
                 reminder.imageItems.length || reminder.items.length ? (
-                    <>
+                    <View style={styles.container}>
                         <ImageItemList 
                             onItemDragEnd={onImageItemDragEnd} 
                             items={reminder.imageItems} 
@@ -282,7 +287,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                             setModalAlarmTitleVisible={setModalAlarmTitleVisible}
 
                         />
-                    </>
+                    </View>
                 ) :(
                     <View style={styles.emptyListContainer}>
                         {

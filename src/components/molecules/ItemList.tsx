@@ -29,6 +29,8 @@ const createStyles = (theme) => StyleSheet.create({
     textItem: {
         padding: 10,
         color: theme.textColor,
+        fontFamily: 'Montserrat_400Regular',
+        width: '90%'
     },
     audioItem: {
         flexDirection: 'row',
@@ -50,13 +52,14 @@ const createStyles = (theme) => StyleSheet.create({
         left: 0,
         width: 30,
     },
-    reminderItemContainer: {
+    alarmItemContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         height: 70,
     },
-    reminderItem: {
-        color: theme.textColor
+    alarmItem: {
+        color: theme.textColor,
+        fontFamily: 'Montserrat_400Regular'
     },
     clockIcon: {
         position: 'relative',
@@ -299,7 +302,7 @@ const ItemList = ({
                                     {
                                         {
                                             alarm: (
-                                                <TouchableOpacity onPress={() => handleOnReminderPress(item.id)} style={styles.reminderItemContainer}>
+                                                <TouchableOpacity onPress={() => handleOnReminderPress(item.id)} style={styles.alarmItemContainer}>
                                                     <IconButton 
                                                         name='clock-o'
                                                         //@ts-ignore
@@ -308,8 +311,8 @@ const ItemList = ({
                                                     />
                                                     <View>
                                                         {/*@ts-ignore*/}
-                                                        <Text style={{...styles.reminderItem, fontWeight: 'bold'}}>{item.value.title}</Text>
-                                                        <Text style={styles.reminderItem}>
+                                                        <Text style={{...styles.alarmItem, fontWeight: 'bold'}}>{item.value.title}</Text>
+                                                        <Text style={styles.alarmItem}>
                                                             {/*@ts-ignore*/}
                                                             {i18n.t('date')} {item.value.date?.split('T')[0].split('-').reverse().map((i, indx) => indx !== 0 ? '/' + i : i)} {item.value.date?.split('T')[1].substring(0, 5)}hs
                                                         </Text>

@@ -15,6 +15,7 @@ const createStyles = (theme) => StyleSheet.create({
     title: {
         color: theme.textColor,
         paddingHorizontal: 10,
+        fontFamily: 'Montserrat_400Regular'
     }
 })
 

@@ -16,6 +16,7 @@ const createStyles = (theme, window, isDarkTheme) => StyleSheet.create({
     },
     draxListContainer: {
         flex: 1,
+        backgroundColor: theme.backgroundColor,
     },
     deleteButton: {
         backgroundColor: theme.deleteButtonColor,
@@ -38,6 +39,7 @@ const createStyles = (theme, window, isDarkTheme) => StyleSheet.create({
     },
     emptyListText: {
         color: isDarkTheme ? theme.textColor : theme.primaryColor,
+        fontFamily: 'Montserrat_400Regular'
     }
 })
 

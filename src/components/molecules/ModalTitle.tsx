@@ -22,6 +22,7 @@ const createStyles = (theme) => StyleSheet.create({
     modalTitle: {
         fontSize: 20,
         color: theme.textColor,
+        fontFamily: 'Montserrat_400Regular'
     },
     input: {
         color: theme.textColor,
@@ -30,6 +31,7 @@ const createStyles = (theme) => StyleSheet.create({
         padding: 10,
         borderRadius: theme.borderRadius,
         marginBottom: 30,
+        fontFamily: 'Montserrat_400Regular',
     },
     buttonsContainer: {
         flexDirection: 'row',
