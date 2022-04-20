@@ -164,8 +164,7 @@ const ItemList = ({
     }
 
     const calculateIconColor = (date) => {
-        const now = new Date().toISOString().split('T')[0];
-        console.log({date, now});
+        const now = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60 * 1000).toISOString();
         if (date < now) {
             return theme.deleteButtonColor;
         } else if (date > now) {
@@ -298,7 +297,7 @@ const ItemList = ({
                                     <IconButton name='reorder' containerStyle={styles.reorderIcon} size={15} />
                                     {
                                         {
-                                            reminder: (
+                                            alarm: (
                                                 <TouchableOpacity onPress={() => handleOnReminderPress(item.id)} style={styles.reminderItemContainer}>
                                                     <IconButton 
                                                         name='clock-o'
@@ -311,7 +310,7 @@ const ItemList = ({
                                                         <Text style={{...styles.reminderItem, fontWeight: 'bold'}}>{item.value.title}</Text>
                                                         <Text style={styles.reminderItem}>
                                                             {/*@ts-ignore*/}
-                                                            Fecha: {item.value.date?.split('T')[0].split('-').reverse().map((i, indx) => indx !== 0 ? '/' + i : i)} {item.value.time?.split('T')[1].substring(0, 5)}hs
+                                                            Fecha: {item.value.date?.split('T')[0].split('-').reverse().map((i, indx) => indx !== 0 ? '/' + i : i)} {item.value.date?.split('T')[1].substring(0, 5)}hs
                                                         </Text>
                                                     </View>
                                                 </TouchableOpacity>

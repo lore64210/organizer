@@ -9,6 +9,8 @@ import generateUUID from '../../utils/uuidUtil';
 import {deleteAsync} from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import RNDateTimePicker from '@react-native-community/datetimepicker'
+import { cancelNotification, schedulePushNotification } from '../atoms/Notification';
+import { NativeModules } from 'react-native'
 
 const createStyles = (theme, isDarkTheme, window) => (StyleSheet.create({
     checkButtonPressed: {
@@ -63,7 +65,6 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [datePicked, setDatePicked] = useState(new Date());
-    const [timePicked, setTimePicked] = useState(new Date());
     const [reminderTitle, setReminderTitle] = useState('');
     const [modalTitleReminderVisible, setModalTitleReminderVisible] = useState(false);
     const [currentAlarmSelected, setCurrentAlarmSelected] = useState('');
@@ -133,6 +134,8 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
         const {item} = e;
         if (item.type === 'audio') {
             deleteAsync(item.value, {idempotent: true});
+        } else if (item.type === 'alarm') {
+            cancelNotification(item.value.notificationId);
         }
         dispatch({
             type: SET_CURRENT_REMINDER, 
@@ -182,22 +185,21 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
         }
     }
 
-    const handleOnTimePick = (event, value) => {
+    const handleOnTimePick = async (event, value) => {
         setShowTimePicker(false);
         if (event.type === 'set') {
-
-            value.setHours(value.getHours() - (new Date().getTimezoneOffset() / 60));
             const time = value.toISOString();
+            const date = datePicked.toISOString();
+            const alarmDateWithoutOffset = new Date(date.split('T')[0] + 'T' + time.split('T')[1]);
+            const alarmDate = new Date(alarmDateWithoutOffset.getTime() - new Date().getTimezoneOffset() * 60 * 1000);
+            const notificationId = await schedulePushNotification(reminderTitle, alarmDateWithoutOffset.setSeconds(0));
             const newItem = {
                 id: currentAlarmSelected ? currentAlarmSelected : generateUUID(),
-                type: 'reminder',
-                value: {
-                    date: datePicked.toISOString(),
-                    time,
-                    title: reminderTitle,
-                },
-            }
+                type: 'alarm',
+                value: {date: alarmDate.toISOString(), title: reminderTitle, notificationId},
+            };
             if (currentAlarmSelected) {
+                cancelNotification(reminder.items.filter(i => i.id === currentAlarmSelected)[0].value.notificationId); 
                 dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, items: reminder.items.map(i => i.id === currentAlarmSelected ? newItem : i)}})
             } else {
                 dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, items: [newItem, ...reminder.items]}})
@@ -217,12 +219,10 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
         if (currentAlarmSelected) {
             const currentAlarm = reminder.items.filter(i => i.id === currentAlarmSelected)[0];
             setReminderTitle(currentAlarm.value.title);
-            setDatePicked(new Date(currentAlarm.value.date));
-            setTimePicked(new Date(currentAlarm.value.time));
+            setDatePicked(new Date(new Date(currentAlarm.value.date).getTime() + new Date().getTimezoneOffset() * 60 * 1000));
         } else {
             setReminderTitle('');
             setDatePicked(new Date());
-            setTimePicked(new Date());
         }
     }, [currentAlarmSelected]);
 
@@ -346,7 +346,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                         onChange={handleOnTimePick} 
                         mode="time" 
                         display='clock' 
-                        value={timePicked} 
+                        value={datePicked} 
                     />
             }
 
