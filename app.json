@@ -23,7 +23,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#041C32"
-      }
+      },
+      "package": "com.lore64210.Organizer"
     },
     "web": {
       "favicon": "./assets/favicon.png"

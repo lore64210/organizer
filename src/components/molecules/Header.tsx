@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet, Image} from 'react-native';
 import { IconButton } from '../atoms';
 import {useSelector, useDispatch} from 'react-redux';
 import {CHANGE_THEME, START_THEME_ANIMATION} from '../../config/redux/actions';
@@ -13,7 +13,6 @@ const createStyles = (theme, isDarkTheme) => (StyleSheet.create({
     title: {
         color: isDarkTheme ? theme.textColor : theme.primaryColor,
         fontSize: 18,
-        paddingTop: 50,
         paddingBottom: 5,
         fontFamily: 'Montserrat_700Bold', 
     },
@@ -22,6 +21,11 @@ const createStyles = (theme, isDarkTheme) => (StyleSheet.create({
         backgroundColor: theme.backgroundColor,
         width: 40,
         height: 40,
+    },
+    logo: {
+        width: 75, 
+        height: 75,
+        marginTop: 10,
     }
 }));
 
@@ -43,6 +47,11 @@ export default ({title, onTitlePress = () => {}}) => {
 
     return (
         <View style={styles.container}>
+            {
+                isDarkTheme 
+                    ? <Image style={styles.logo} source={require('../../../assets/adaptive-icon.png')} />
+                    : <Image style={styles.logo} source={require('../../../assets/adaptive-icon-light.png')} />
+            }
             <Text onPress={onTitlePress} style={styles.title}>{title}</Text>
             <IconButton 
                 onPress={changeTheme} 
