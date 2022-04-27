@@ -81,6 +81,7 @@ const ItemList = ({
     setShowDeleteButton,
     setCurrentAlarmSelected,
     setModalAlarmTitleVisible,
+    setShowButtons,
 }) => {
     //@ts-ignore
     const {theme} = useSelector(({themeReducer}) => {
@@ -161,9 +162,12 @@ const ItemList = ({
     }, [actualItemTextId]);
 
     const handleOnInputPressOut = async (value) => {
-        const supported = await Linking.canOpenURL(value);
-        if (supported) {
-            Linking.openURL(value)
+        setShowButtons(false);
+        if (typeof value === 'string') {
+            const supported = await Linking.canOpenURL(value);
+            if (supported) {
+                Linking.openURL(value)
+            }
         }
     }
 

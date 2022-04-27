@@ -285,6 +285,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                             setShowDeleteButton={setShowDeleteButton}
                             setCurrentAlarmSelected={setCurrentAlarmSelected}
                             setModalAlarmTitleVisible={setModalAlarmTitleVisible}
+                            setShowButtons={setShowButtons}
 
                         />
                     </View>
