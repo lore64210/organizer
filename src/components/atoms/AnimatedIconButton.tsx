@@ -16,6 +16,12 @@ const createStyles = (theme) => StyleSheet.create({
         borderWidth: 2,
         borderColor: theme.backgroundColor,
     },
+    button: {
+        width: '100%',
+        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     icon: {
         fontSize: 20,
     }
@@ -60,7 +66,7 @@ export default (props) => {
 
     return (
         <Animated.View style={containerStyleAux}>
-            <TouchableOpacity onPress={onPress}>
+            <TouchableOpacity style={styles.button} onPress={onPress}>
                 <FontAwesome style={{...styles.icon, ...style}} name={name} color={color} size={size}/>
             </TouchableOpacity>
         </Animated.View>

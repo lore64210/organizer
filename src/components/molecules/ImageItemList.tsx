@@ -32,6 +32,7 @@ const createStyles = (theme, window) => StyleSheet.create({
         width: '100%',
         height: '100%',
         borderWidth: 0,
+        bottom: '100%',
     },
     deleteButtonContainer: {
         width: 50,
@@ -138,7 +139,7 @@ const ImagesItemList = ({items, onPress, orderImages, onItemDragEnd}) => {
                                 name='trash' 
                                 containerStyle={styles.deleteButton} 
                                 showButton={showDeleteImageButton}
-                                position={window.width - 210}
+                                position={window.width/2 - 40}
                                 initialPosition={window.width}
                                 color={theme.backgroundColor}
                                 disableTouchable
