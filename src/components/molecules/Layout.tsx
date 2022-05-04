@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef} from 'react';
 import {StyleSheet, Animated} from 'react-native';
 import Header from './Header';
 import { useSelector } from 'react-redux';
@@ -12,14 +12,14 @@ const createStyles = (theme) => StyleSheet.create({
 
 const Layout = ({children, headerProps}) => {
 
-    const opacityAnimation = useRef(new Animated.Value(1)).current;
     
     //@ts-ignore
     const {theme, startThemeAnimation, isDarkTheme} = useSelector(({themeReducer}) => {
         return themeReducer;
     });
     const styles = createStyles(theme);
-    const [backgroundColor] = useState(new Animated.Value(1));
+    const backgroundColor = useRef(new Animated.Value(1)).current;
+    const opacityAnimation = useRef(new Animated.Value(1)).current;
     
     useEffect(() => {
         if (startThemeAnimation) {
@@ -27,7 +27,7 @@ const Layout = ({children, headerProps}) => {
                 backgroundColor, 
                 {
                     toValue: isDarkTheme ? 0 : 1, 
-                    duration: 3000 , 
+                    duration: 1500 , 
                     useNativeDriver: false
                 }
             ).start();
@@ -36,7 +36,7 @@ const Layout = ({children, headerProps}) => {
                     opacityAnimation, 
                     {
                         toValue: 0, 
-                        duration: 750, 
+                        duration: 500, 
                         useNativeDriver: false
                     }
                 ),
@@ -52,7 +52,7 @@ const Layout = ({children, headerProps}) => {
                     opacityAnimation, 
                     {
                         toValue: 1, 
-                        duration: 750, 
+                        duration: 500, 
                         useNativeDriver: false
                     }
                 ),
