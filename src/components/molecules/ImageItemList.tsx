@@ -1,11 +1,10 @@
-import {useState, useEffect, useRef} from 'react';
+import {useState, useEffect} from 'react';
 import {View, StyleSheet, Image, useWindowDimensions, Animated} from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { DraxProvider, DraxList } from 'react-native-drax';
 import { item } from '../../config/types';
 import { AnimatedIconButton } from '../atoms';
-import { SET_CURRENT_REMINDER, UPDATE_REMINDER } from '../../config/redux/actions';
 
 const createStyles = (theme, window) => StyleSheet.create({
     container: {

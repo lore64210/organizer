@@ -74,7 +74,6 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
     const [showModalImage, setShowModalImage] = useState(false)
     const [showModalAudio, setShowModalAudio] = useState(false)
     const [selectedImage, setSelectedImage] = useState(null);
-    const [checksEnabled, setChecksEnabled] = useState(false);
     const [showDeleteButton, setShowDeleteButton] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
@@ -261,6 +260,10 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
         setCurrentAlarmSelected('');
     }
 
+    const setChecksEnabled = (checksEnabled) => { 
+        dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, checksEnabled}})
+    }
+
     return (
         <Layout headerProps={{title: reminder.title, onTitlePress: () => onTitlePress()}}>
             {
@@ -276,7 +279,7 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
                             actualItemTextId={actualItemTextId} 
                             items={reminder.items} 
                             changeItemText={changeItemText} 
-                            checksEnabled={checksEnabled}
+                            checksEnabled={reminder.checksEnabled}
                             changeItemCheck={changeItemCheck}  
                             orderItemList={orderItemList}
                             onItemDragStart={onItemDragStart}
@@ -354,11 +357,11 @@ const ReminderScreen : React.FC<{navigation: any}> = ({navigation}) => {
             />
             <AnimatedIconButton 
                 name="list-alt" 
-                onPress={() => setChecksEnabled((previousChecksEnabled) => !previousChecksEnabled)} 
+                onPress={() => setChecksEnabled(!reminder.checksEnabled)} 
                 position={380} 
                 showButton={showButtons}
-                color={checksEnabled ? (isDarkTheme ? theme.primaryColor : theme.secondaryColor) : theme.textColor}
-                containerStyle={{zIndex: 6, ...(checksEnabled ? styles.checkButtonPressed : {})}}
+                color={reminder.checksEnabled ? (isDarkTheme ? theme.primaryColor : theme.secondaryColor) : theme.textColor}
+                containerStyle={{zIndex: 6, ...(reminder.checksEnabled ? styles.checkButtonPressed : {})}}
             />
             <ModalTitle
                 visible={modalVisible}
