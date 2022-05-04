@@ -98,6 +98,7 @@ const ModalTitle = ({visible, setVisible, saveTitle, title: reminderTitle, goBac
                         placeholder={i18n.t('insertTitle')}
                         maxLength={30}
                         placeholderTextColor={theme.placeholderTextColor}
+                        onSubmitEditing={saveChanges}
                     />
                     <View style={styles.buttonsContainer}>
                         {
