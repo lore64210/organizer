@@ -5,19 +5,21 @@ import {IconButton} from '../atoms';
 import { useSelector } from 'react-redux';
 import i18n from 'i18n-js';
 
-const createStyles = (theme) => StyleSheet.create({
+const createStyles = (theme, isDarkTheme) => StyleSheet.create({
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
     },
     modalContentContainer: {
-        backgroundColor: theme.secondaryColor,
+        backgroundColor: isDarkTheme ? theme.secondaryColor : theme.primaryColor,
         width: '90%',
         height: 200,
         justifyContent: 'space-around',
         alignItems: 'center',
         borderRadius: theme.borderRadius,
+        borderWidth: 3,
+        borderColor: theme.secondaryColor,
     },
     modalTitle: {
         fontSize: 20,
@@ -26,7 +28,7 @@ const createStyles = (theme) => StyleSheet.create({
     },
     input: {
         color: theme.textColor,
-        backgroundColor: theme.primaryColor,
+        backgroundColor: isDarkTheme ? theme.primaryColor : theme.secondaryColor,
         width: '90%',
         padding: 10,
         borderRadius: theme.borderRadius,
@@ -43,15 +45,16 @@ const createStyles = (theme) => StyleSheet.create({
         width: 40,
         height: 40,
         left: 0,
-    }
+        backgroundColor: isDarkTheme ? theme.primaryColor : theme.secondaryColor,
+    },
 });
 
 const ModalTitle = ({visible, setVisible, saveTitle, title: reminderTitle, goBack, cancelButton = false, modalTitle = i18n.t('organizerTitle')}) => {
     //@ts-ignore
-    const {theme} = useSelector(({themeReducer}) => {
+    const {theme, isDarkTheme} = useSelector(({themeReducer}) => {
         return themeReducer;
     });
-    const styles = createStyles(theme);
+    const styles = createStyles(theme, isDarkTheme);
 
     const inputRef = useRef<TextInput>(null);
 
