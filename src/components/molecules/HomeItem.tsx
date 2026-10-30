@@ -1,54 +1,83 @@
-import {useRef, useEffect} from 'react';
-import {StyleSheet, Text, Animated} from 'react-native';
-import {TouchableOpacity} from 'react-native-gesture-handler';
-import { useSelector } from 'react-redux';
+import { StyleSheet, Text, View, Pressable } from 'react-native';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { useReorderableDrag } from 'react-native-reorderable-list';
+import i18n from '../../config/i18n';
+import { useAppSelector } from '../../config/redux/hooks';
+import type { Reminder, Theme } from '../../config/types';
 
-const createStyles = (theme) => StyleSheet.create({
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
     container: {
-        backgroundColor: theme.primaryColor,
-        marginVertical: 15,
-        marginHorizontal: 10,
-        minHeight: 50,
-        borderRadius: theme.borderRadius,
-        justifyContent: 'center',
+      backgroundColor: theme.primaryColor,
+      marginVertical: 8,
+      marginHorizontal: 10,
+      minHeight: 56,
+      borderRadius: theme.borderRadius,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    content: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 12,
+      paddingLeft: 12,
+    },
+    grip: {
+      paddingRight: 10,
+      opacity: 0.6,
     },
     title: {
-        color: theme.textColor,
-        paddingHorizontal: 10,
-        fontFamily: 'Montserrat_400Regular'
-    }
-})
+      flex: 1,
+      color: theme.textColor,
+      fontFamily: 'Montserrat_400Regular',
+    },
+    deleteButton: {
+      width: 44,
+      height: 44,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });
 
-export default ({item, onItemPress}) => {
-    //@ts-ignore
-    const {theme} = useSelector(({themeReducer}) => {
-        return themeReducer;
-    });
-    const styles = createStyles(theme);
+type Props = {
+  item: Reminder;
+  onPress: () => void;
+  onDelete: () => void;
+};
 
-    const heightAnimationRef = useRef(new Animated.Value(75)).current;
-    const opacityAnimationRef = useRef(new Animated.Value(1)).current;
+const HomeItem = ({ item, onPress, onDelete }: Props) => {
+  const theme = useAppSelector(state => state.themeReducer.theme);
+  const styles = createStyles(theme);
+  const drag = useReorderableDrag();
 
-    useEffect(() => {
-        if (item.hide) {
-            Animated.timing(heightAnimationRef, {
-                toValue: 0,
-                duration: 500,
-                useNativeDriver: false,
-            }).start();
-            Animated.timing(opacityAnimationRef, {
-                toValue: 0,
-                duration: 500,
-                useNativeDriver: false,
-            }).start();
-        }
-    }, [item]);
+  return (
+    <View style={styles.container}>
+      <Pressable
+        style={styles.content}
+        onPress={onPress}
+        onLongPress={drag}
+        delayLongPress={200}
+        accessibilityRole="button"
+        accessibilityLabel={item.title || i18n.t('openReminder')}
+        accessibilityHint={i18n.t('reorderItem')}
+      >
+        <FontAwesome name="bars" size={16} color={theme.textColor} style={styles.grip} />
+        <Text numberOfLines={2} style={styles.title}>
+          {item.title}
+        </Text>
+      </Pressable>
+      <Pressable
+        style={styles.deleteButton}
+        onPress={onDelete}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={i18n.t('delete')}
+      >
+        <FontAwesome name="trash-o" size={18} color={theme.deleteButtonColor} />
+      </Pressable>
+    </View>
+  );
+};
 
-    return (
-        <Animated.View style={{height: heightAnimationRef, opacity: opacityAnimationRef}}>
-            <TouchableOpacity onPress={onItemPress} style={styles.container}>
-                <Text style={styles.title}>{item.title}</Text>
-            </TouchableOpacity>
-        </Animated.View>
-    );
-}
+export default HomeItem;

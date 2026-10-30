@@ -1,155 +1,118 @@
-import {useState, useEffect} from 'react';
-import {View, StyleSheet, Image, useWindowDimensions, Animated} from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { useSelector } from 'react-redux';
-import { DraxProvider, DraxList } from 'react-native-drax';
-import { item } from '../../config/types';
-import { AnimatedIconButton } from '../atoms';
+import { Image, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import ReorderableList, { useReorderableDrag } from 'react-native-reorderable-list';
+import i18n from '../../config/i18n';
+import { useAppSelector } from '../../config/redux/hooks';
+import type { Item, Theme } from '../../config/types';
+import { moveItem } from '../../utils/reorder';
 
-const createStyles = (theme, window) => StyleSheet.create({
+const createStyles = (theme: Theme, window: ReturnType<typeof useWindowDimensions>) =>
+  StyleSheet.create({
     container: {
-        marginTop: 20,
-        alignItems: 'center',
-        height: (window.height / 4) + 20,
+      marginTop: 20,
+      alignItems: 'center',
+      height: window.height / 4 + 20,
     },
     listContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: theme.primaryColor,
-        width: '95%',
-        borderRadius: theme.borderRadius,
-        flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.primaryColor,
+      width: '95%',
+      borderRadius: theme.borderRadius,
+      paddingHorizontal: 6,
+      height: window.height / 4,
     },
-    item: {
-        marginHorizontal: 5,
-        borderRadius: theme.borderRadius,
-        height: window.height / 4,
-        width: window.width / 4,
+    thumb: {
+      width: window.width / 4 - 20,
+      height: window.height / 4 - 16,
+      marginHorizontal: 5,
+      borderRadius: theme.borderRadius,
+      overflow: 'hidden',
     },
-    deleteButton: {
-        backgroundColor: theme.deleteButtonColor,
-        width: '100%',
-        height: '100%',
-        borderWidth: 0,
-        bottom: '100%',
+    image: {
+      width: '100%',
+      height: '100%',
     },
-    deleteButtonContainer: {
-        width: 50,
-        height: 50,
-        position: 'absolute',
-        bottom: '10%',
+    removeBadge: {
+      position: 'absolute',
+      top: 4,
+      right: 4,
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      backgroundColor: theme.deleteButtonColor,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
-});
+  });
 
-const ImagesItemList = ({items, onPress, orderImages, onItemDragEnd}) => {
-    const window = useWindowDimensions();
-    //@ts-ignore
-    const {theme} = useSelector(({themeReducer}) => {
-        return themeReducer;
-    });
-    const styles = createStyles(theme, window);
+type ThumbProps = {
+  item: Item;
+  onPress: (item: Item) => void;
+  onDelete: (item: Item) => void;
+  styles: ReturnType<typeof createStyles>;
+};
 
-    const [showDeleteImageButton, setShowDeleteImageButton] = useState(false);
-    const [imageToDelete, setImageToDelete] = useState('');
-    const [imagesWidth, setImagesWidth] = useState({});
-    const [imagesOpacity, setImagesOpacity] = useState({});
+const ImageThumb = ({ item, onPress, onDelete, styles }: ThumbProps) => {
+  const drag = useReorderableDrag();
+  const uri = typeof item.value === 'string' ? item.value : '';
 
-    const onDragEnd = (e) => {
-        const {dragAbsolutePosition} = e;
-        let {x: itemPositionX} = dragAbsolutePosition;
-        if (itemPositionX > window.width - 50) {
-            setTimeout(() => onItemDragEnd(e), 800);
-            setImageToDelete(e.item.id);
-        }
-        setShowDeleteImageButton(false);
-    }
+  return (
+    <Pressable
+      style={styles.thumb}
+      onPress={() => onPress(item)}
+      onLongPress={drag}
+      delayLongPress={200}
+      accessibilityRole="imagebutton"
+      accessibilityLabel={i18n.t('openReminder')}
+      accessibilityHint={i18n.t('reorderItem')}
+    >
+      <Image style={styles.image} source={{ uri }} resizeMode="cover" />
+      <Pressable
+        style={styles.removeBadge}
+        onPress={() => onDelete(item)}
+        hitSlop={6}
+        accessibilityRole="button"
+        accessibilityLabel={i18n.t('delete')}
+      >
+        <FontAwesome name="times" size={12} color="#FFFFFF" />
+      </Pressable>
+    </Pressable>
+  );
+};
 
-    useEffect(() => {
-        let newImagesWidth = {};
-        let newImagesOpacity = {};
-        items
-            .map((i) => ({
-                valueOpacity: new Animated.Value(1),
-                valueHeight: new Animated.Value(window.width / 4 + 10), 
-                key: i.id
-            }))
-            .forEach(i => {
-                newImagesWidth = {
-                    ...newImagesWidth,
-                    [i.key]: i.valueHeight
-                }
-                newImagesOpacity = {
-                    ...newImagesOpacity,
-                    [i.key]: i.valueOpacity,
-                }
-            });
-        setImagesWidth({...newImagesWidth})                
-        setImagesOpacity({...newImagesOpacity})                
-    }, [items]);
+type Props = {
+  items: Item[];
+  onPress: (item: Item) => void;
+  onDelete: (item: Item) => void;
+  onReorder: (items: Item[]) => void;
+};
 
-    useEffect(() => {
-        if(imageToDelete && imagesWidth[imageToDelete] && imagesOpacity[imageToDelete]) {
-            Animated.timing(imagesWidth[imageToDelete], {
-                useNativeDriver: false, 
-                toValue: 0, 
-                duration: 750
-            }).start();
-            Animated.timing(imagesOpacity[imageToDelete], {
-                useNativeDriver: false, 
-                toValue: 0, 
-                duration: 750
-            }).start();
-        }
-    }, [imageToDelete]);
-    
-    return (
-        <>
-            {
-                items.length ? (
-                    <View style={styles.container}>
-                        <View style={styles.listContainer}>
-                            <DraxProvider>
-                                <DraxList
-                                    lockItemDragsToMainAxis
-                                    keyboardDismissMode='on-drag'
-                                    horizontal
-                                    onItemDragEnd={onDragEnd}
-                                    onItemDragStart={() => setShowDeleteImageButton(true)}
-                                    data={items}
-                                    renderItemContent={({item}) => (
-                                        <Animated.View style={{width: imagesWidth[item.id], opacity: imagesOpacity[item.id]}}>
-                                            <TouchableOpacity onPress={() => onPress(item)}>
-                                                {/*@ts-ignore */}
-                                                <Image style={styles.item} source={{uri: item.value}}/>
-                                            </TouchableOpacity>
-                                        </Animated.View>
-                                    )}
-                                    onItemReorder={({ fromIndex, toIndex }) => {
-                                        const newData = [...items];
-                                        newData.splice(toIndex, 0, newData.splice(fromIndex, 1)[0]);
-                                        orderImages(newData);
-                                    }}
-                                    keyExtractor={(item : item) => item.id}
-                                />
-                            </DraxProvider>
-                        </View>
-                        <View style={styles.deleteButtonContainer}>
-                            <AnimatedIconButton 
-                                name='trash' 
-                                containerStyle={styles.deleteButton} 
-                                showButton={showDeleteImageButton}
-                                position={window.width/2 - 40}
-                                initialPosition={window.width}
-                                color={theme.backgroundColor}
-                                disableTouchable
-                                horizontal
-                            />
-                        </View>
-                    </View>
-                ) : <View />
-            }
-        </>
-    );
-}
+const ImageItemList = ({ items, onPress, onDelete, onReorder }: Props) => {
+  const window = useWindowDimensions();
+  const theme = useAppSelector(state => state.themeReducer.theme);
+  const styles = createStyles(theme, window);
 
-export default ImagesItemList;
+  if (!items.length) {
+    return null;
+  }
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.listContainer}>
+        <ReorderableList
+          horizontal
+          data={items}
+          keyExtractor={item => item.id}
+          showsHorizontalScrollIndicator={false}
+          onReorder={({ from, to }) => onReorder(moveItem(items, from, to))}
+          renderItem={({ item }) => (
+            <ImageThumb item={item} onPress={onPress} onDelete={onDelete} styles={styles} />
+          )}
+        />
+      </View>
+    </View>
+  );
+};
+
+export default ImageItemList;

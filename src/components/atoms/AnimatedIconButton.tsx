@@ -1,74 +1,108 @@
-import {useRef, useEffect} from 'react';
-import {View, TouchableOpacity, Animated, StyleSheet} from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
-import { useSelector } from 'react-redux';
+import { useRef, useEffect } from 'react';
+import {
+  TouchableOpacity,
+  Animated,
+  StyleSheet,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from 'react-native';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import type { ComponentProps } from 'react';
+import { useAppSelector } from '../../config/redux/hooks';
+import type { Theme } from '../../config/types';
 
-const createStyles = (theme) => StyleSheet.create({
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
     container: {
-        backgroundColor: theme.primaryColor,
-        borderRadius: theme.borderRadiusButton,
-        position: 'absolute',
-        right: 20,
-        width: theme.buttonSize,
-        height: theme.buttonSize,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 2,
-        borderColor: theme.backgroundColor,
+      backgroundColor: theme.primaryColor,
+      borderRadius: theme.borderRadiusButton,
+      position: 'absolute',
+      right: 20,
+      width: theme.buttonSize,
+      height: theme.buttonSize,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 2,
+      borderColor: theme.backgroundColor,
     },
     button: {
-        width: '100%',
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
+      width: '100%',
+      height: '100%',
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     icon: {
-        fontSize: 20,
-    }
-});
+      fontSize: 20,
+    },
+  });
 
-export default (props) => {
-    //@ts-ignore
-    const {theme} = useSelector(({themeReducer}) => {
-        return themeReducer;
-    });
-    const styles = createStyles(theme);
+type IconName = ComponentProps<typeof FontAwesome>['name'];
 
-    const {
-        name,
-        color = theme.textColor,
-        size = 30, 
-        onPress, style = {}, 
-        containerStyle = {}, 
-        position = 20,
-        initialPosition = 20,
-        showButton,
-        horizontal = false,
-    } = props;
-    
-    const showButtonsAnimation = useRef(new Animated.Value(initialPosition)).current;
+type Props = {
+  name: IconName;
+  color?: string;
+  size?: number;
+  onPress?: () => void;
+  onLongPress?: () => void;
+  style?: StyleProp<TextStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
+  position?: number;
+  initialPosition?: number;
+  showButton?: boolean;
+  horizontal?: boolean;
+  accessibilityLabel?: string;
+};
 
-    useEffect(() => {
-        Animated
-            .timing(
-                showButtonsAnimation, 
-                {
-                    toValue: showButton ? position : initialPosition, 
-                    duration: 300, 
-                    useNativeDriver: false
-                })
-            .start();
-    }, [showButton]);
+const AnimatedIconButton = ({
+  name,
+  color,
+  size = 30,
+  onPress,
+  onLongPress,
+  style,
+  containerStyle,
+  position = 20,
+  initialPosition = 20,
+  showButton = false,
+  horizontal = false,
+  accessibilityLabel,
+}: Props) => {
+  const theme = useAppSelector(state => state.themeReducer.theme);
+  const styles = createStyles(theme);
 
-    const containerStyleAux = !horizontal 
-        ? {...styles.container, ...containerStyle, bottom: showButtonsAnimation}
-        : {...styles.container, ...containerStyle, left: showButtonsAnimation}
+  const showButtonsAnimation = useRef(new Animated.Value(initialPosition)).current;
 
-    return (
-        <Animated.View style={containerStyleAux}>
-            <TouchableOpacity style={styles.button} onPress={onPress}>
-                <FontAwesome style={{...styles.icon, ...style}} name={name} color={color} size={size}/>
-            </TouchableOpacity>
-        </Animated.View>
-    )
-}
+  useEffect(() => {
+    Animated.timing(showButtonsAnimation, {
+      toValue: showButton ? position : initialPosition,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [showButton, position, initialPosition, showButtonsAnimation]);
+
+  const animatedContainerStyle = horizontal
+    ? [styles.container, containerStyle, { left: showButtonsAnimation }]
+    : [styles.container, containerStyle, { bottom: showButtonsAnimation }];
+
+  return (
+    <Animated.View style={animatedContainerStyle}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={onPress}
+        onLongPress={onLongPress}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+      >
+        <FontAwesome
+          style={[styles.icon, style]}
+          name={name}
+          color={color ?? theme.textColor}
+          size={size}
+        />
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
+
+export default AnimatedIconButton;

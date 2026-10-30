@@ -1,75 +1,75 @@
-import {useEffect, useRef} from 'react';
-import {StyleSheet, Animated} from 'react-native';
-import Header from './Header';
-import { useSelector } from 'react-redux';
+import { useEffect, useRef, type ReactNode } from 'react';
+import { Animated, StyleSheet } from 'react-native';
+import { useAppSelector } from '../../config/redux/hooks';
 import { darkTheme, ligthTheme } from '../../config/theme';
+import Header from './Header';
 
-const createStyles = (theme) => StyleSheet.create({
-    container: {
-        flex: 1,
-    }
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
 });
 
-const Layout = ({children, headerProps}) => {
+type Props = {
+  children: ReactNode;
+  headerProps?: {
+    title?: string;
+    onTitlePress?: () => void;
+  };
+};
 
-    
-    //@ts-ignore
-    const {theme, startThemeAnimation, isDarkTheme} = useSelector(({themeReducer}) => {
-        return themeReducer;
-    });
-    const styles = createStyles(theme);
-    const backgroundColor = useRef(new Animated.Value(1)).current;
-    const opacityAnimation = useRef(new Animated.Value(1)).current;
-    
-    useEffect(() => {
-        if (startThemeAnimation) {
-            Animated.timing(
-                backgroundColor, 
-                {
-                    toValue: isDarkTheme ? 0 : 1, 
-                    duration: 1500 , 
-                    useNativeDriver: false
-                }
-            ).start();
-            Animated.sequence([
-                Animated.timing(
-                    opacityAnimation, 
-                    {
-                        toValue: 0, 
-                        duration: 500, 
-                        useNativeDriver: false
-                    }
-                ),
-                Animated.timing(
-                    opacityAnimation, 
-                    {
-                        toValue: 0, 
-                        duration: 500, 
-                        useNativeDriver: false
-                    }
-                ),
-                Animated.timing(
-                    opacityAnimation, 
-                    {
-                        toValue: 1, 
-                        duration: 500, 
-                        useNativeDriver: false
-                    }
-                ),
-            ]).start();
-        }
-    }, [startThemeAnimation]);
+const Layout = ({ children, headerProps }: Props) => {
+  const { startThemeAnimation, isDarkTheme } = useAppSelector(state => state.themeReducer);
+  const backgroundColor = useRef(new Animated.Value(1)).current;
+  const opacityAnimation = useRef(new Animated.Value(1)).current;
 
-    return (
-        <Animated.View style={{...styles.container, opacity: opacityAnimation, backgroundColor: backgroundColor.interpolate({
-                inputRange: [0, 1], 
-                outputRange: [ligthTheme.backgroundColor, darkTheme.backgroundColor],
-            })
-        }}>
-            <Header {...headerProps} />
-            {children}
-        </Animated.View>
-    );
-}
+  useEffect(() => {
+    if (!startThemeAnimation) {
+      return;
+    }
+
+    Animated.timing(backgroundColor, {
+      toValue: isDarkTheme ? 0 : 1,
+      duration: 1500,
+      useNativeDriver: false,
+    }).start();
+
+    Animated.sequence([
+      Animated.timing(opacityAnimation, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: false,
+      }),
+      Animated.timing(opacityAnimation, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: false,
+      }),
+      Animated.timing(opacityAnimation, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: false,
+      }),
+    ]).start();
+  }, [startThemeAnimation, isDarkTheme, backgroundColor, opacityAnimation]);
+
+  return (
+    <Animated.View
+      style={[
+        styles.container,
+        {
+          opacity: opacityAnimation,
+          backgroundColor: backgroundColor.interpolate({
+            inputRange: [0, 1],
+            outputRange: [ligthTheme.backgroundColor, darkTheme.backgroundColor],
+          }),
+        },
+      ]}
+    >
+      <Header {...headerProps} />
+      {children}
+    </Animated.View>
+  );
+};
 
 export default Layout;

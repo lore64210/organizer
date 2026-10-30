@@ -1,44 +1,52 @@
-import StackNavigator from './src/components/templates/StackNavigator';
+import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
+import * as SplashScreen from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
+import { StatusBar } from 'expo-status-bar';
+import { Montserrat_400Regular } from '@expo-google-fonts/montserrat/400Regular';
+import { Montserrat_700Bold } from '@expo-google-fonts/montserrat/700Bold';
+import StackNavigator from './src/components/templates/StackNavigator';
 import { store, persistor } from './src/config/redux/store';
-import * as Notifications from "expo-notifications";
-import * as Localization from 'expo-localization';
-import i18n from 'i18n-js';
-import { en, es } from './src/config/translations'
-import AppLoading from 'expo-app-loading';
-import { useFonts, Montserrat_400Regular, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
+import { useAppSelector } from './src/config/redux/hooks';
+import { configureNotifications } from './src/services/notifications';
+import './src/config/i18n';
+
+SplashScreen.preventAutoHideAsync().catch(() => {});
+configureNotifications().catch(error => console.warn('Notifications setup failed', error));
+
+const ThemedStatusBar = () => {
+  const isDarkTheme = useAppSelector(state => state.themeReducer.isDarkTheme);
+  return <StatusBar style={isDarkTheme ? 'light' : 'dark'} />;
+};
 
 const App = () => {
-
-  let [fontsLoaded] = useFonts({
-    Montserrat_400Regular, Montserrat_700Bold
+  const [fontsLoaded, fontError] = useFonts({
+    Montserrat_400Regular,
+    Montserrat_700Bold,
   });
 
-  i18n.translations = { en, es }
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [fontsLoaded, fontError]);
 
-  i18n.locale = Localization.locale;
-  i18n.fallbacks = true;
-
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: false,
-      shouldSetBadge: true,
-    }),
-  });
-
-  if (!fontsLoaded) {
-    return <AppLoading />;
+  if (!fontsLoaded && !fontError) {
+    return null;
   }
 
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <StackNavigator />
-      </PersistGate>
-    </Provider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <ThemedStatusBar />
+          <StackNavigator />
+        </PersistGate>
+      </Provider>
+    </GestureHandlerRootView>
   );
-}
+};
 
 export default App;

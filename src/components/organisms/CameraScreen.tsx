@@ -1,185 +1,224 @@
-import {useState, useRef, useEffect} from 'react';
-import {View, StyleSheet, useWindowDimensions} from 'react-native';
-import {Camera} from 'expo-camera';
-import { IconButton, AnimatedIconButton } from '../atoms';
+import { useEffect, useRef, useState } from 'react';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import {
+  CameraView,
+  useCameraPermissions,
+  type BarcodeScanningResult,
+  type BarcodeType,
+  type CameraType,
+  type FlashMode,
+} from 'expo-camera';
 import Slider from '@react-native-community/slider';
-import {useSelector, useDispatch} from 'react-redux';
+import i18n from '../../config/i18n';
+import { useAppDispatch, useAppSelector } from '../../config/redux/hooks';
 import { SET_CURRENT_REMINDER } from '../../config/redux/actions';
+import type { Item, Theme } from '../../config/types';
+import { IconButton } from '../atoms';
+import { notify } from '../../utils/alerts';
 import generateUUID from '../../utils/uuidUtil';
 
-const createStyles = (theme, window) => StyleSheet.create({
+const BARCODE_TYPES: BarcodeType[] = [
+  'qr',
+  'ean13',
+  'ean8',
+  'code128',
+  'code39',
+  'upc_a',
+  'upc_e',
+  'pdf417',
+  'aztec',
+  'datamatrix',
+];
+
+const createStyles = (theme: Theme, window: ReturnType<typeof useWindowDimensions>) =>
+  StyleSheet.create({
     container: {
-        flex: 1,
+      flex: 1,
+      backgroundColor: '#000000',
     },
     camera: {
-        flex: 1,
+      flex: 1,
     },
     buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        position: 'absolute',
-        bottom: 0,
-        width: '100%',
-        left: 0,
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+      position: 'absolute',
+      bottom: 0,
+      width: '100%',
+      left: 0,
     },
     button: {
-        position: 'relative',
-        right: 0,
+      position: 'relative',
+      right: 0,
+      left: 0,
+      bottom: 0,
     },
     takePictureButton: {
-        width: 70,
-        height: 70
+      width: 70,
+      height: 70,
     },
     zoomBar: {
-        left: '55%',
-        bottom: '25%',
-        position: 'absolute',
-        transform: [{rotate: '-90deg'}],
-        width: 200,
-        height: 30,
+      left: '55%',
+      bottom: '25%',
+      position: 'absolute',
+      transform: [{ rotate: '-90deg' }],
+      width: 200,
+      height: 30,
     },
-    codeButton: {
-        zIndex: 0,
-        left: window.width / 2 - 25,
-        borderWidth: 0,
+    scannedButtonContainer: {
+      position: 'absolute',
+      bottom: 110,
+      left: window.width / 2 - 25,
     },
-});
+    scannedButton: {
+      width: 50,
+      height: 50,
+      position: 'relative',
+      left: 0,
+      bottom: 0,
+    },
+  });
 
-const CameraScreen = ({navigation}) => {
+type Props = {
+  navigation: any;
+};
 
-    const window = useWindowDimensions();
+const CameraScreen = ({ navigation }: Props) => {
+  const dispatch = useAppDispatch();
+  const theme = useAppSelector(state => state.themeReducer.theme);
+  const reminder = useAppSelector(state => state.remindersReducer.currentReminder);
+  const window = useWindowDimensions();
+  const styles = createStyles(theme, window);
 
-    //@ts-ignore
-    const {theme} = useSelector(({themeReducer}) => {
-        return themeReducer;
+  const [permission, requestPermission] = useCameraPermissions();
+  const [zoom, setZoom] = useState(0);
+  const [facing, setFacing] = useState<CameraType>('back');
+  const [flash, setFlash] = useState<FlashMode>('off');
+  const [dataScanned, setDataScanned] = useState<string | null>(null);
+  const [dataScannedIcon, setDataScannedIcon] = useState<'qrcode' | 'barcode'>('qrcode');
+
+  const cameraRef = useRef<CameraView>(null);
+
+  useEffect(() => {
+    if (!permission) {
+      return;
+    }
+    if (!permission.granted && permission.canAskAgain) {
+      requestPermission();
+      return;
+    }
+    if (!permission.granted) {
+      notify(i18n.t('cameraPermission'));
+      navigation.goBack();
+    }
+  }, [permission]);
+
+  const takePicture = async () => {
+    const photo = await cameraRef.current?.takePictureAsync({ quality: 0.8 });
+    if (!photo?.uri || !reminder) {
+      return;
+    }
+    const newImage: Item = {
+      id: generateUUID(),
+      value: photo.uri,
+      type: 'image',
+    };
+    dispatch({
+      type: SET_CURRENT_REMINDER,
+      payload: { ...reminder, imageItems: [newImage, ...reminder.imageItems] },
     });
-    const styles = createStyles(theme, window);
+    navigation.goBack();
+  };
 
-    const [hasPermission, setHasPermission] = useState(null);
-    const [zoom, setZoom] = useState(0);
-    const [type, setType] = useState(Camera.Constants.Type.back);
-    const [flashMode, setFlashMode] = useState(Camera.Constants.FlashMode.off);
-    const [dataScanned, setDataScanned] = useState(null);
-    const [dataScannedIcon, setDataScannedIcon] = useState('qrcode');
+  const handleBarCodeScanned = ({ type, data }: BarcodeScanningResult) => {
+    setDataScannedIcon(type === 'qr' ? 'qrcode' : 'barcode');
+    setDataScanned(data);
+  };
 
-    const cameraRef = useRef(null);
-    
-    //@ts-ignore
-    const reminder = useSelector(({remindersReducer: {currentReminder}}) => {
-        return currentReminder;
+  const onCodeScannedButtonPress = () => {
+    if (!dataScanned || !reminder) {
+      return;
+    }
+    const newItem: Item = {
+      id: generateUUID(),
+      value: dataScanned,
+      type: 'text',
+      checked: false,
+    };
+    dispatch({
+      type: SET_CURRENT_REMINDER,
+      payload: { ...reminder, items: [newItem, ...reminder.items] },
     });
+    navigation.goBack();
+  };
 
-    const dispatch = useDispatch();
-    
-    useEffect(() => {
-        (async () => {
-            const { status } = await Camera.requestCameraPermissionsAsync();
-            setHasPermission(status === 'granted');
-        })();
-        return () => {}
-    }, []);
+  if (!permission?.granted) {
+    return <View style={styles.container} />;
+  }
 
-    if (hasPermission === false) {
-        navigation.goBack();
-        return <View />;
-    }
-
-    const takePicture = async () => {
-        if(cameraRef.current){
-            const {uri} = await cameraRef.current.takePictureAsync(null);
-            const newImage = {
-                id: generateUUID(),
-                value: uri,
-                type: 'image',
-                position: reminder.imageItems.length + 1,
-                hidden: false,
-            };
-            dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, imageItems: [newImage, ...reminder.imageItems]}});
-            navigation.goBack();
-        }
-    }
-    
-    const handleBarCodeScanned = ({ type, data }) => {
-        setDataScannedIcon(type ==  256 ? 'qrcode' : 'barcode');
-        setDataScanned(data);
-    }
-
-    const onCodeScannedButtonPress = () => {
-        const newItem = {
-            id: generateUUID(),
-            value: dataScanned,
-            type: 'text',
-            position: reminder.items.length + 1,
-            hidden: false,
-        };
-        dispatch({type: SET_CURRENT_REMINDER, payload: {...reminder, items: [newItem, ...reminder.items]}});
-        navigation.goBack();
-    }
-
-    return (
+  return (
+    <View style={styles.container}>
+      <CameraView
+        ref={cameraRef}
+        style={styles.camera}
+        facing={facing}
+        flash={flash}
+        zoom={zoom}
+        barcodeScannerSettings={{ barcodeTypes: BARCODE_TYPES }}
+        onBarcodeScanned={dataScanned ? undefined : handleBarCodeScanned}
+      >
         <View style={styles.container}>
-            <Camera 
-                onBarCodeScanned={handleBarCodeScanned}
-                ref={cameraRef} 
-                style={styles.camera} 
-                type={type} 
-                flashMode={flashMode} 
-                zoom={zoom}
-            >
-                <View style={styles.container}>
-                    <View style={styles.zoomBar}>
-                        <Slider
-                            style={{width: '100%', height: '100%'}}
-                            minimumValue={0}
-                            maximumValue={1}
-                            minimumTrackTintColor={theme.primaryColor}
-                            maximumTrackTintColor={theme.backgroundColor}
-                            thumbTintColor={theme.textColor}
-                            onValueChange={setZoom}
-                            value={zoom}
-                        />
-                    </View>
-                    <View style={styles.buttonContainer}>
-                        <IconButton 
-                            containerStyle={styles.button} 
-                            name='flash' 
-                            onPress={() => {
-                                setFlashMode(flashMode === Camera.Constants.FlashMode.on 
-                                ? Camera.Constants.FlashMode.off
-                                : Camera.Constants.FlashMode.on);
-                            }}
-                            color={flashMode === Camera.Constants.FlashMode.off ? theme.secondaryColor :  theme.textColor}
-                        />
-                        <AnimatedIconButton 
-                            name={dataScannedIcon} 
-                            onPress={onCodeScannedButtonPress} 
-                            position={110} 
-                            showButton={!!dataScanned}
-                            containerStyle={styles.codeButton}
-                        />
-                        <IconButton 
-                            size={50}
-                            containerStyle={{...styles.button, ...styles.takePictureButton}} 
-                            name='dot-circle-o' 
-                            onPress={takePicture}
-                        />
-                        <IconButton 
-                            containerStyle={styles.button} 
-                            name='refresh' 
-                            onPress={() => {
-                                setType(
-                                    type === Camera.Constants.Type.back
-                                    ? Camera.Constants.Type.front
-                                    : Camera.Constants.Type.back
-                                );
-                            }}
-                        />
-                    </View>
-                </View>
-            </Camera>
+          <View style={styles.zoomBar}>
+            <Slider
+              style={{ width: '100%', height: '100%' }}
+              minimumValue={0}
+              maximumValue={1}
+              minimumTrackTintColor={theme.primaryColor}
+              maximumTrackTintColor={theme.backgroundColor}
+              thumbTintColor={theme.textColor}
+              onValueChange={setZoom}
+              value={zoom}
+            />
+          </View>
+
+          {dataScanned ? (
+            <View style={styles.scannedButtonContainer}>
+              <IconButton
+                containerStyle={styles.scannedButton}
+                name={dataScannedIcon}
+                onPress={onCodeScannedButtonPress}
+                accessibilityLabel={i18n.t('newItemPlaceholder')}
+              />
+            </View>
+          ) : null}
+
+          <View style={styles.buttonContainer}>
+            <IconButton
+              containerStyle={styles.button}
+              name="flash"
+              onPress={() => setFlash(current => (current === 'on' ? 'off' : 'on'))}
+              color={flash === 'on' ? theme.textColor : theme.secondaryColor}
+              accessibilityLabel={i18n.t('cameraPermission')}
+            />
+            <IconButton
+              size={50}
+              containerStyle={{ ...styles.button, ...styles.takePictureButton }}
+              name="dot-circle-o"
+              onPress={takePicture}
+              accessibilityLabel={i18n.t('cameraPermission')}
+            />
+            <IconButton
+              containerStyle={styles.button}
+              name="refresh"
+              onPress={() => setFacing(current => (current === 'back' ? 'front' : 'back'))}
+              accessibilityLabel={i18n.t('cameraPermission')}
+            />
+          </View>
+        </View>
+      </CameraView>
     </View>
-    )
-}
+  );
+};
 
 export default CameraScreen;

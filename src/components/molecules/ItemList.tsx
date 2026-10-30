@@ -1,380 +1,378 @@
-import {useRef, useEffect, useState} from 'react';
-import {View, StyleSheet, TextInput, Animated, useWindowDimensions, KeyboardAvoidingView, Linking, Text} from 'react-native';
-import { IconButton, Checkbox } from '../atoms';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  type TextInputInstance,
+} from 'react-native';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Slider from '@react-native-community/slider';
-import { Audio } from 'expo-av';
-import { Sound } from 'expo-av/build/Audio';
-import { useSelector } from 'react-redux';
-import { DraxProvider, DraxList } from 'react-native-drax';
-import { item } from '../../config/types';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import i18n from 'i18n-js';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import ReorderableList, { useReorderableDrag } from 'react-native-reorderable-list';
+import i18n from '../../config/i18n';
+import { useAppSelector } from '../../config/redux/hooks';
+import { isAlarmValue, type Item, type Theme } from '../../config/types';
+import { formatAlarmDate, formatAlarmTime } from '../../utils/date';
+import { moveItem } from '../../utils/reorder';
+import { Checkbox, IconButton } from '../atoms';
 
-const createStyles = (theme) => StyleSheet.create({
-    itemListContainer: {
-        alignItems: 'flex-end',
-        marginRight: '2.5%',
+const URL_PATTERN = /^(https?:\/\/|www\.)\S+$/i;
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    row: {
+      width: '100%',
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
     },
     checkbox: {
-        position: 'absolute',
-        left: '2.5%',
-        top: 35,
+      position: 'absolute',
+      left: '2.5%',
+      top: 30,
+      zIndex: 2,
     },
     itemContainer: {
-        backgroundColor: theme.primaryColor,
-        marginVertical: 20,
-        borderRadius: theme.borderRadius,
-        flexDirection: 'row',
+      backgroundColor: theme.primaryColor,
+      marginVertical: 8,
+      marginRight: '2.5%',
+      borderRadius: theme.borderRadius,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    grip: {
+      paddingVertical: 14,
+      paddingLeft: 10,
+      paddingRight: 4,
+      opacity: 0.6,
+    },
+    content: {
+      flex: 1,
+      justifyContent: 'center',
     },
     textItem: {
-        padding: 10,
-        color: theme.textColor,
-        fontFamily: 'Montserrat_400Regular',
-        width: '90%'
+      paddingVertical: 12,
+      paddingHorizontal: 8,
+      color: theme.textColor,
+      fontFamily: 'Montserrat_400Regular',
+      minHeight: 46,
+      textAlignVertical: 'top',
     },
-    audioItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
+    action: {
+      width: 40,
+      height: 44,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
-    audioButton: {
-        position: 'relative',
-        left: 0,
-        bottom: 0,
-    },
-    audioSlider: {
-        height: 10,
-        width: '80%'
-    },
-    reorderIcon: {
-        position: 'relative',
-        top: 0,
-        left: 0,
-        width: 30,
-    },
-    alarmItemContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        height: 70,
+    alarmItemContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 10,
     },
     alarmItem: {
-        color: theme.textColor,
-        fontFamily: 'Montserrat_400Regular'
+      color: theme.textColor,
+      fontFamily: 'Montserrat_400Regular',
     },
-    clockIcon: {
-        position: 'relative',
-        left: 0,
-        bottom: 0,
+    alarmTitle: {
+      fontWeight: 'bold',
+    },
+    audioItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingRight: 4,
+    },
+    audioButton: {
+      position: 'relative',
+      left: 0,
+      bottom: 0,
+      width: 40,
+      height: 40,
+      backgroundColor: 'transparent',
+    },
+    audioSlider: {
+      flex: 1,
+      height: 36,
+    },
+    audioTime: {
+      color: theme.textColor,
+      fontFamily: 'Montserrat_400Regular',
+      fontSize: 11,
+      minWidth: 74,
+      textAlign: 'right',
+      paddingRight: 6,
+    },
+  });
+
+const formatSeconds = (seconds: number): string => {
+  const total = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0;
+  const minutes = Math.floor(total / 60);
+  return `${minutes}:${(total % 60).toString().padStart(2, '0')}`;
+};
+
+type AudioItemProps = {
+  uri: string;
+  activeId: string | null;
+  onActivate: (id: string | null) => void;
+  itemId: string;
+  styles: ReturnType<typeof createStyles>;
+  theme: Theme;
+};
+
+const AudioItem = ({ uri, activeId, onActivate, itemId, styles, theme }: AudioItemProps) => {
+  const player = useAudioPlayer({ uri }, { updateInterval: 250 });
+  const status = useAudioPlayerStatus(player);
+  const isActive = activeId === itemId;
+
+  useEffect(() => {
+    if (!isActive && status.playing) {
+      player.pause();
     }
-});
+  }, [isActive]);
 
-const ItemList = ({
-    items, 
-    actualItemTextId, 
-    changeItemText, 
-    checksEnabled, 
-    changeItemCheck, 
-    orderItemList, 
-    onItemDragEnd, 
-    onItemDragStart,
-    reminderHasImages,
-    setShowDeleteButton,
-    setCurrentAlarmSelected,
-    setModalAlarmTitleVisible,
-    setShowButtons,
-}) => {
-    //@ts-ignore
-    const {theme} = useSelector(({themeReducer}) => {
-        return themeReducer;
-    });
-    const styles = createStyles(theme);
-    
-    const [currentAudioPlaying, setcurrentAudioPlaying] = useState(null);
-    const [sounds, setSounds] = useState<{id: string, sound: Sound, positionMillis: any, durationMillis: any}[]>([]);
-    const [itemsHeight, setItemsHeight] = useState({});
-    const [itemsOpacity, setItemsOpacity] = useState({});
-    const [itemToDelete, setItemToDelete] = useState('');
-
-    const window = useWindowDimensions();
-
-    const textItemsRef = useRef({});
-    
-    const showChecksAnimation = useRef(new Animated.Value(window.width * 0.95)).current;
-
-    useEffect(() => {
-        Animated
-            .timing(
-                showChecksAnimation, 
-                {
-                    toValue: checksEnabled ?  window.width * 0.86 : window.width * 0.95, 
-                    duration: 250, 
-                    useNativeDriver: false,
-                })
-            .start();
-    }, [checksEnabled]);
-
-    useEffect(() => {
-        let newItemsHeight = {};
-        let newItemsOpacity = {};
-        items
-            .map(i => ({key: [i.id], valueHeight: new Animated.Value(100), valueOpacity: new Animated.Value(1)}))
-            .forEach(i => {
-                newItemsHeight = {...newItemsHeight, [i.key]: i.valueHeight};
-                newItemsOpacity = {...newItemsOpacity, [i.key]: i.valueOpacity};
-            });
-        setItemsHeight(newItemsHeight);
-        setItemsOpacity(newItemsOpacity);
-    }, [items.length]);
-
-    useEffect(() => {
-        if (itemToDelete && itemsHeight[itemToDelete] && itemsOpacity[itemToDelete]) {
-            Animated.timing(itemsHeight[itemToDelete], {
-                toValue: 0,
-                useNativeDriver: false,
-                duration: 750,
-            }).start();
-            Animated.timing(itemsOpacity[itemToDelete], {
-                toValue: 0,
-                useNativeDriver: false,
-                duration: 750,
-            }).start();
-        }
-    }, [itemToDelete]);
-
-    const handleOnItemDragEnd = (e) => {
-        const {dragAbsolutePosition} = e;
-        let {x: itemPositionX, y: itemPositionY} = dragAbsolutePosition;
-        itemPositionY = reminderHasImages ? itemPositionY + window.height / 4 + 20 : itemPositionY;
-        if (itemPositionY < window.height - 75 
-            && itemPositionY > window.height - 175
-            && itemPositionX < window.width / 2 + 75
-            && itemPositionX > window.width / 2 - 25) {
-                setTimeout(() => onItemDragEnd(e), 800);
-                setItemToDelete(e.item.id);
-        }
-        setShowDeleteButton(false);
+  const toggle = () => {
+    if (status.playing) {
+      player.pause();
+      onActivate(null);
+      return;
     }
-
-    useEffect(() => {
-        if (textItemsRef.current[actualItemTextId]) {
-            textItemsRef.current[actualItemTextId].focus();
-        }
-    }, [actualItemTextId]);
-
-    const handleOnInputPressOut = async (value) => {
-        setShowButtons(false);
-        if (typeof value === 'string') {
-            const supported = await Linking.canOpenURL(value);
-            if (supported) {
-                Linking.openURL(value)
-            }
-        }
+    onActivate(itemId);
+    if (status.didJustFinish || status.currentTime >= (status.duration || 0)) {
+      player.seekTo(0);
     }
+    player.play();
+  };
 
-    const calculateIconColor = (date) => {
-        const now = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60 * 1000).toISOString();
-        if (date < now) {
-            return theme.deleteButtonColor;
-        } else if (date > now) {
-            return 'green';
-        } else {
-            return theme.textColor;
-        }
+  return (
+    <View style={styles.audioItem}>
+      <IconButton
+        name={status.playing ? 'pause' : 'play'}
+        onPress={toggle}
+        containerStyle={styles.audioButton}
+        color={theme.textColor}
+        accessibilityLabel={i18n.t(status.playing ? 'pauseAudio' : 'playAudio')}
+      />
+      <View style={styles.audioSlider}>
+        <Slider
+          style={{ width: '100%', height: '100%' }}
+          minimumValue={0}
+          maximumValue={status.duration > 0 ? status.duration : 1}
+          minimumTrackTintColor={theme.textColor}
+          maximumTrackTintColor={theme.backgroundColor}
+          thumbTintColor={theme.textColor}
+          onSlidingComplete={value => player.seekTo(value)}
+          value={status.currentTime}
+        />
+      </View>
+      <Text style={styles.audioTime}>
+        {formatSeconds(status.currentTime)} / {formatSeconds(status.duration)}
+      </Text>
+    </View>
+  );
+};
+
+type RowProps = {
+  item: Item;
+  checksEnabled: boolean;
+  changeItemText: (text: string, id: string) => void;
+  changeItemCheck: (checked: boolean, id: string) => void;
+  onDelete: (item: Item) => void;
+  onAlarmPress: (id: string) => void;
+  setShowButtons: (visible: boolean) => void;
+  inputRef: (input: TextInputInstance | null) => void;
+  activeAudioId: string | null;
+  onActivateAudio: (id: string | null) => void;
+};
+
+const ItemRow = ({
+  item,
+  checksEnabled,
+  changeItemText,
+  changeItemCheck,
+  onDelete,
+  onAlarmPress,
+  setShowButtons,
+  inputRef,
+  activeAudioId,
+  onActivateAudio,
+}: RowProps) => {
+  const theme = useAppSelector(state => state.themeReducer.theme);
+  const styles = createStyles(theme);
+  const drag = useReorderableDrag();
+
+  const textValue = typeof item.value === 'string' ? item.value : '';
+  const trimmedText = textValue.trim();
+  const link = URL_PATTERN.test(trimmedText)
+    ? trimmedText.startsWith('www.')
+      ? `https://${trimmedText}`
+      : trimmedText
+    : null;
+
+  const openLink = () => {
+    if (link) {
+      Linking.openURL(link).catch(() => {});
     }
+  };
 
-    const handleOnReminderPress = (itemId) => {
-        setCurrentAlarmSelected(itemId);
-        setModalAlarmTitleVisible(true);
-    }
-
-    // ------------- LOGICA PARA AUDIOS ----------------------------------------------------------------------
-
-    useEffect(() => {
-        const newSounds = items
-            .filter(i => i.type === 'audio')
-            .map(async i => {
-                const getSound = async () => {
-                    const {sound} = await Audio.Sound.createAsync({uri: i.value}, {}, (status) => onPlaybackStatusUpdate(status, i.id));
-                    return sound;
-                };
-                const newSound = await getSound();
-                return {sound: newSound, id: i.id, positionMillis: 0, durationMillis: 1}
-            });
-        Promise.all(newSounds).then(setSounds);
-    }, [items.length]);
-
-    const onAudioButtonPress = (audioId) => {
-        if (!currentAudioPlaying) {
-            playAudio(audioId);
-        } else if (currentAudioPlaying === audioId) {
-            pauseAudio(audioId);
-        }
-    }
-
-    const playAudio = async (audioId) => {
-        if (sounds?.length) {
-            setcurrentAudioPlaying(audioId);
-            const [{sound, positionMillis}] = sounds.filter(sound => sound.id === audioId);
-            await sound.playFromPositionAsync(positionMillis);
-        }
-    }
-
-    const pauseAudio = async (audioId) => {
-        setcurrentAudioPlaying(null);
-        const [{sound}] = sounds?.filter(sound => sound.id === audioId);
-        await sound.pauseAsync();
-    }
-
-    const onPlaybackStatusUpdate = async (playbackStatus, id) => {
-        setSounds((prevSounds) => prevSounds.map(s => {
-            if (s.id === id) {
-                return {
-                    ...s,
-                    positionMillis: playbackStatus.positionMillis,
-                    durationMillis: playbackStatus.durationMillis,
-                }
-            }
-            return s;
-        }));
-        if (playbackStatus.didJustFinish) {
-            setSounds((prevSounds) => prevSounds.map(s => {
-                if (s.id === id) {
-                    return {
-                        ...s,
-                        positionMillis: 0,
-                    }
-                }
-                return s;
-            }));
-            setcurrentAudioPlaying(null);
-        }
-    }
-    
-    const getMaximumDurationValue = (audio) => {
-        const filteredSounds = sounds.filter(s => s.id === audio.id);
-        return filteredSounds.length ? filteredSounds[0].durationMillis : 1
+  const renderContent = () => {
+    if (item.type === 'alarm' && isAlarmValue(item.value)) {
+      return (
+        <Pressable
+          style={styles.alarmItemContent}
+          onPress={() => onAlarmPress(item.id)}
+          accessibilityRole="button"
+        >
+          <FontAwesome
+            name="clock-o"
+            size={22}
+            color={theme.textColor}
+            style={{ paddingHorizontal: 10 }}
+          />
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.alarmItem, styles.alarmTitle]} numberOfLines={1}>
+              {item.value.title}
+            </Text>
+            <Text style={styles.alarmItem}>
+              {i18n.t('date')} {formatAlarmDate(item.value.date)} {formatAlarmTime(item.value.date)}hs
+            </Text>
+          </View>
+        </Pressable>
+      );
     }
 
-    const onAudioControlSlideComplete = async (newPositionMillis, audioId) => {
-        if (currentAudioPlaying) {
-            const [{sound}] = sounds?.filter(sound => sound.id === audioId);
-            await sound.pauseAsync();
-            await sound.playFromPositionAsync(newPositionMillis);
-        }
-        setSounds(sounds.map(s => {
-            if (s.id === audioId) {
-                return {...s, positionMillis: newPositionMillis};
-            }
-            return s;
-        }));
+    if (item.type === 'audio') {
+      return (
+        <AudioItem
+          uri={textValue}
+          itemId={item.id}
+          activeId={activeAudioId}
+          onActivate={onActivateAudio}
+          styles={styles}
+          theme={theme}
+        />
+      );
     }
-
-    const getAudioControlValue = (audio) => {
-        const filteredSounds = sounds.filter(s => s.id === audio.id);
-        return filteredSounds.length ? filteredSounds[0].positionMillis : 0
-    }
-
-    // ----------------------------------------------------------------------------------------
 
     return (
-        <KeyboardAvoidingView style={{flex: 1}}>
-            <DraxProvider>
-                <DraxList
-                    contentContainerStyle={{marginBottom: window.height}}
-                    removeClippedSubviews={false}
-                    keyboardDismissMode='on-drag'
-                    onItemDragEnd={handleOnItemDragEnd}
-                    onItemDragStart={onItemDragStart}
-                    data={items}
-                    scrollToOverflowEnabled
-                    renderItemContent={({item}) => (
-                        <View key={item.id}>
-                            <Animated.View 
-                                style={{
-                                    ...styles.itemListContainer, 
-                                    opacity: itemsOpacity[item.id], 
-                                    height: itemToDelete === item.id ? itemsHeight[item.id] : 'auto',
-                                }}
-                            >
-                                <Checkbox 
-                                    style={styles.checkbox}
-                                    isChecked={item.checked} 
-                                    onPress={(checked) => changeItemCheck(checked, item.id)}
-                                />
-                                <Animated.View style={{...styles.itemContainer, width: showChecksAnimation}}>
-                                    <IconButton name='reorder' containerStyle={styles.reorderIcon} size={15} />
-                                    {
-                                        {
-                                            alarm: (
-                                                <TouchableOpacity onPress={() => handleOnReminderPress(item.id)} style={styles.alarmItemContainer}>
-                                                    <IconButton 
-                                                        name='clock-o'
-                                                        //@ts-ignore
-                                                        color={calculateIconColor(item.value.date)}
-                                                        containerStyle={styles.clockIcon}
-                                                    />
-                                                    <View>
-                                                        {/*@ts-ignore*/}
-                                                        <Text style={{...styles.alarmItem, fontWeight: 'bold'}}>{item.value.title}</Text>
-                                                        <Text style={styles.alarmItem}>
-                                                            {/*@ts-ignore*/}
-                                                            {i18n.t('date')} {item.value.date?.split('T')[0].split('-').reverse().map((i, indx) => indx !== 0 ? '/' + i : i)} {item.value.date?.split('T')[1].substring(0, 5)}hs
-                                                        </Text>
-                                                    </View>
-                                                </TouchableOpacity>
-                                            ),
-                                            text: (
-                                                <TextInput 
-                                                    ref={input => textItemsRef.current[item.id] = input}
-                                                    multiline
-                                                    style={styles.textItem} 
-                                                    onChangeText={newText => changeItemText(newText, item.id)} 
-                                                    placeholderTextColor={theme.placeholderTextColor}
-                                                    placeholder={i18n.t('newItemPlaceholder')}
-                                                    /*@ts-ignore*/
-                                                    value={item.value.toString()}
-                                                    onPressOut={() => handleOnInputPressOut(item)}
-                                                />
-                                            ),
-                                            audio: (
-                                                <View style={styles.audioItem}>
-                                                    <IconButton 
-                                                        name={currentAudioPlaying === item.id ? 'pause' : 'play'} 
-                                                        containerStyle={styles.audioButton} 
-                                                        color={!currentAudioPlaying || currentAudioPlaying === item.id ? theme.textColor : 'grey'}
-                                                        onPress={() => onAudioButtonPress(item.id)}
-                                                    />
-                                                    <View style={styles.audioSlider}>
-                                                        <Slider
-                                                            style={{width: '100%', height: '100%'}}
-                                                            minimumValue={0}
-                                                            maximumValue={getMaximumDurationValue(item)}
-                                                            minimumTrackTintColor={theme.textColor}
-                                                            maximumTrackTintColor={theme.backgroundColor}
-                                                            thumbTintColor={theme.textColor}
-                                                            onSlidingComplete={newPositionMillis => onAudioControlSlideComplete(newPositionMillis, item.id)}
-                                                            value={getAudioControlValue(item)}
-                                                        />
-                                                    </View>
-                                                </View>
-                                            )
-                                        }[item.type]
-                                    }
-                                </Animated.View>
-                            </Animated.View>
-                        </View>
-                    )}
-                    onItemReorder={({ fromIndex, toIndex }) => {
-                        const newData = [...items];
-                        newData.splice(toIndex, 0, newData.splice(fromIndex, 1)[0]);
-                        orderItemList(newData);
-                    }}
-                    keyExtractor={(item : item) => item.id}
-                />
-            </DraxProvider>
-        </KeyboardAvoidingView>
-
+      <TextInput
+        ref={inputRef}
+        multiline
+        style={styles.textItem}
+        onChangeText={newText => changeItemText(newText, item.id)}
+        onFocus={() => setShowButtons(false)}
+        placeholderTextColor={theme.placeholderTextColor}
+        placeholder={i18n.t('newItemPlaceholder')}
+        value={textValue}
+      />
     );
-}
+  };
+
+  return (
+    <View style={styles.row}>
+      {checksEnabled && item.type !== 'alarm' && item.type !== 'audio' ? (
+        <Checkbox
+          style={styles.checkbox}
+          isChecked={item.checked}
+          onPress={checked => changeItemCheck(checked, item.id)}
+        />
+      ) : null}
+      <View style={[styles.itemContainer, { width: checksEnabled && item.type === 'text' ? '86%' : '95%' }]}>
+        <Pressable
+          onLongPress={drag}
+          delayLongPress={150}
+          style={styles.grip}
+          accessibilityRole="button"
+          accessibilityLabel={i18n.t('reorderItem')}
+          hitSlop={6}
+        >
+          <FontAwesome name="reorder" size={15} color={theme.textColor} />
+        </Pressable>
+        <View style={styles.content}>{renderContent()}</View>
+        {link ? (
+          <Pressable
+            style={styles.action}
+            onPress={openLink}
+            hitSlop={6}
+            accessibilityRole="link"
+            accessibilityLabel={i18n.t('openLink')}
+          >
+            <FontAwesome name="external-link" size={16} color={theme.textColor} />
+          </Pressable>
+        ) : null}
+        <Pressable
+          style={styles.action}
+          onPress={() => onDelete(item)}
+          hitSlop={6}
+          accessibilityRole="button"
+          accessibilityLabel={i18n.t('deleteItem')}
+        >
+          <FontAwesome name="trash-o" size={16} color={theme.deleteButtonColor} />
+        </Pressable>
+      </View>
+    </View>
+  );
+};
+
+type Props = {
+  items: Item[];
+  actualItemTextId: string | null;
+  changeItemText: (text: string, id: string) => void;
+  checksEnabled?: boolean;
+  changeItemCheck: (checked: boolean, id: string) => void;
+  onReorder: (items: Item[]) => void;
+  onDelete: (item: Item) => void;
+  onAlarmPress: (id: string) => void;
+  setShowButtons: (visible: boolean) => void;
+};
+
+const ItemList = ({
+  items,
+  actualItemTextId,
+  changeItemText,
+  checksEnabled = false,
+  changeItemCheck,
+  onReorder,
+  onDelete,
+  onAlarmPress,
+  setShowButtons,
+}: Props) => {
+  const textItemsRef = useRef<Record<string, TextInputInstance | null>>({});
+  const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const input = actualItemTextId ? textItemsRef.current[actualItemTextId] : null;
+    input?.focus();
+  }, [actualItemTextId]);
+
+  return (
+    <ReorderableList
+      data={items}
+      keyExtractor={item => item.id}
+      contentContainerStyle={{ paddingBottom: 140 }}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+      style={{ flex: 1 }}
+      onReorder={({ from, to }) => onReorder(moveItem(items, from, to))}
+      renderItem={({ item }) => (
+        <ItemRow
+          item={item}
+          checksEnabled={checksEnabled}
+          changeItemText={changeItemText}
+          changeItemCheck={changeItemCheck}
+          onDelete={onDelete}
+          onAlarmPress={onAlarmPress}
+          setShowButtons={setShowButtons}
+          inputRef={input => {
+            textItemsRef.current[item.id] = input;
+          }}
+          activeAudioId={activeAudioId}
+          onActivateAudio={setActiveAudioId}
+        />
+      )}
+      extraData={activeAudioId}
+    />
+  );
+};
 
 export default ItemList;

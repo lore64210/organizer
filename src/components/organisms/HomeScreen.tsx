@@ -1,146 +1,136 @@
-import {useState} from 'react';
-import {useSelector, useDispatch} from 'react-redux';
-import {DELETE_REMINDER, SET_CURRENT_REMINDER, SET_ORDERED_REMINDERS, UPDATE_REMINDER} from '../../config/redux/actions';
-import {reminder} from '../../config/types';
-import {AnimatedIconButton, IconButton} from '../atoms';
-import {HomeItem, Layout} from '../molecules';
-import uuid from '../../utils/uuidUtil';
-import { View, StyleSheet, useWindowDimensions, Text, Image } from 'react-native';
-import { DraxProvider, DraxList } from 'react-native-drax';
-import {deleteAsync} from 'expo-file-system';
-import i18n from 'i18n-js';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import ReorderableList from 'react-native-reorderable-list';
+import i18n from '../../config/i18n';
+import { useAppDispatch, useAppSelector } from '../../config/redux/hooks';
+import {
+  DELETE_REMINDER,
+  SET_CURRENT_REMINDER,
+  SET_ORDERED_REMINDERS,
+} from '../../config/redux/actions';
+import { isAlarmValue, type Item, type Reminder, type Theme } from '../../config/types';
+import { IconButton } from '../atoms';
+import { HomeItem, Layout } from '../molecules';
+import { cancelAlarm } from '../../services/notifications';
+import { confirm } from '../../utils/alerts';
+import { deleteFile } from '../../utils/files';
+import { moveItem } from '../../utils/reorder';
+import generateUUID from '../../utils/uuidUtil';
 
-const createStyles = (theme, window, isDarkTheme) => StyleSheet.create({
+const createStyles = (theme: Theme, isDarkTheme: boolean) =>
+  StyleSheet.create({
     button: {
-        borderWidth: 2,
+      borderWidth: 2,
     },
-    draxListContainer: {
-        flex: 1,
-        backgroundColor: theme.backgroundColor,
-    },
-    deleteButton: {
-        backgroundColor: theme.deleteButtonColor,
-        right: 0,
-        width: '100%',
-        height: '100%',
-    },
-    deleteButtonContainer: {
-        width: 50,
-        height: 50,
-        position: 'absolute',
-        left: window.width / 2 - 25,
-        bottom: 0,
+    listContainer: {
+      flex: 1,
+      backgroundColor: theme.backgroundColor,
     },
     emptyListContainer: {
-        flex: 1,
-        backgroundColor: theme.backgroundColor,
-        justifyContent: 'center',
-        alignItems: 'center',
+      flex: 1,
+      backgroundColor: theme.backgroundColor,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     emptyListText: {
-        color: isDarkTheme ? theme.textColor : theme.primaryColor,
-        fontFamily: 'Montserrat_400Regular'
-    }
-})
+      color: isDarkTheme ? theme.textColor : theme.primaryColor,
+      fontFamily: 'Montserrat_400Regular',
+    },
+  });
 
-const emptyReminder: reminder = {
-    id: '',
-    title: '',
-    items: [],
-    imageItems: [],
-    hide: false
+const createEmptyReminder = (): Reminder => ({
+  id: generateUUID(),
+  title: '',
+  items: [],
+  imageItems: [],
+  checksEnabled: false,
+  createdAt: Date.now(),
+});
+
+const cleanupFiles = (items: Item[]) => {
+  items.forEach(item => {
+    if (typeof item.value === 'string' && item.type === 'audio') {
+      deleteFile(item.value);
+    }
+    if (isAlarmValue(item.value)) {
+      cancelAlarm(item.value.notificationId);
+    }
+  });
 };
 
-const HomeScreen : React.FC<{navigation: any}> = ({navigation}) => {
-    //@ts-ignore
-    const {theme, isDarkTheme} = useSelector(({themeReducer}) => {
-        return themeReducer;
+const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+  const dispatch = useAppDispatch();
+  const { theme, isDarkTheme } = useAppSelector(state => state.themeReducer);
+  const reminders = useAppSelector(state => state.remindersReducer.reminders);
+  const styles = createStyles(theme, isDarkTheme);
+
+  const openReminder = (reminder: Reminder) => {
+    dispatch({ type: SET_CURRENT_REMINDER, payload: reminder });
+    navigation.navigate('ReminderScreen');
+  };
+
+  const createReminder = () => {
+    openReminder(createEmptyReminder());
+  };
+
+  const deleteReminder = async (reminder: Reminder) => {
+    const accepted = await confirm({
+      title: i18n.t('deleteReminderTitle'),
+      message: i18n.t('deleteReminderMessage', { title: reminder.title }),
+      confirmLabel: i18n.t('delete'),
+      cancelLabel: i18n.t('cancel'),
     });
-    const window = useWindowDimensions();
-    const styles = createStyles(theme, window, isDarkTheme);
-
-    //@ts-ignore
-    const reminders = useSelector(({remindersReducer: {reminders}}) => {
-        return reminders;
-    });
-
-    const dispatch = useDispatch();
-
-    const [showDeleteButton, setShowDeleteButton] = useState(false);
-
-    const onPress = reminder => {
-        navigation.navigate('ReminderScreen')
-        dispatch({type: SET_CURRENT_REMINDER, payload: reminder});    
+    if (!accepted) {
+      return;
     }
+    cleanupFiles(reminder.items);
+    cleanupFiles(reminder.imageItems);
+    dispatch({ type: DELETE_REMINDER, payload: reminder });
+  };
 
-    const onItemDragEnd = (e) => {
-        const {dragAbsolutePosition, item} = e;
-        const {x: itemPositionX, y: itemPositionY} = dragAbsolutePosition;
-        if (itemPositionY < window.height - 75 
-            && itemPositionY > window.height - 175
-            && itemPositionX < window.width / 2 + 75
-            && itemPositionX > window.width / 2 - 25) {
-                dispatch({type: UPDATE_REMINDER, payload: {...item, hide: true}});
-                setTimeout(() => {
-                    item.items.forEach(i => {
-                        if (i.type === 'audio') {
-                            deleteAsync(i.value, {idempotent: true})
-                        }
-                    });
-                    item.imageItems.forEach(i => {
-                        deleteAsync(i.value, {idempotent: true});
-                    });
-                    dispatch({type: DELETE_REMINDER, payload: item});
-                }, 1500)
-        }
-        setShowDeleteButton(false);
-    }
-
-    return (
-        <Layout headerProps={{title: 'O R G A N I Z E R'}}>
-            {
-                reminders?.length ? (
-                    <DraxProvider>
-                        <DraxList
-                            style={styles.draxListContainer}
-                            data={reminders}
-                            onItemDragStart={() => setShowDeleteButton(true)}
-                            onItemDragEnd={onItemDragEnd}
-                            renderItemContent={({ item: reminder } : { item : reminder }) => (
-                                <HomeItem key={reminder.id} item={reminder} onItemPress={() => onPress(reminder)} />
-                            )}
-                            onItemReorder={({ fromIndex, toIndex }) => {
-                                const newData = [...reminders];
-                                newData.splice(toIndex, 0, newData.splice(fromIndex, 1)[0]);
-                                dispatch({type: SET_ORDERED_REMINDERS, payload: newData})
-                            }}
-                            keyExtractor={(item : reminder) => item.id}
-                        />
-                        <View style={styles.deleteButtonContainer}>
-                            <AnimatedIconButton 
-                                name='trash' 
-                                containerStyle={styles.deleteButton}
-                                showButton={showDeleteButton}
-                                position={20}
-                                initialPosition={-100}
-                                color={theme.backgroundColor}
-                            />
-                        </View>
-                    </DraxProvider>
-                ) : (
-                    <View style={styles.emptyListContainer}>
-                        {
-                            isDarkTheme 
-                                ? <Image style={{width: 100, height: 100}} source={require('../../../assets/adaptive-icon.png')} />
-                                : <Image style={{width: 100, height: 100}} source={require('../../../assets/adaptive-icon-light.png')} />
-                        }
-                        <Text style={styles.emptyListText}>{i18n.t('noItemsToShow')}</Text>
-                    </View>
-                )
+  return (
+    <Layout headerProps={{ title: 'O R G A N I Z E R' }}>
+      {reminders.length ? (
+        <View style={styles.listContainer}>
+          <ReorderableList
+            data={reminders}
+            keyExtractor={item => item.id}
+            contentContainerStyle={{ paddingBottom: 120 }}
+            onReorder={({ from, to }) =>
+              dispatch({
+                type: SET_ORDERED_REMINDERS,
+                payload: moveItem(reminders, from, to),
+              })
             }
-            <IconButton containerStyle={styles.button} name='plus' onPress={() => onPress({...emptyReminder, id: uuid(), position: reminders.length + 1})} />
-        </Layout>
-    )
-}
+            renderItem={({ item }) => (
+              <HomeItem
+                item={item}
+                onPress={() => openReminder(item)}
+                onDelete={() => deleteReminder(item)}
+              />
+            )}
+          />
+        </View>
+      ) : (
+        <View style={styles.emptyListContainer}>
+          <Image
+            style={{ width: 100, height: 100 }}
+            source={
+              isDarkTheme
+                ? require('../../../assets/adaptive-icon.png')
+                : require('../../../assets/adaptive-icon-light.png')
+            }
+          />
+          <Text style={styles.emptyListText}>{i18n.t('noItemsToShow')}</Text>
+        </View>
+      )}
+      <IconButton
+        containerStyle={styles.button}
+        name="plus"
+        onPress={createReminder}
+        accessibilityLabel={i18n.t('insertTitle')}
+      />
+    </Layout>
+  );
+};
 
 export default HomeScreen;
