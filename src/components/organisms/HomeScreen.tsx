@@ -37,14 +37,23 @@ const createStyles = (theme: Theme, isDarkTheme: boolean) =>
     },
   });
 
-const createEmptyReminder = (): Reminder => ({
-  id: generateUUID(),
-  title: '',
-  items: [],
-  imageItems: [],
-  checksEnabled: false,
-  createdAt: Date.now(),
-});
+const createEmptyReminder = (): Reminder => {
+  const firstItem: Item = {
+    id: generateUUID(),
+    value: '',
+    type: 'text',
+    checked: false,
+  };
+
+  return {
+    id: generateUUID(),
+    title: '',
+    items: [firstItem],
+    imageItems: [],
+    checksEnabled: false,
+    createdAt: Date.now(),
+  };
+};
 
 const cleanupFiles = (items: Item[]) => {
   items.forEach(item => {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import RNDateTimePicker, {
   type DateTimePickerEvent,
@@ -68,6 +68,24 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [alarmTitle, setAlarmTitle] = useState('');
   const [alarmTitleModalVisible, setAlarmTitleModalVisible] = useState(false);
   const [currentAlarmSelected, setCurrentAlarmSelected] = useState('');
+
+  // New reminders start with one empty item: focus it once the title is saved.
+  const initialFocusPending = useRef(!reminder?.title);
+
+  useEffect(() => {
+    if (!initialFocusPending.current || titleModalVisible) {
+      return;
+    }
+    initialFocusPending.current = false;
+
+    const firstItem = reminder?.items[0];
+    if (!firstItem || firstItem.type !== 'text') {
+      return;
+    }
+
+    const timer = setTimeout(() => setActualItemTextId(firstItem.id), 200);
+    return () => clearTimeout(timer);
+  }, [titleModalVisible, reminder]);
 
   useEffect(() => {
     if (!currentAlarmSelected) {
