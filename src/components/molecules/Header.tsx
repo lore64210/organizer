@@ -11,13 +11,15 @@ const createStyles = (theme: Theme, isDarkTheme: boolean) =>
     container: {
       backgroundColor: theme.backgroundColor,
       alignItems: 'center',
-      borderBottomColor: isDarkTheme ? theme.secondaryColor : theme.primaryColor,
-      borderBottomWidth: 5,
+      paddingBottom: 4,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: isDarkTheme ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)',
     },
     title: {
       color: isDarkTheme ? theme.textColor : theme.primaryColor,
-      fontSize: 18,
-      paddingBottom: 5,
+      fontSize: 17,
+      letterSpacing: 0.4,
+      paddingBottom: 8,
       fontFamily: 'Montserrat_700Bold',
     },
     themeButton: {
@@ -60,9 +62,9 @@ const createStyles = (theme: Theme, isDarkTheme: boolean) =>
       fontFamily: 'Montserrat_700Bold',
     },
     logo: {
-      width: 75,
-      height: 75,
-      marginTop: 10,
+      width: 56,
+      height: 56,
+      marginTop: 12,
     },
   });
 

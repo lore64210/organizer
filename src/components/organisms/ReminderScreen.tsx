@@ -37,7 +37,11 @@ const createStyles = (theme: Theme, isDarkTheme: boolean) =>
       backgroundColor: isDarkTheme ? theme.textColor : theme.primaryColor,
     },
     button: {
-      borderWidth: 2,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.25,
+      shadowRadius: 12,
+      elevation: 8,
     },
     emptyListContainer: {
       flex: 1,
@@ -53,9 +57,9 @@ const createStyles = (theme: Theme, isDarkTheme: boolean) =>
     },
     viewImagesButton: {
       marginTop: 18,
-      paddingHorizontal: 18,
-      paddingVertical: 10,
-      borderRadius: theme.borderRadius,
+      paddingHorizontal: 22,
+      paddingVertical: 11,
+      borderRadius: theme.borderRadiusButton,
       backgroundColor: theme.primaryColor,
     },
     viewImagesButtonText: {

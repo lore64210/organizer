@@ -21,7 +21,11 @@ import generateUUID from '../../utils/uuidUtil';
 const createStyles = (theme: Theme, isDarkTheme: boolean) =>
   StyleSheet.create({
     button: {
-      borderWidth: 2,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.25,
+      shadowRadius: 12,
+      elevation: 8,
     },
     listContainer: {
       flex: 1,

@@ -5,8 +5,10 @@ const darkTheme = {
     primaryColor: '#064663',
     secondaryColor: '#04293A',
     buttonSize: 50,
-    borderRadius: 12,
-    borderRadiusButton: 100,
+    borderRadius: 18,
+    borderRadiusSmall: 12,
+    borderRadiusLarge: 28,
+    borderRadiusButton: 999,
     deleteButtonColor: '#A61C21',
 }
 
@@ -17,26 +19,12 @@ const ligthTheme = {
     primaryColor: '#61A4BC',
     secondaryColor: '#5B7DB1',
     buttonSize: 50,
-    borderRadius: 12,
-    borderRadiusButton: 100,
+    borderRadius: 18,
+    borderRadiusSmall: 12,
+    borderRadiusLarge: 28,
+    borderRadiusButton: 999,
     deleteButtonColor: '#D53E43',
 }
-
-/*
-
-const ligthTheme = {
-    textColor: 'white',
-    placeholderTextColor: 'gainsboro',
-    backgroundColor: 'white',
-    primaryColor: '#76a6f0',
-    secondaryColor: '#5b769f',
-    buttonSize: 50,
-    borderRadius: 12,
-    borderRadiusButton: 100,
-    deleteButtonColor: '#D53E43',
-}
-
-*/
 
 export {
     darkTheme,

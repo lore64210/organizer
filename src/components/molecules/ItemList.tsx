@@ -45,12 +45,13 @@ const createStyles = (theme: Theme) =>
       zIndex: 2,
     },
     swipeContainer: {
-      marginVertical: 8,
+      marginVertical: 10,
       marginRight: '2.5%',
     },
     itemContainer: {
       backgroundColor: theme.primaryColor,
       borderRadius: theme.borderRadius,
+      borderCurve: 'continuous',
       flexDirection: 'row',
       alignItems: 'center',
     },

@@ -7,11 +7,11 @@ const createStyles = (theme: Theme, isDarkTheme: boolean) =>
   StyleSheet.create({
     container: {
       backgroundColor: isDarkTheme ? theme.textColor : theme.primaryColor,
-      borderRadius: 5,
+      borderRadius: 6,
       zIndex: -5,
     },
     emptyCheckbox: {
-      borderRadius: 5,
+      borderRadius: 6,
       backgroundColor: theme.primaryColor,
       height: 20,
       width: 20,

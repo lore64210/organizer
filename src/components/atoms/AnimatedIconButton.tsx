@@ -24,8 +24,11 @@ const createStyles = (theme: Theme) =>
       height: theme.buttonSize,
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 2,
-      borderColor: theme.backgroundColor,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 4,
     },
     labeledContainer: {
       width: 'auto',

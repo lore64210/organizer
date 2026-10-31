@@ -51,6 +51,7 @@ const SwipeToDelete = ({
       containerStyle={[
         {
           borderRadius: theme.borderRadius,
+          borderCurve: 'continuous',
           overflow: 'hidden',
           backgroundColor: theme.primaryColor,
         },

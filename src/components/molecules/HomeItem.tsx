@@ -9,8 +9,8 @@ import SwipeToDelete from './SwipeToDelete';
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     swipeContainer: {
-      marginVertical: 8,
-      marginHorizontal: 10,
+      marginVertical: 10,
+      marginHorizontal: 12,
     },
     container: {
       backgroundColor: theme.primaryColor,

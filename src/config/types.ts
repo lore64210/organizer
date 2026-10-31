@@ -31,6 +31,8 @@ export type Theme = {
   secondaryColor: string;
   buttonSize: number;
   borderRadius: number;
+  borderRadiusSmall: number;
+  borderRadiusLarge: number;
   borderRadiusButton: number;
   deleteButtonColor: string;
 };

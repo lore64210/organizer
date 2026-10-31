@@ -59,7 +59,8 @@ const createStyles = (theme: Theme) =>
     },
     thumbInner: {
       aspectRatio: 1,
-      borderRadius: theme.borderRadius,
+      borderRadius: theme.borderRadiusSmall,
+      borderCurve: 'continuous',
       overflow: 'hidden',
       backgroundColor: theme.secondaryColor,
     },
