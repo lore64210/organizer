@@ -93,5 +93,4 @@ src/
 ## Pendientes conocidos
 
 - El selector de fecha/hora usa el diálogo nativo de Android; en iOS se muestra inline (falta envolverlo en un modal propio).
-- `assets/notification-icon.png` es un placeholder de 1×1 px: reemplazar por un ícono blanco de 96×96 para builds de Android.
 - Sin tests automatizados ni ESLint todavía.

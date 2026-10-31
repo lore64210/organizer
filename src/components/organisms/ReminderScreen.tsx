@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Image, Keyboard, StyleSheet, Text, View } from 'react-native';
+import { Image, Keyboard, Pressable, StyleSheet, Text, View } from 'react-native';
 import RNDateTimePicker, {
   type DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
@@ -13,13 +13,12 @@ import {
 import { isAlarmValue, type Item, type Theme } from '../../config/types';
 import { AnimatedIconButton, IconButton } from '../atoms';
 import {
-  ImageItemList,
   ItemList,
   Layout,
   ModalAudio,
-  ModalImage,
   ModalTitle,
 } from '../molecules';
+import GalleryModal from './GalleryModal';
 import { cancelAlarm, scheduleAlarm } from '../../services/notifications';
 import { useKeyboardOffset } from '../../hooks/useKeyboardOffset';
 import { notify } from '../../utils/alerts';
@@ -48,6 +47,20 @@ const createStyles = (theme: Theme, isDarkTheme: boolean) =>
     emptyListText: {
       color: isDarkTheme ? theme.textColor : theme.primaryColor,
       fontFamily: 'Montserrat_400Regular',
+      textAlign: 'center',
+      paddingHorizontal: 24,
+    },
+    viewImagesButton: {
+      marginTop: 18,
+      paddingHorizontal: 18,
+      paddingVertical: 10,
+      borderRadius: theme.borderRadius,
+      backgroundColor: theme.primaryColor,
+    },
+    viewImagesButtonText: {
+      color: theme.textColor,
+      fontFamily: 'Montserrat_400Regular',
+      fontSize: 14,
     },
   });
 
@@ -61,9 +74,8 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [showButtons, setShowButtons] = useState(false);
   const [titleModalVisible, setTitleModalVisible] = useState(!reminder?.title);
   const [actualItemTextId, setActualItemTextId] = useState<string | null>(null);
-  const [showModalImage, setShowModalImage] = useState(false);
   const [showModalAudio, setShowModalAudio] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<Item | null>(null);
+  const [galleryVisible, setGalleryVisible] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [datePicked, setDatePicked] = useState(new Date());
@@ -184,11 +196,6 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       deleteFile(item.value);
     }
     updateImages(reminder.imageItems.filter(current => current.id !== item.id));
-  };
-
-  const onImagePress = (item: Item) => {
-    setSelectedImage(item);
-    setShowModalImage(true);
   };
 
   const openGallery = async () => {
@@ -323,23 +330,19 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     });
   };
 
-  const hasContent = reminder.imageItems.length > 0 || reminder.items.length > 0;
+  const hasImages = reminder.imageItems.length > 0;
 
   return (
     <Layout
       headerProps={{
         title: reminder.title,
         onTitlePress: () => setTitleModalVisible(true),
+        imageCount: reminder.imageItems.length,
+        onImagesPress: () => setGalleryVisible(true),
       }}
     >
-      {hasContent ? (
+      {reminder.items.length ? (
         <View style={styles.container}>
-          <ImageItemList
-            items={reminder.imageItems}
-            onPress={onImagePress}
-            onDelete={deleteImage}
-            onReorder={updateImages}
-          />
           <ItemList
             items={reminder.items}
             actualItemTextId={actualItemTextId}
@@ -351,6 +354,27 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             onAlarmPress={onAlarmPress}
             setShowButtons={setShowButtons}
           />
+        </View>
+      ) : hasImages ? (
+        <View style={styles.emptyListContainer}>
+          <Image
+            style={{ width: 100, height: 100 }}
+            source={
+              isDarkTheme
+                ? require('../../../assets/adaptive-icon.png')
+                : require('../../../assets/adaptive-icon-light.png')
+            }
+          />
+          <Text style={styles.emptyListText}>
+            {i18n.t('imagesAttached', { count: reminder.imageItems.length })}
+          </Text>
+          <Pressable
+            style={styles.viewImagesButton}
+            onPress={() => setGalleryVisible(true)}
+            accessibilityRole="button"
+          >
+            <Text style={styles.viewImagesButtonText}>{i18n.t('viewImages')}</Text>
+          </Pressable>
         </View>
       ) : (
         <View style={styles.emptyListContainer}>
@@ -453,7 +477,12 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         cancelButton
         goBack={resetAlarmDraft}
       />
-      <ModalImage item={selectedImage} visible={showModalImage} setVisible={setShowModalImage} />
+      <GalleryModal
+        visible={galleryVisible}
+        onClose={() => setGalleryVisible(false)}
+        items={reminder.imageItems}
+        onDelete={deleteImage}
+      />
       <ModalAudio
         saveAudio={addAudioItem}
         visible={showModalAudio}

@@ -15,6 +15,8 @@ type Props = {
   headerProps?: {
     title?: string;
     onTitlePress?: () => void;
+    imageCount?: number;
+    onImagesPress?: () => void;
   };
 };
 
