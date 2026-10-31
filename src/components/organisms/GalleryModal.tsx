@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   FlatList,
   Image,
@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Gallery, fitContainer, useImageResolution } from 'react-native-zoom-toolkit';
+import { Gallery, fitContainer, useImageResolution, type GalleryRefType } from 'react-native-zoom-toolkit';
 import i18n from '../../config/i18n';
 import { useAppSelector } from '../../config/redux/hooks';
 import type { Item, Theme } from '../../config/types';
@@ -67,6 +67,17 @@ const createStyles = (theme: Theme) =>
       width: '100%',
       height: '100%',
     },
+    removeBadge: {
+      position: 'absolute',
+      top: 4,
+      right: 4,
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      backgroundColor: theme.deleteButtonColor,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     empty: {
       color: theme.textColor,
       fontFamily: 'Montserrat_400Regular',
@@ -95,6 +106,14 @@ const createStyles = (theme: Theme) =>
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: 'rgba(0,0,0,0.45)',
+    },
+    viewerButtonDisabled: {
+      opacity: 0.35,
+    },
+    viewerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
     },
     counter: {
       color: '#FFFFFF',
@@ -132,13 +151,15 @@ type Props = {
   onClose: () => void;
   items: Item[];
   onDelete: (item: Item) => void;
+  onReorder: (from: number, to: number) => void;
 };
 
-const GalleryModal = ({ visible, onClose, items, onDelete }: Props) => {
+const GalleryModal = ({ visible, onClose, items, onDelete, onReorder }: Props) => {
   const theme = useAppSelector(state => state.themeReducer.theme);
   const styles = createStyles(theme);
   const insets = useSafeAreaInsets();
 
+  const galleryRef = useRef<GalleryRefType>(null);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -159,12 +180,7 @@ const GalleryModal = ({ visible, onClose, items, onDelete }: Props) => {
     [],
   );
 
-  const deleteCurrent = async () => {
-    const item = items[currentIndex];
-    if (!item) {
-      return;
-    }
-
+  const confirmDelete = async (item: Item): Promise<boolean> => {
     const accepted = await confirm({
       title: i18n.t('deleteItemTitle'),
       message: i18n.t('deleteImageMessage'),
@@ -172,15 +188,43 @@ const GalleryModal = ({ visible, onClose, items, onDelete }: Props) => {
       cancelLabel: i18n.t('cancel'),
     });
     if (!accepted) {
+      return false;
+    }
+    onDelete(item);
+    return true;
+  };
+
+  const deleteFromGrid = async (item: Item) => {
+    const deleted = await confirmDelete(item);
+    if (deleted && items.length <= 1) {
+      close();
+    }
+  };
+
+  const deleteCurrent = async () => {
+    const item = items[currentIndex];
+    if (!item) {
       return;
     }
-
-    onDelete(item);
+    const deleted = await confirmDelete(item);
+    if (!deleted) {
+      return;
+    }
     if (items.length <= 1) {
       close();
       return;
     }
     setViewerIndex(null);
+  };
+
+  const moveImage = (direction: -1 | 1) => {
+    const to = currentIndex + direction;
+    if (to < 0 || to >= items.length) {
+      return;
+    }
+    onReorder(currentIndex, to);
+    setCurrentIndex(to);
+    galleryRef.current?.setIndex(to);
   };
 
   return (
@@ -228,6 +272,15 @@ const GalleryModal = ({ visible, onClose, items, onDelete }: Props) => {
                       style={styles.thumbImage}
                       resizeMode="cover"
                     />
+                    <Pressable
+                      style={styles.removeBadge}
+                      onPress={() => deleteFromGrid(item)}
+                      hitSlop={6}
+                      accessibilityRole="button"
+                      accessibilityLabel={i18n.t('delete')}
+                    >
+                      <FontAwesome name="times" size={12} color="#FFFFFF" />
+                    </Pressable>
                   </View>
                 </Pressable>
               )}
@@ -237,6 +290,7 @@ const GalleryModal = ({ visible, onClose, items, onDelete }: Props) => {
         ) : (
           <View style={styles.viewer}>
             <Gallery
+              ref={galleryRef}
               data={items}
               keyExtractor={item => item.id}
               initialIndex={viewerIndex}
@@ -261,15 +315,43 @@ const GalleryModal = ({ visible, onClose, items, onDelete }: Props) => {
               <Text style={styles.counter} pointerEvents="none">
                 {currentIndex + 1} / {items.length}
               </Text>
-              <Pressable
-                onPress={deleteCurrent}
-                style={styles.viewerButton}
-                hitSlop={8}
-                accessibilityRole="button"
-                accessibilityLabel={i18n.t('delete')}
-              >
-                <FontAwesome name="trash" size={18} color="#FFFFFF" />
-              </Pressable>
+              <View style={styles.viewerActions}>
+                <Pressable
+                  onPress={() => moveImage(-1)}
+                  disabled={currentIndex === 0}
+                  style={[
+                    styles.viewerButton,
+                    currentIndex === 0 && styles.viewerButtonDisabled,
+                  ]}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={i18n.t('moveImageLeft')}
+                >
+                  <FontAwesome name="arrow-left" size={16} color="#FFFFFF" />
+                </Pressable>
+                <Pressable
+                  onPress={() => moveImage(1)}
+                  disabled={currentIndex >= items.length - 1}
+                  style={[
+                    styles.viewerButton,
+                    currentIndex >= items.length - 1 && styles.viewerButtonDisabled,
+                  ]}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={i18n.t('moveImageRight')}
+                >
+                  <FontAwesome name="arrow-right" size={16} color="#FFFFFF" />
+                </Pressable>
+                <Pressable
+                  onPress={deleteCurrent}
+                  style={styles.viewerButton}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={i18n.t('delete')}
+                >
+                  <FontAwesome name="trash" size={18} color="#FFFFFF" />
+                </Pressable>
+              </View>
             </View>
           </View>
         )}
