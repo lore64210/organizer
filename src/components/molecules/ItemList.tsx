@@ -18,6 +18,7 @@ import { isAlarmValue, type Item, type Theme } from '../../config/types';
 import { formatAlarmDate, formatAlarmTime } from '../../utils/date';
 import { moveItem } from '../../utils/reorder';
 import { Checkbox, IconButton } from '../atoms';
+import SwipeToDelete from './SwipeToDelete';
 
 const URL_PATTERN = /^(https?:\/\/|www\.)\S+$/i;
 
@@ -38,19 +39,23 @@ const createStyles = (theme: Theme) =>
     checkbox: {
       position: 'absolute',
       left: '2.5%',
-      top: 32,
+      top: 38,
       zIndex: 2,
+    },
+    swipeContainer: {
+      marginVertical: 8,
+      marginRight: '2.5%',
     },
     itemContainer: {
       backgroundColor: theme.primaryColor,
-      marginVertical: 8,
-      marginRight: '2.5%',
       borderRadius: theme.borderRadius,
       flexDirection: 'row',
       alignItems: 'center',
     },
     grip: {
-      paddingVertical: 14,
+      alignSelf: 'flex-start',
+      paddingTop: 12,
+      paddingBottom: 8,
       paddingLeft: 10,
       paddingRight: 4,
       opacity: 0.6,
@@ -286,39 +291,39 @@ const ItemRow = ({
           onPress={checked => changeItemCheck(checked, item.id)}
         />
       ) : null}
-      <View style={[styles.itemContainer, { width: checksEnabled && item.type === 'text' ? '86%' : '95%' }]}>
-        <Pressable
-          onLongPress={drag}
-          delayLongPress={150}
-          style={styles.grip}
-          accessibilityRole="button"
-          accessibilityLabel={i18n.t('reorderItem')}
-          hitSlop={6}
-        >
-          <FontAwesome name="reorder" size={15} color={theme.textColor} />
-        </Pressable>
-        <View style={styles.content}>{renderContent()}</View>
-        {link ? (
+      <SwipeToDelete
+        style={[
+          styles.swipeContainer,
+          { width: checksEnabled && item.type === 'text' ? '86%' : '95%' },
+        ]}
+        onDelete={() => onDelete(item)}
+        accessibilityLabel={i18n.t('deleteItem')}
+      >
+        <View style={styles.itemContainer}>
           <Pressable
-            style={styles.action}
-            onPress={openLink}
+            onLongPress={drag}
+            delayLongPress={150}
+            style={styles.grip}
+            accessibilityRole="button"
+            accessibilityLabel={i18n.t('reorderItem')}
             hitSlop={6}
-            accessibilityRole="link"
-            accessibilityLabel={i18n.t('openLink')}
           >
-            <FontAwesome name="external-link" size={16} color={theme.textColor} />
+            <FontAwesome name="reorder" size={15} color={theme.textColor} />
           </Pressable>
-        ) : null}
-        <Pressable
-          style={styles.action}
-          onPress={() => onDelete(item)}
-          hitSlop={6}
-          accessibilityRole="button"
-          accessibilityLabel={i18n.t('deleteItem')}
-        >
-          <FontAwesome name="trash-o" size={16} color={theme.deleteButtonColor} />
-        </Pressable>
-      </View>
+          <View style={styles.content}>{renderContent()}</View>
+          {link ? (
+            <Pressable
+              style={styles.action}
+              onPress={openLink}
+              hitSlop={6}
+              accessibilityRole="link"
+              accessibilityLabel={i18n.t('openLink')}
+            >
+              <FontAwesome name="external-link" size={16} color={theme.textColor} />
+            </Pressable>
+          ) : null}
+        </View>
+      </SwipeToDelete>
     </View>
   );
 };

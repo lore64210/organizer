@@ -42,3 +42,6 @@ export {
     darkTheme,
     ligthTheme,
 };
+
+/** Background for swipe-to-delete actions (same red in both themes for contrast with the black icon). */
+export const swipeActionColor = '#D53E43';
