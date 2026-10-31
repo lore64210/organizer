@@ -24,7 +24,7 @@ import { cancelAlarm, scheduleAlarm } from '../../services/notifications';
 import { useKeyboardOffset } from '../../hooks/useKeyboardOffset';
 import { notify } from '../../utils/alerts';
 import { toAlarmDate } from '../../utils/date';
-import { deleteFile } from '../../utils/files';
+import { deleteFile, persistFile } from '../../utils/files';
 import generateUUID from '../../utils/uuidUtil';
 
 const createStyles = (theme: Theme, isDarkTheme: boolean) =>
@@ -144,10 +144,11 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     setShowButtons(false);
   };
 
-  const addAudioItem = (uri: string) => {
+  const addAudioItem = async (uri: string) => {
+    const storedUri = await persistFile(uri);
     const newItem: Item = {
       id: generateUUID(),
-      value: uri,
+      value: storedUri,
       type: 'audio',
     };
     updateItems([newItem, ...reminder.items]);
@@ -209,7 +210,7 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     const newImage: Item = {
       id: generateUUID(),
-      value: result.assets[0].uri,
+      value: await persistFile(result.assets[0].uri),
       type: 'image',
     };
     updateImages([newImage, ...reminder.imageItems]);

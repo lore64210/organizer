@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import ReorderableList from 'react-native-reorderable-list';
 import i18n from '../../config/i18n';
@@ -13,6 +14,7 @@ import { HomeItem, Layout } from '../molecules';
 import { cancelAlarm } from '../../services/notifications';
 import { confirm } from '../../utils/alerts';
 import { deleteFile } from '../../utils/files';
+import { migrateRemindersMedia } from '../../utils/mediaMigration';
 import { moveItem } from '../../utils/reorder';
 import generateUUID from '../../utils/uuidUtil';
 
@@ -71,6 +73,37 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { theme, isDarkTheme } = useAppSelector(state => state.themeReducer);
   const reminders = useAppSelector(state => state.remindersReducer.reminders);
   const styles = createStyles(theme, isDarkTheme);
+
+  // One-time migration: media used to live in the cache directory.
+  const remindersRef = useRef(reminders);
+  remindersRef.current = reminders;
+  const migrationStarted = useRef(false);
+
+  useEffect(() => {
+    if (migrationStarted.current) {
+      return;
+    }
+    migrationStarted.current = true;
+
+    let cancelled = false;
+    migrateRemindersMedia(remindersRef.current).then(migrated => {
+      if (cancelled) {
+        return;
+      }
+      const migratedById = new Map(migrated.map(reminder => [reminder.id, reminder]));
+      const next = remindersRef.current.map(
+        reminder => migratedById.get(reminder.id) ?? reminder,
+      );
+      const changed = next.some((reminder, index) => reminder !== remindersRef.current[index]);
+      if (changed) {
+        dispatch({ type: SET_ORDERED_REMINDERS, payload: next });
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dispatch]);
 
   const openReminder = (reminder: Reminder) => {
     dispatch({ type: SET_CURRENT_REMINDER, payload: reminder });

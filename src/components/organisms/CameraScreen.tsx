@@ -15,6 +15,7 @@ import { SET_CURRENT_REMINDER } from '../../config/redux/actions';
 import type { Item, Theme } from '../../config/types';
 import { IconButton } from '../atoms';
 import { notify } from '../../utils/alerts';
+import { persistFile } from '../../utils/files';
 import generateUUID from '../../utils/uuidUtil';
 
 const BARCODE_TYPES: BarcodeType[] = [
@@ -124,7 +125,7 @@ const CameraScreen = ({ navigation }: Props) => {
     }
     const newImage: Item = {
       id: generateUUID(),
-      value: photo.uri,
+      value: await persistFile(photo.uri),
       type: 'image',
     };
     dispatch({
