@@ -12,6 +12,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Slider from '@react-native-community/slider';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import ReorderableList, { useReorderableDrag } from 'react-native-reorderable-list';
+import { GestureDetector, useNativeGesture } from 'react-native-gesture-handler';
 import i18n from '../../config/i18n';
 import { useAppSelector } from '../../config/redux/hooks';
 import { isAlarmValue, type Item, type Theme } from '../../config/types';
@@ -214,6 +215,8 @@ const ItemRow = ({
   const theme = useAppSelector(state => state.themeReducer.theme);
   const styles = createStyles(theme);
   const drag = useReorderableDrag();
+  // Lets the swipe gesture work even when it starts on the native TextInput.
+  const textInputGesture = useNativeGesture({});
 
   const textValue = typeof item.value === 'string' ? item.value : '';
   const trimmedText = textValue.trim();
@@ -269,16 +272,18 @@ const ItemRow = ({
     }
 
     return (
-      <TextInput
-        ref={inputRef}
-        multiline
-        style={styles.textItem}
-        onChangeText={newText => changeItemText(newText, item.id)}
-        onFocus={() => setShowButtons(false)}
-        placeholderTextColor={theme.placeholderTextColor}
-        placeholder={i18n.t('newItemPlaceholder')}
-        value={textValue}
-      />
+      <GestureDetector gesture={textInputGesture}>
+        <TextInput
+          ref={inputRef}
+          multiline
+          style={styles.textItem}
+          onChangeText={newText => changeItemText(newText, item.id)}
+          onFocus={() => setShowButtons(false)}
+          placeholderTextColor={theme.placeholderTextColor}
+          placeholder={i18n.t('newItemPlaceholder')}
+          value={textValue}
+        />
+      </GestureDetector>
     );
   };
 
@@ -298,6 +303,7 @@ const ItemRow = ({
         ]}
         onDelete={() => onDelete(item)}
         accessibilityLabel={i18n.t('deleteItem')}
+        simultaneousWith={item.type === 'text' ? textInputGesture : undefined}
       >
         <View style={styles.itemContainer}>
           <Pressable

@@ -22,13 +22,24 @@ type Props = {
   onDelete: () => void;
   accessibilityLabel: string;
   style?: StyleProp<ViewStyle>;
+  /**
+   * Gestures that must be able to run at the same time as the swipe.
+   * Used for native components (TextInput) that would otherwise swallow the pan.
+   */
+  simultaneousWith?: React.ComponentProps<typeof ReanimatedSwipeable>['simultaneousWith'];
 };
 
 /**
  * Swipe a row to the left to reveal a red delete action.
  * The row keeps its normal layout (and height) while closed.
  */
-const SwipeToDelete = ({ children, onDelete, accessibilityLabel, style }: Props) => {
+const SwipeToDelete = ({
+  children,
+  onDelete,
+  accessibilityLabel,
+  style,
+  simultaneousWith,
+}: Props) => {
   const theme = useAppSelector(state => state.themeReducer.theme);
 
   return (
@@ -36,6 +47,7 @@ const SwipeToDelete = ({ children, onDelete, accessibilityLabel, style }: Props)
       friction={2}
       rightThreshold={ACTION_WIDTH / 2}
       overshootRight={false}
+      simultaneousWith={simultaneousWith}
       containerStyle={[
         {
           borderRadius: theme.borderRadius,
