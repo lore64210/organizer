@@ -30,7 +30,6 @@ const createStyles = (theme: Theme) =>
     labeledContainer: {
       width: 'auto',
       minWidth: theme.buttonSize,
-      paddingHorizontal: 14,
     },
     button: {
       width: '100%',
@@ -39,14 +38,16 @@ const createStyles = (theme: Theme) =>
       justifyContent: 'center',
     },
     labeledButton: {
+      width: 'auto',
       flexDirection: 'row',
+      paddingHorizontal: 14,
     },
     icon: {
       fontSize: 20,
     },
     label: {
       fontSize: 13,
-      marginLeft: 8,
+      marginRight: 8,
       fontFamily: 'Montserrat_400Regular',
     },
   });
@@ -128,17 +129,17 @@ const AnimatedIconButton = ({
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel ?? label}
       >
+        {hasLabel ? (
+          <Text style={[styles.label, { color: iconColor }]} numberOfLines={1}>
+            {label}
+          </Text>
+        ) : null}
         <FontAwesome
           style={[styles.icon, style]}
           name={name}
           color={iconColor}
           size={size}
         />
-        {hasLabel ? (
-          <Text style={[styles.label, { color: iconColor }]} numberOfLines={1}>
-            {label}
-          </Text>
-        ) : null}
       </TouchableOpacity>
     </Animated.View>
   );
