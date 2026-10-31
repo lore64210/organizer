@@ -19,6 +19,7 @@ const themeInitialState: ThemeState = {
   theme: { ...darkTheme },
   isDarkTheme: true,
   startThemeAnimation: false,
+  themeAnimationOrigin: null,
 };
 
 type RemindersAction =
@@ -30,7 +31,10 @@ type RemindersAction =
 
 type ThemeAction =
   | { type: typeof CHANGE_THEME; payload: boolean }
-  | { type: typeof START_THEME_ANIMATION; payload?: boolean };
+  | {
+      type: typeof START_THEME_ANIMATION;
+      payload?: { x: number; y: number } | null;
+    };
 
 /** Replaces a reminder keeping its position, ignoring ids that are not in the list. */
 const replaceReminder = (reminders: Reminder[], reminder: Reminder): Reminder[] =>
@@ -92,9 +96,14 @@ const themeReducer = (state = themeInitialState, action: ThemeAction): ThemeStat
         isDarkTheme: action.payload,
         theme: action.payload ? darkTheme : ligthTheme,
         startThemeAnimation: false,
+        themeAnimationOrigin: null,
       };
     case START_THEME_ANIMATION:
-      return { ...state, startThemeAnimation: true };
+      return {
+        ...state,
+        startThemeAnimation: true,
+        themeAnimationOrigin: action.payload ?? null,
+      };
     default:
       return state;
   }

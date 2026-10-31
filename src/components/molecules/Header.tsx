@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, Image } from 'react-native';
+import type { GestureResponderEvent } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../config/redux/hooks';
-import { CHANGE_THEME, START_THEME_ANIMATION } from '../../config/redux/actions';
+import { START_THEME_ANIMATION } from '../../config/redux/actions';
 import { IconButton } from '../atoms';
 import i18n from '../../config/i18n';
 import type { Theme } from '../../config/types';
@@ -74,12 +75,20 @@ type Props = {
 
 const Header = ({ title, onTitlePress = () => {}, imageCount = 0, onImagesPress }: Props) => {
   const dispatch = useAppDispatch();
-  const { isDarkTheme, theme } = useAppSelector(state => state.themeReducer);
+  const { isDarkTheme, theme, startThemeAnimation } = useAppSelector(
+    state => state.themeReducer,
+  );
   const styles = createStyles(theme, isDarkTheme);
 
-  const changeTheme = () => {
-    dispatch({ type: START_THEME_ANIMATION });
-    setTimeout(() => dispatch({ type: CHANGE_THEME, payload: !isDarkTheme }), 225);
+  const changeTheme = (event: GestureResponderEvent) => {
+    if (startThemeAnimation) {
+      return;
+    }
+    // The circle grows from the point the user tapped.
+    dispatch({
+      type: START_THEME_ANIMATION,
+      payload: { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY },
+    });
   };
 
   return (

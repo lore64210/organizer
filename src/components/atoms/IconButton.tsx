@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableHighlight, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
+import { StyleSheet, TouchableHighlight, type GestureResponderEvent, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import type { ComponentProps } from 'react';
 import { useAppSelector } from '../../config/redux/hooks';
@@ -26,7 +26,7 @@ type Props = {
   name: IconName;
   color?: string;
   size?: number;
-  onPress?: () => void;
+  onPress?: (event: GestureResponderEvent) => void;
   onPressIn?: () => void;
   onPressOut?: () => void;
   onLongPress?: () => void;

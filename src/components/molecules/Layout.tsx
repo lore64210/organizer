@@ -1,6 +1,7 @@
-import { useEffect, useRef, type ReactNode } from 'react';
-import { Animated, StyleSheet } from 'react-native';
-import { useAppSelector } from '../../config/redux/hooks';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Animated, Easing, StyleSheet, useWindowDimensions } from 'react-native';
+import { useAppDispatch, useAppSelector } from '../../config/redux/hooks';
+import { CHANGE_THEME } from '../../config/redux/actions';
 import { darkTheme, ligthTheme } from '../../config/theme';
 import Header from './Header';
 
@@ -8,7 +9,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  content: {
+    flex: 1,
+  },
 });
+
+type Circle = {
+  x: number;
+  y: number;
+  radius: number;
+  color: string;
+};
 
 type Props = {
   children: ReactNode;
@@ -21,55 +32,83 @@ type Props = {
 };
 
 const Layout = ({ children, headerProps }: Props) => {
-  const { startThemeAnimation, isDarkTheme } = useAppSelector(state => state.themeReducer);
-  const backgroundColor = useRef(new Animated.Value(1)).current;
-  const opacityAnimation = useRef(new Animated.Value(1)).current;
+  const dispatch = useAppDispatch();
+  const { theme, startThemeAnimation, isDarkTheme, themeAnimationOrigin } = useAppSelector(
+    state => state.themeReducer,
+  );
+  const { width, height } = useWindowDimensions();
+
+  const circleScale = useRef(new Animated.Value(0)).current;
+  const contentOpacity = useRef(new Animated.Value(1)).current;
+  const [circle, setCircle] = useState<Circle | null>(null);
 
   useEffect(() => {
     if (!startThemeAnimation) {
+      setCircle(null);
       return;
     }
 
-    Animated.timing(backgroundColor, {
-      toValue: isDarkTheme ? 0 : 1,
-      duration: 1500,
-      useNativeDriver: false,
-    }).start();
+    const origin = themeAnimationOrigin ?? { x: width / 2, y: height / 2 };
+    // Radius needed to cover the farthest corner from the tap point.
+    const radius = Math.hypot(
+      Math.max(origin.x, width - origin.x),
+      Math.max(origin.y, height - origin.y),
+    );
 
-    Animated.sequence([
-      Animated.timing(opacityAnimation, {
-        toValue: 0,
-        duration: 500,
-        useNativeDriver: false,
-      }),
-      Animated.timing(opacityAnimation, {
-        toValue: 0,
-        duration: 500,
-        useNativeDriver: false,
-      }),
-      Animated.timing(opacityAnimation, {
+    circleScale.setValue(0);
+    contentOpacity.setValue(1);
+    setCircle({
+      x: origin.x,
+      y: origin.y,
+      radius,
+      color: isDarkTheme ? ligthTheme.backgroundColor : darkTheme.backgroundColor,
+    });
+
+    Animated.timing(circleScale, {
+      toValue: 1,
+      duration: 550,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      if (!finished) {
+        return;
+      }
+      // The circle covers the whole screen: swap the palette underneath and reveal it.
+      contentOpacity.setValue(0);
+      dispatch({ type: CHANGE_THEME, payload: !isDarkTheme });
+      Animated.timing(contentOpacity, {
         toValue: 1,
-        duration: 500,
-        useNativeDriver: false,
-      }),
-    ]).start();
-  }, [startThemeAnimation, isDarkTheme, backgroundColor, opacityAnimation]);
+        duration: 260,
+        useNativeDriver: true,
+      }).start();
+    });
+  }, [startThemeAnimation]);
 
   return (
-    <Animated.View
-      style={[
-        styles.container,
-        {
-          opacity: opacityAnimation,
-          backgroundColor: backgroundColor.interpolate({
-            inputRange: [0, 1],
-            outputRange: [ligthTheme.backgroundColor, darkTheme.backgroundColor],
-          }),
-        },
-      ]}
-    >
-      <Header {...headerProps} />
-      {children}
+    <Animated.View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
+      <Animated.View
+        style={[styles.content, { opacity: contentOpacity }]}
+        pointerEvents={startThemeAnimation ? 'none' : 'auto'}
+      >
+        <Header {...headerProps} />
+        {children}
+      </Animated.View>
+
+      {circle ? (
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            left: circle.x - circle.radius,
+            top: circle.y - circle.radius,
+            width: circle.radius * 2,
+            height: circle.radius * 2,
+            borderRadius: circle.radius,
+            backgroundColor: circle.color,
+            transform: [{ scale: circleScale }],
+          }}
+        />
+      ) : null}
     </Animated.View>
   );
 };
