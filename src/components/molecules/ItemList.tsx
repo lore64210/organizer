@@ -21,6 +21,13 @@ import { Checkbox, IconButton } from '../atoms';
 
 const URL_PATTERN = /^(https?:\/\/|www\.)\S+$/i;
 
+// Text items start with room for three lines and grow as the user types.
+const TEXT_FONT_SIZE = 14;
+const TEXT_LINE_HEIGHT = 20;
+const TEXT_VERTICAL_PADDING = 12;
+const TEXT_MIN_LINES = 3;
+const TEXT_MIN_HEIGHT = TEXT_MIN_LINES * TEXT_LINE_HEIGHT + TEXT_VERTICAL_PADDING * 2;
+
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     row: {
@@ -31,7 +38,7 @@ const createStyles = (theme: Theme) =>
     checkbox: {
       position: 'absolute',
       left: '2.5%',
-      top: 30,
+      top: 32,
       zIndex: 2,
     },
     itemContainer: {
@@ -53,11 +60,13 @@ const createStyles = (theme: Theme) =>
       justifyContent: 'center',
     },
     textItem: {
-      paddingVertical: 12,
+      paddingVertical: TEXT_VERTICAL_PADDING,
       paddingHorizontal: 8,
       color: theme.textColor,
       fontFamily: 'Montserrat_400Regular',
-      minHeight: 46,
+      fontSize: TEXT_FONT_SIZE,
+      lineHeight: TEXT_LINE_HEIGHT,
+      minHeight: TEXT_MIN_HEIGHT,
       textAlignVertical: 'top',
     },
     action: {
