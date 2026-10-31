@@ -4,7 +4,6 @@ import {
   DELETE_REMINDER,
   SET_CURRENT_REMINDER,
   CHANGE_THEME,
-  START_THEME_ANIMATION,
   SET_ORDERED_REMINDERS,
 } from './actions';
 import type { Reminder, RemindersState, ThemeState } from '../types';
@@ -18,8 +17,6 @@ const remindersInitialState: RemindersState = {
 const themeInitialState: ThemeState = {
   theme: { ...darkTheme },
   isDarkTheme: true,
-  startThemeAnimation: false,
-  themeAnimationOrigin: null,
 };
 
 type RemindersAction =
@@ -29,12 +26,7 @@ type RemindersAction =
   | { type: typeof SET_CURRENT_REMINDER; payload: Reminder | null }
   | { type: typeof SET_ORDERED_REMINDERS; payload: Reminder[] };
 
-type ThemeAction =
-  | { type: typeof CHANGE_THEME; payload: boolean }
-  | {
-      type: typeof START_THEME_ANIMATION;
-      payload?: { x: number; y: number } | null;
-    };
+type ThemeAction = { type: typeof CHANGE_THEME; payload: boolean };
 
 /** Replaces a reminder keeping its position, ignoring ids that are not in the list. */
 const replaceReminder = (reminders: Reminder[], reminder: Reminder): Reminder[] =>
@@ -95,14 +87,6 @@ const themeReducer = (state = themeInitialState, action: ThemeAction): ThemeStat
         ...state,
         isDarkTheme: action.payload,
         theme: action.payload ? darkTheme : ligthTheme,
-        startThemeAnimation: false,
-        themeAnimationOrigin: null,
-      };
-    case START_THEME_ANIMATION:
-      return {
-        ...state,
-        startThemeAnimation: true,
-        themeAnimationOrigin: action.payload ?? null,
       };
     default:
       return state;

@@ -45,8 +45,6 @@ export type RemindersState = {
 export type ThemeState = {
   theme: Theme;
   isDarkTheme: boolean;
-  startThemeAnimation: boolean;
-  themeAnimationOrigin: { x: number; y: number } | null;
 };
 
 export type RootState = {
