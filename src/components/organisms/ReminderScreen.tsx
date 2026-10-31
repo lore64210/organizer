@@ -373,46 +373,52 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       />
       <AnimatedIconButton
         name="pencil"
+        label={i18n.t('actionText')}
         onPress={addItemText}
         position={80}
         showButton={showButtons}
         containerStyle={{ zIndex: 9 }}
-        accessibilityLabel={i18n.t('newItemPlaceholder')}
+        size={20}
       />
       <AnimatedIconButton
         name="microphone"
+        label={i18n.t('actionAudio')}
         onPress={onAudioButtonPress}
         position={140}
         showButton={showButtons}
         containerStyle={{ zIndex: 8 }}
-        accessibilityLabel={i18n.t('pressToStartRecording')}
+        size={20}
       />
       <AnimatedIconButton
         name="camera"
+        label={i18n.t('actionCamera')}
         onPress={onCameraButtonPress}
         position={200}
         showButton={showButtons}
         containerStyle={{ zIndex: 7 }}
-        accessibilityLabel={i18n.t('cameraPermission')}
+        size={20}
       />
       <AnimatedIconButton
         name="image"
+        label={i18n.t('actionGallery')}
         onPress={onGalleryButtonPress}
         position={260}
         showButton={showButtons}
         containerStyle={{ zIndex: 6 }}
-        accessibilityLabel={i18n.t('photosPermission')}
+        size={20}
       />
       <AnimatedIconButton
         name="calendar"
+        label={i18n.t('actionAlarm')}
         onPress={onCalendarButtonPress}
         position={320}
         showButton={showButtons}
         containerStyle={{ zIndex: 5 }}
-        accessibilityLabel={i18n.t('alarmTitle')}
+        size={20}
       />
       <AnimatedIconButton
         name="list-alt"
+        label={i18n.t('actionChecklist')}
         onPress={() => setChecksEnabled(!reminder.checksEnabled)}
         position={380}
         showButton={showButtons}
@@ -427,7 +433,7 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           zIndex: 6,
           ...(reminder.checksEnabled ? styles.checkButtonPressed : {}),
         }}
-        accessibilityLabel={i18n.t('reorderItem')}
+        size={20}
       />
 
       <ModalTitle

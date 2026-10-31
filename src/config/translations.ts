@@ -30,6 +30,12 @@ const en = {
   pauseAudio: 'Pause audio',
   openReminder: 'Open reminder',
   recording: 'Recording...',
+  actionText: 'Text',
+  actionAudio: 'Audio',
+  actionCamera: 'Camera',
+  actionGallery: 'Gallery',
+  actionAlarm: 'Alarm',
+  actionChecklist: 'Checklist',
 };
 
 const es = {
@@ -64,6 +70,12 @@ const es = {
   pauseAudio: 'Pausar audio',
   openReminder: 'Abrir recordatorio',
   recording: 'Grabando...',
+  actionText: 'Texto',
+  actionAudio: 'Audio',
+  actionCamera: 'Cámara',
+  actionGallery: 'Galería',
+  actionAlarm: 'Alarma',
+  actionChecklist: 'Checklist',
 };
 
 export { en, es };
