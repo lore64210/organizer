@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, Keyboard, StyleSheet, Text, View } from 'react-native';
 import RNDateTimePicker, {
   type DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
@@ -21,6 +21,7 @@ import {
   ModalTitle,
 } from '../molecules';
 import { cancelAlarm, scheduleAlarm } from '../../services/notifications';
+import { useKeyboardOffset } from '../../hooks/useKeyboardOffset';
 import { notify } from '../../utils/alerts';
 import { toAlarmDate } from '../../utils/date';
 import { deleteFile } from '../../utils/files';
@@ -55,6 +56,7 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { theme, isDarkTheme } = useAppSelector(state => state.themeReducer);
   const reminder = useAppSelector(state => state.remindersReducer.currentReminder);
   const styles = createStyles(theme, isDarkTheme);
+  const keyboardOffset = useKeyboardOffset();
 
   const [showButtons, setShowButtons] = useState(false);
   const [titleModalVisible, setTitleModalVisible] = useState(!reminder?.title);
@@ -124,6 +126,8 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   };
 
   const onShowButtonsPress = () => {
+    // The floating menu needs the room the keyboard is taking.
+    Keyboard.dismiss();
     setShowButtons(!showButtons);
     setActualItemTextId(null);
   };
@@ -364,7 +368,7 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       <IconButton
         name={showButtons ? 'minus' : 'plus'}
         onPress={onShowButtonsPress}
-        containerStyle={{ ...styles.button, zIndex: 20 }}
+        containerStyle={{ ...styles.button, zIndex: 20, bottom: 20 + keyboardOffset }}
         accessibilityLabel={showButtons ? i18n.t('cancel') : i18n.t('insertTitle')}
       />
       <AnimatedIconButton
