@@ -18,6 +18,7 @@ import { useAppSelector } from '../../config/redux/hooks';
 import { isAlarmValue, type Item, type Theme } from '../../config/types';
 import { formatAlarmDate, formatAlarmTime } from '../../utils/date';
 import { moveItem } from '../../utils/reorder';
+import { formatSeconds } from '../../utils/time';
 import { Checkbox, IconButton } from '../atoms';
 import SwipeToDelete from './SwipeToDelete';
 
@@ -119,12 +120,6 @@ const createStyles = (theme: Theme) =>
       paddingRight: 6,
     },
   });
-
-const formatSeconds = (seconds: number): string => {
-  const total = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0;
-  const minutes = Math.floor(total / 60);
-  return `${minutes}:${(total % 60).toString().padStart(2, '0')}`;
-};
 
 type AudioItemProps = {
   uri: string;

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 import {
   RecordingPresets,
@@ -7,12 +7,15 @@ import {
   useAudioPlayer,
   useAudioPlayerStatus,
   useAudioRecorder,
+  useAudioRecorderState,
 } from 'expo-audio';
 import { IconButton } from '../atoms';
 import i18n from '../../config/i18n';
 import { useAppSelector } from '../../config/redux/hooks';
 import type { Theme } from '../../config/types';
 import { notify } from '../../utils/alerts';
+import { deleteFile } from '../../utils/files';
+import { formatSeconds } from '../../utils/time';
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
@@ -25,7 +28,7 @@ const createStyles = (theme: Theme) =>
     modalContentContainer: {
       backgroundColor: theme.secondaryColor,
       width: '90%',
-      height: 220,
+      height: 240,
       justifyContent: 'space-around',
       alignItems: 'center',
       borderRadius: theme.borderRadius,
@@ -37,12 +40,17 @@ const createStyles = (theme: Theme) =>
       textAlign: 'center',
       paddingHorizontal: 16,
     },
-    audioButtonsContainer: {
+    timer: {
+      fontSize: 13,
+      color: theme.textColor,
+      fontFamily: 'Montserrat_400Regular',
+      opacity: 0.75,
+    },    audioButtonsContainer: {
       width: '60%',
       flexDirection: 'row',
       justifyContent: 'space-around',
       alignItems: 'center',
-      marginTop: 10,
+      marginTop: 6,
     },
     audioButton: {
       position: 'relative',
@@ -50,6 +58,9 @@ const createStyles = (theme: Theme) =>
       height: 60,
       left: 0,
       bottom: 0,
+    },
+    recordingButton: {
+      backgroundColor: theme.deleteButtonColor,
     },
     buttonsContainer: {
       flexDirection: 'row',
@@ -109,39 +120,26 @@ const ModalAudio = ({ visible, setVisible, saveAudio }: Props) => {
   const styles = createStyles(theme);
 
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
-  const [isRecording, setIsRecording] = useState(false);
-  const [uri, setUri] = useState<string | null>(null);
-  const isRecordingRef = useRef(false);
-  const isStartingRef = useRef(false);
-  const pendingStopRef = useRef(false);
+  const recorderState = useAudioRecorderState(recorder, 200);
+  const isRecording = recorderState.isRecording;
 
-  useEffect(() => {
-    isRecordingRef.current = isRecording;
-  }, [isRecording]);
+  const [uri, setUri] = useState<string | null>(null);
+  const [isStarting, setIsStarting] = useState(false);
 
   useEffect(
     () => () => {
-      if (isRecordingRef.current) {
+      if (recorder.isRecording) {
         recorder.stop().catch(() => {});
       }
     },
     [recorder],
   );
 
-  const finishRecording = async () => {
-    setIsRecording(false);
-    try {
-      await recorder.stop();
-      await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
-      setUri(recorder.uri);
-    } catch (error) {
-      console.warn('Failed to stop recording', error);
-    }
-  };
-
   const startRecording = async () => {
-    pendingStopRef.current = false;
-    isStartingRef.current = true;
+    if (isStarting || recorder.isRecording) {
+      return;
+    }
+    setIsStarting(true);
     try {
       const { granted } = await requestRecordingPermissionsAsync();
       if (!granted) {
@@ -152,38 +150,70 @@ const ModalAudio = ({ visible, setVisible, saveAudio }: Props) => {
         allowsRecording: true,
         playsInSilentMode: true,
       });
+      if (uri) {
+        deleteFile(uri);
+        setUri(null);
+      }
       await recorder.prepareToRecordAsync();
       recorder.record();
-      setIsRecording(true);
-      // The user can release the button before the async setup finishes.
-      if (pendingStopRef.current) {
-        pendingStopRef.current = false;
-        await finishRecording();
-      }
+      setUri(null);
     } catch (error) {
       console.warn('Failed to start recording', error);
-      setIsRecording(false);
+      notify(i18n.t('recordingError'));
     } finally {
-      isStartingRef.current = false;
+      setIsStarting(false);
     }
   };
 
   const stopRecording = async () => {
-    if (isStartingRef.current) {
-      pendingStopRef.current = true;
+    if (!recorder.isRecording) {
       return;
     }
-    if (!isRecording) {
+    const duration = recorder.currentTime;
+    try {
+      await recorder.stop();
+      await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
+      const recordedUri = recorder.uri;
+      if (!recordedUri) {
+        setUri(null);
+        return;
+      }
+      if (duration < 0.4) {
+        deleteFile(recordedUri);
+        notify(i18n.t('recordingTooShort'));
+        setUri(null);
+        return;
+      }
+      setUri(recordedUri);
+    } catch (error) {
+      console.warn('Failed to stop recording', error);
+      notify(i18n.t('recordingError'));
+    }
+  };
+
+  const onMicPress = () => {
+    if (recorder.isRecording) {
+      stopRecording();
       return;
     }
-    await finishRecording();
+    startRecording();
+  };
+
+  const resetRecording = async () => {
+    if (recorder.isRecording) {
+      try {
+        await recorder.stop();
+        await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
+        deleteFile(recorder.uri);
+      } catch (error) {
+        console.warn('Failed to cancel recording', error);
+      }
+    }
+    setUri(null);
   };
 
   const onClose = async () => {
-    if (isRecording) {
-      await stopRecording();
-    }
-    setUri(null);
+    await resetRecording();
     setVisible(false);
   };
 
@@ -197,24 +227,39 @@ const ModalAudio = ({ visible, setVisible, saveAudio }: Props) => {
     }
   };
 
+  const statusText = isRecording
+    ? `${i18n.t('recording')} ${formatSeconds(recorderState.durationMillis / 1000)}`
+    : uri
+      ? i18n.t('recordingReady')
+      : i18n.t('pressToStartRecording');
+
+  const hint = isRecording
+    ? i18n.t('releaseToStopRecording')
+    : uri
+      ? i18n.t('pressToStartRecording')
+      : null;
+
   return (
     <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
       <View style={styles.modalContainer}>
         <View style={styles.modalContentContainer}>
-          <Text style={styles.modalTitle}>
-            {isRecording ? i18n.t('releaseToStopRecording') : i18n.t('pressToStartRecording')}
-          </Text>
+          <Text style={styles.modalTitle}>{statusText}</Text>
+          {hint ? <Text style={styles.timer}>{hint}</Text> : null}
           <View style={styles.audioButtonsContainer}>
             <IconButton
               size={30}
-              containerStyle={styles.audioButton}
-              name="microphone"
-              onPressIn={startRecording}
-              onPressOut={stopRecording}
-              color={isRecording ? theme.deleteButtonColor : theme.textColor}
-              accessibilityLabel={i18n.t('pressToStartRecording')}
+              containerStyle={[styles.audioButton, isRecording && styles.recordingButton]}
+              name={isRecording ? 'stop' : 'microphone'}
+              onPress={onMicPress}
+              disabled={isStarting}
+              color={theme.textColor}
+              accessibilityLabel={i18n.t(
+                isRecording ? 'releaseToStopRecording' : 'pressToStartRecording',
+              )}
             />
-            {uri ? <AudioPreview uri={uri} theme={theme} styles={styles} /> : null}
+            {uri && !isRecording ? (
+              <AudioPreview uri={uri} theme={theme} styles={styles} />
+            ) : null}
           </View>
           <View style={styles.buttonsContainer}>
             <IconButton
