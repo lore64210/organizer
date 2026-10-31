@@ -36,6 +36,9 @@ const createStyles = (theme: Theme, window: ReturnType<typeof useWindowDimension
       flex: 1,
       backgroundColor: '#000000',
     },
+    overlay: {
+      flex: 1,
+    },
     camera: {
       flex: 1,
     },
@@ -168,7 +171,7 @@ const CameraScreen = ({ navigation }: Props) => {
         barcodeScannerSettings={{ barcodeTypes: BARCODE_TYPES }}
         onBarcodeScanned={dataScanned ? undefined : handleBarCodeScanned}
       >
-        <View style={styles.container}>
+        <View style={styles.overlay}>
           <View style={styles.zoomBar}>
             <Slider
               style={{ width: '100%', height: '100%' }}
