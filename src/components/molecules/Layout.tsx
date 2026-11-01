@@ -1,5 +1,6 @@
 import { useRef, useState, type ReactNode } from 'react';
 import { Animated, Easing, StyleSheet, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppDispatch, useAppSelector } from '../../config/redux/hooks';
 import { CHANGE_THEME } from '../../config/redux/actions';
 import { darkTheme, ligthTheme } from '../../config/theme';
@@ -35,6 +36,7 @@ const Layout = ({ children, headerProps }: Props) => {
   const dispatch = useAppDispatch();
   const { theme, isDarkTheme } = useAppSelector(state => state.themeReducer);
   const { width, height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   const circleScale = useRef(new Animated.Value(0)).current;
   const circleOpacity = useRef(new Animated.Value(1)).current;
@@ -96,7 +98,7 @@ const Layout = ({ children, headerProps }: Props) => {
   return (
     <Animated.View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
       <Animated.View
-        style={styles.content}
+        style={[styles.content, { paddingTop: insets.top }]}
         pointerEvents={animating ? 'none' : 'auto'}
       >
         <Header {...headerProps} onThemePress={changeTheme} />
