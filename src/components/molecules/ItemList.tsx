@@ -41,7 +41,7 @@ const createStyles = (theme: Theme) =>
     checkbox: {
       position: 'absolute',
       left: '2.5%',
-      top: 38,
+      top: 22,
       zIndex: 2,
     },
     swipeContainer: {
