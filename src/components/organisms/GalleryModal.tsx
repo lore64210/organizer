@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  FlatList,
   Image,
   Modal,
   Pressable,
@@ -10,12 +9,20 @@ import {
   View,
 } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Sortable from 'react-native-sortables';
 import { Gallery, fitContainer, useImageResolution, type GalleryRefType } from 'react-native-zoom-toolkit';
 import i18n from '../../config/i18n';
 import { useAppSelector } from '../../config/redux/hooks';
 import type { Item, Theme } from '../../config/types';
 import { useDialog } from '../../providers/DialogProvider';
+import { moveItem } from '../../utils/reorder';
+
+const GRID_COLUMNS = 3;
+const GRID_GAP = 6;
+const GRID_PADDING = 8;
 
 const pageStyles = StyleSheet.create({
   page: {
@@ -49,16 +56,18 @@ const createStyles = (theme: Theme) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    grid: {
-      paddingHorizontal: 6,
+    gridContent: {
+      padding: GRID_PADDING,
       paddingBottom: 24,
     },
     thumbCell: {
-      width: '33.333%',
       padding: 3,
     },
+    thumbTouchable: {
+      flex: 1,
+    },
     thumbInner: {
-      aspectRatio: 1,
+      flex: 1,
       borderRadius: theme.borderRadiusSmall,
       borderCurve: 'continuous',
       overflow: 'hidden',
@@ -70,8 +79,8 @@ const createStyles = (theme: Theme) =>
     },
     removeBadge: {
       position: 'absolute',
-      top: 4,
-      right: 4,
+      top: 6,
+      right: 6,
       width: 24,
       height: 24,
       borderRadius: 12,
@@ -152,14 +161,19 @@ type Props = {
   onClose: () => void;
   items: Item[];
   onDelete: (item: Item) => void;
-  onReorder: (from: number, to: number) => void;
+  onReorder: (items: Item[]) => void;
 };
 
 const GalleryModal = ({ visible, onClose, items, onDelete, onReorder }: Props) => {
   const theme = useAppSelector(state => state.themeReducer.theme);
-  const dialog = useDialog();
   const styles = createStyles(theme);
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const dialog = useDialog();
+
+  const thumbSize =
+    (width - GRID_PADDING * 2 - GRID_GAP * (GRID_COLUMNS - 1)) / GRID_COLUMNS;
+  const scrollableRef = useAnimatedRef<Animated.ScrollView>();
 
   const galleryRef = useRef<GalleryRefType>(null);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
@@ -175,6 +189,11 @@ const GalleryModal = ({ visible, onClose, items, onDelete, onReorder }: Props) =
   const close = () => {
     setViewerIndex(null);
     onClose();
+  };
+
+  const openViewer = (index: number) => {
+    setCurrentIndex(index);
+    setViewerIndex(index);
   };
 
   const renderItem = useCallback(
@@ -225,7 +244,7 @@ const GalleryModal = ({ visible, onClose, items, onDelete, onReorder }: Props) =
     if (to < 0 || to >= items.length) {
       return;
     }
-    onReorder(currentIndex, to);
+    onReorder(moveItem(items, currentIndex, to));
     setCurrentIndex(to);
     galleryRef.current?.setIndex(to);
   };
@@ -237,7 +256,7 @@ const GalleryModal = ({ visible, onClose, items, onDelete, onReorder }: Props) =
       onRequestClose={viewerIndex === null ? close : () => setViewerIndex(null)}
       statusBarTranslucent
     >
-      <View style={styles.root}>
+      <GestureHandlerRootView style={styles.root}>
         {viewerIndex === null ? (
           <>
             <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
@@ -255,40 +274,49 @@ const GalleryModal = ({ visible, onClose, items, onDelete, onReorder }: Props) =
               </Pressable>
             </View>
 
-            <FlatList
-              data={items}
-              keyExtractor={item => item.id}
-              numColumns={3}
-              contentContainerStyle={styles.grid}
-              renderItem={({ item, index }) => (
-                <Pressable
-                  style={styles.thumbCell}
-                  onPress={() => {
-                    setCurrentIndex(index);
-                    setViewerIndex(index);
-                  }}
-                  accessibilityRole="imagebutton"
-                >
-                  <View style={styles.thumbInner}>
-                    <Image
-                      source={{ uri: String(item.value) }}
-                      style={styles.thumbImage}
-                      resizeMode="cover"
-                    />
-                    <Pressable
-                      style={styles.removeBadge}
-                      onPress={() => deleteFromGrid(item)}
-                      hitSlop={6}
-                      accessibilityRole="button"
-                      accessibilityLabel={i18n.t('delete')}
+            {items.length ? (
+              <Animated.ScrollView
+                ref={scrollableRef}
+                contentContainerStyle={styles.gridContent}
+              >
+                <Sortable.Grid
+                  data={items}
+                  columns={GRID_COLUMNS}
+                  rowGap={GRID_GAP}
+                  columnGap={GRID_GAP}
+                  keyExtractor={item => item.id}
+                  scrollableRef={scrollableRef}
+                  onDragEnd={({ data }) => onReorder(data)}
+                  renderItem={({ item, index }) => (
+                    <View
+                      style={[styles.thumbCell, { width: thumbSize, height: thumbSize }]}
                     >
-                      <FontAwesome name="times" size={12} color="#FFFFFF" />
-                    </Pressable>
-                  </View>
-                </Pressable>
-              )}
-              ListEmptyComponent={<Text style={styles.empty}>{i18n.t('noImages')}</Text>}
-            />
+                      <Sortable.Touchable
+                        style={styles.thumbTouchable}
+                        onTap={() => openViewer(index)}
+                      >
+                        <View style={styles.thumbInner}>
+                          <Image
+                            source={{ uri: String(item.value) }}
+                            style={styles.thumbImage}
+                            resizeMode="cover"
+                          />
+                        </View>
+                      </Sortable.Touchable>
+
+                      <Sortable.Touchable
+                        style={styles.removeBadge}
+                        onTap={() => deleteFromGrid(item)}
+                      >
+                        <FontAwesome name="times" size={12} color="#FFFFFF" />
+                      </Sortable.Touchable>
+                    </View>
+                  )}
+                />
+              </Animated.ScrollView>
+            ) : (
+              <Text style={styles.empty}>{i18n.t('noImages')}</Text>
+            )}
           </>
         ) : (
           <View style={styles.viewer}>
@@ -358,7 +386,7 @@ const GalleryModal = ({ visible, onClose, items, onDelete, onReorder }: Props) =
             </View>
           </View>
         )}
-      </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 };

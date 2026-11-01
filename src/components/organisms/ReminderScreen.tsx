@@ -24,7 +24,6 @@ import { useKeyboardOffset } from '../../hooks/useKeyboardOffset';
 import { useDialog } from '../../providers/DialogProvider';
 import { toAlarmDate } from '../../utils/date';
 import { deleteFile, persistFile } from '../../utils/files';
-import { moveItem } from '../../utils/reorder';
 import generateUUID from '../../utils/uuidUtil';
 
 const createStyles = (theme: Theme, isDarkTheme: boolean) =>
@@ -202,10 +201,6 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       deleteFile(item.value);
     }
     updateImages(reminder.imageItems.filter(current => current.id !== item.id));
-  };
-
-  const reorderImages = (from: number, to: number) => {
-    updateImages(moveItem(reminder.imageItems, from, to));
   };
 
   const openGallery = async () => {
@@ -492,7 +487,7 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         onClose={() => setGalleryVisible(false)}
         items={reminder.imageItems}
         onDelete={deleteImage}
-        onReorder={reorderImages}
+        onReorder={updateImages}
       />
       <ModalAudio
         saveAudio={addAudioItem}
