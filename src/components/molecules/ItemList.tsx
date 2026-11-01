@@ -1,11 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ComponentRef } from 'react';
 import {
   FlatList,
+  Keyboard,
   Linking,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
+  findNodeHandle,
   useWindowDimensions,
   View,
   type TextInputInstance,
@@ -367,6 +369,7 @@ const ItemList = ({
 }: Props) => {
   const textItemsRef = useRef<Record<string, TextInputInstance | null>>({});
   const listRef = useRef<FlatList<Item>>(null);
+  const listWrapperRef = useRef<ComponentRef<typeof View>>(null);
   const focusedInput = useRef<{ input: TextInputInstance; index: number } | null>(null);
   const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
   const { height: windowHeight } = useWindowDimensions();
@@ -382,18 +385,37 @@ const ItemList = ({
       if (!input || focusedInput.current?.input !== input) {
         return;
       }
+
       input.measureInWindow((_x, y, _width, height) => {
-        const visibleBottom = windowHeight - keyboardOffset - 12;
-        if (y + height > visibleBottom) {
+        const keyboardTop = Keyboard.metrics()?.screenY ?? windowHeight;
+        const gap = 12;
+        if (y + height + gap <= keyboardTop) {
+          return;
+        }
+
+        // Native helper that scrolls against the real keyboard frame. Its math
+        // assumes the scroll view starts at the top of the screen, so we pass the
+        // list's own offset from the top as the additional offset.
+        listWrapperRef.current?.measureInWindow((_listX, listY) => {
+          const responder: any = listRef.current?.getScrollResponder?.();
+          const handle = findNodeHandle(input);
+          if (responder?.scrollResponderScrollNativeHandleToKeyboard && handle != null) {
+            responder.scrollResponderScrollNativeHandleToKeyboard(
+              handle,
+              listY + gap,
+              true,
+            );
+            return;
+          }
           listRef.current?.scrollToIndex({
             index,
             viewPosition: 0.95,
             animated: true,
           });
-        }
+        });
       });
     },
-    [windowHeight, keyboardOffset],
+    [windowHeight],
   );
 
   const onFocusInput = useCallback(
@@ -415,8 +437,18 @@ const ItemList = ({
     }
   }, [keyboardOffset, windowHeight, keepVisible]);
 
+  // Metrics are only guaranteed once the keyboard finished animating in.
+  useEffect(() => {
+    const subscription = Keyboard.addListener('keyboardDidShow', () => {
+      if (focusedInput.current) {
+        keepVisible(focusedInput.current.input, focusedInput.current.index);
+      }
+    });
+    return () => subscription.remove();
+  }, [keepVisible]);
+
   return (
-    <View style={{ flex: 1, paddingBottom: keyboardOffset }}>
+    <View ref={listWrapperRef} style={{ flex: 1, paddingBottom: keyboardOffset }}>
       <ReorderableList
         ref={listRef}
         data={items}
