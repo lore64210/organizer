@@ -21,7 +21,7 @@ import {
 import GalleryModal from './GalleryModal';
 import { cancelAlarm, scheduleAlarm } from '../../services/notifications';
 import { useKeyboardOffset } from '../../hooks/useKeyboardOffset';
-import { notify } from '../../utils/alerts';
+import { useDialog } from '../../providers/DialogProvider';
 import { toAlarmDate } from '../../utils/date';
 import { deleteFile, persistFile } from '../../utils/files';
 import { moveItem } from '../../utils/reorder';
@@ -71,6 +71,7 @@ const createStyles = (theme: Theme, isDarkTheme: boolean) =>
 
 const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const dispatch = useAppDispatch();
+  const dialog = useDialog();
   const { theme, isDarkTheme } = useAppSelector(state => state.themeReducer);
   const reminder = useAppSelector(state => state.remindersReducer.currentReminder);
   const styles = createStyles(theme, isDarkTheme);
@@ -210,7 +211,7 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const openGallery = async () => {
     const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!granted) {
-      notify(i18n.t('photosPermission'));
+      dialog.notify({ title: i18n.t('photosPermission') });
       return;
     }
 
@@ -278,14 +279,14 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     const alarmDate = toAlarmDate(datePicked, value);
     if (alarmDate.getTime() <= Date.now()) {
-      notify(i18n.t('dateInPast'));
+      dialog.notify({ title: i18n.t('dateInPast') });
       resetAlarmDraft();
       return;
     }
 
     const notificationId = await scheduleAlarm(alarmTitle, alarmDate);
     if (!notificationId) {
-      notify(i18n.t('notificationsDisabled'));
+      dialog.notify({ title: i18n.t('notificationsDisabled') });
       resetAlarmDraft();
       return;
     }

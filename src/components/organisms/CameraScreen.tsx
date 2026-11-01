@@ -14,7 +14,7 @@ import { useAppDispatch, useAppSelector } from '../../config/redux/hooks';
 import { SET_CURRENT_REMINDER } from '../../config/redux/actions';
 import type { Item, Theme } from '../../config/types';
 import { IconButton } from '../atoms';
-import { notify } from '../../utils/alerts';
+import { useDialog } from '../../providers/DialogProvider';
 import { persistFile } from '../../utils/files';
 import generateUUID from '../../utils/uuidUtil';
 
@@ -90,6 +90,7 @@ type Props = {
 
 const CameraScreen = ({ navigation }: Props) => {
   const dispatch = useAppDispatch();
+  const dialog = useDialog();
   const theme = useAppSelector(state => state.themeReducer.theme);
   const reminder = useAppSelector(state => state.remindersReducer.currentReminder);
   const window = useWindowDimensions();
@@ -113,7 +114,7 @@ const CameraScreen = ({ navigation }: Props) => {
       return;
     }
     if (!permission.granted) {
-      notify(i18n.t('cameraPermission'));
+      dialog.notify({ title: i18n.t('cameraPermission') });
       navigation.goBack();
     }
   }, [permission]);

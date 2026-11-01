@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import {
   RecordingPresets,
   requestRecordingPermissionsAsync,
@@ -10,85 +10,57 @@ import {
   useAudioRecorderState,
 } from 'expo-audio';
 import { IconButton } from '../atoms';
+import DialogButton from '../atoms/DialogButton';
 import i18n from '../../config/i18n';
 import { useAppSelector } from '../../config/redux/hooks';
+import { useDialog } from '../../providers/DialogProvider';
 import type { Theme } from '../../config/types';
-import { notify } from '../../utils/alerts';
 import { deleteFile } from '../../utils/files';
 import { formatSeconds } from '../../utils/time';
+import { createModalStyles } from './modalStyles';
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
-    modalContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0,0,0,0.35)',
-    },
-    modalContentContainer: {
-      backgroundColor: theme.secondaryColor,
-      width: '90%',
-      height: 240,
-      justifyContent: 'space-around',
-      alignItems: 'center',
-      borderRadius: theme.borderRadiusLarge,
-      borderCurve: 'continuous',
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 12 },
-      shadowOpacity: 0.3,
-      shadowRadius: 28,
-      elevation: 16,
-    },
-    modalTitle: {
-      fontSize: 18,
-      color: theme.textColor,
-      fontFamily: 'Montserrat_400Regular',
-      textAlign: 'center',
-      paddingHorizontal: 16,
-    },
-    timer: {
-      fontSize: 13,
-      color: theme.textColor,
-      fontFamily: 'Montserrat_400Regular',
-      opacity: 0.75,
-    },    audioButtonsContainer: {
-      width: '60%',
+    recorderRow: {
       flexDirection: 'row',
-      justifyContent: 'space-around',
       alignItems: 'center',
-      marginTop: 6,
+      justifyContent: 'center',
+      gap: 18,
+      marginTop: 10,
+      marginBottom: 4,
     },
-    audioButton: {
+    micButton: {
       position: 'relative',
-      width: 60,
-      height: 60,
       left: 0,
+      right: 'auto',
       bottom: 0,
+      width: 72,
+      height: 72,
+      borderRadius: 36,
+      backgroundColor: theme.secondaryColor,
     },
     recordingButton: {
       backgroundColor: theme.deleteButtonColor,
     },
-    buttonsContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      width: '100%',
-    },
-    button: {
+    previewButton: {
       position: 'relative',
-      width: 40,
-      height: 40,
       left: 0,
+      right: 'auto',
       bottom: 0,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: theme.secondaryColor,
     },
   });
 
 type PreviewProps = {
   uri: string;
   theme: Theme;
-  styles: ReturnType<typeof createStyles>;
+  containerStyle: StyleProp<ViewStyle>;
 };
 
-const AudioPreview = ({ uri, theme, styles }: PreviewProps) => {
+const AudioPreview = ({ uri, theme, containerStyle }: PreviewProps) => {
   const player = useAudioPlayer({ uri }, { updateInterval: 250 });
   const status = useAudioPlayerStatus(player);
 
@@ -105,8 +77,8 @@ const AudioPreview = ({ uri, theme, styles }: PreviewProps) => {
 
   return (
     <IconButton
-      size={30}
-      containerStyle={styles.audioButton}
+      size={24}
+      containerStyle={containerStyle}
       name={status.playing ? 'stop' : 'play'}
       onPress={toggle}
       color={theme.textColor}
@@ -123,7 +95,9 @@ type Props = {
 
 const ModalAudio = ({ visible, setVisible, saveAudio }: Props) => {
   const theme = useAppSelector(state => state.themeReducer.theme);
+  const modalStyles = createModalStyles(theme);
   const styles = createStyles(theme);
+  const dialog = useDialog();
 
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(recorder, 200);
@@ -149,7 +123,7 @@ const ModalAudio = ({ visible, setVisible, saveAudio }: Props) => {
     try {
       const { granted } = await requestRecordingPermissionsAsync();
       if (!granted) {
-        notify(i18n.t('microphonePermission'));
+        dialog.notify({ title: i18n.t('microphonePermission') });
         return;
       }
       await setAudioModeAsync({
@@ -165,7 +139,7 @@ const ModalAudio = ({ visible, setVisible, saveAudio }: Props) => {
       setUri(null);
     } catch (error) {
       console.warn('Failed to start recording', error);
-      notify(i18n.t('recordingError'));
+      dialog.notify({ title: i18n.t('recordingError') });
     } finally {
       setIsStarting(false);
     }
@@ -186,14 +160,14 @@ const ModalAudio = ({ visible, setVisible, saveAudio }: Props) => {
       }
       if (duration < 0.4) {
         deleteFile(recordedUri);
-        notify(i18n.t('recordingTooShort'));
+        dialog.notify({ title: i18n.t('recordingTooShort') });
         setUri(null);
         return;
       }
       setUri(recordedUri);
     } catch (error) {
       console.warn('Failed to stop recording', error);
-      notify(i18n.t('recordingError'));
+      dialog.notify({ title: i18n.t('recordingError') });
     }
   };
 
@@ -246,45 +220,46 @@ const ModalAudio = ({ visible, setVisible, saveAudio }: Props) => {
       : null;
 
   return (
-    <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContentContainer}>
-          <Text style={styles.modalTitle}>{statusText}</Text>
-          {hint ? <Text style={styles.timer}>{hint}</Text> : null}
-          <View style={styles.audioButtonsContainer}>
+    <Modal
+      animationType="fade"
+      transparent
+      visible={visible}
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
+      <Pressable style={modalStyles.backdrop} onPress={onClose}>
+        <Pressable style={modalStyles.card} onPress={() => {}}>
+          <Text style={modalStyles.title}>{statusText}</Text>
+          {hint ? <Text style={modalStyles.message}>{hint}</Text> : null}
+
+          <View style={styles.recorderRow}>
             <IconButton
-              size={30}
-              containerStyle={[styles.audioButton, isRecording && styles.recordingButton]}
+              size={28}
+              containerStyle={[styles.micButton, isRecording && styles.recordingButton]}
               name={isRecording ? 'stop' : 'microphone'}
               onPress={onMicPress}
               disabled={isStarting}
-              color={theme.textColor}
+              color={isRecording ? '#FFFFFF' : theme.textColor}
               accessibilityLabel={i18n.t(
                 isRecording ? 'releaseToStopRecording' : 'pressToStartRecording',
               )}
             />
             {uri && !isRecording ? (
-              <AudioPreview uri={uri} theme={theme} styles={styles} />
+              <AudioPreview uri={uri} theme={theme} containerStyle={styles.previewButton} />
             ) : null}
           </View>
-          <View style={styles.buttonsContainer}>
-            <IconButton
-              containerStyle={styles.button}
-              name="close"
-              onPress={onClose}
-              accessibilityLabel={i18n.t('cancel')}
-            />
-            <IconButton
-              containerStyle={styles.button}
-              name="check"
+
+          <View style={modalStyles.actions}>
+            <DialogButton label={i18n.t('cancel')} onPress={onClose} />
+            <DialogButton
+              label={i18n.t('save')}
               onPress={saveChanges}
-              color={canSave ? theme.textColor : 'grey'}
+              variant="primary"
               disabled={!canSave}
-              accessibilityLabel={i18n.t('save')}
             />
           </View>
-        </View>
-      </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 };

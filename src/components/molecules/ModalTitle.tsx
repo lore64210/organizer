@@ -8,61 +8,20 @@ import {
   type TextInputInstance,
   View,
 } from 'react-native';
-import { IconButton } from '../atoms';
+import DialogButton from '../atoms/DialogButton';
 import i18n from '../../config/i18n';
 import { useAppSelector } from '../../config/redux/hooks';
-import type { Theme } from '../../config/types';
+import { createModalStyles } from './modalStyles';
 
-const createStyles = (theme: Theme, isDarkTheme: boolean) =>
-  StyleSheet.create({
-    modalContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0,0,0,0.35)',
-    },
-    modalContentContainer: {
-      backgroundColor: isDarkTheme ? theme.secondaryColor : theme.primaryColor,
-      width: '90%',
-      height: 200,
-      justifyContent: 'space-around',
-      alignItems: 'center',
-      borderRadius: theme.borderRadiusLarge,
-      borderCurve: 'continuous',
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 12 },
-      shadowOpacity: 0.3,
-      shadowRadius: 28,
-      elevation: 16,
-    },
-    modalTitle: {
-      fontSize: 20,
-      color: theme.textColor,
-      fontFamily: 'Montserrat_400Regular',
-    },
-    input: {
-      color: theme.textColor,
-      backgroundColor: isDarkTheme ? theme.primaryColor : theme.secondaryColor,
-      width: '90%',
-      padding: 10,
-      borderRadius: theme.borderRadiusSmall,
-      marginBottom: 30,
-      fontFamily: 'Montserrat_400Regular',
-    },
-    buttonsContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      width: '100%',
-    },
-    button: {
-      position: 'relative',
-      width: 40,
-      height: 40,
-      left: 0,
-      bottom: 0,
-      backgroundColor: isDarkTheme ? theme.primaryColor : theme.secondaryColor,
-    },
-  });
+const styles = StyleSheet.create({
+  input: {
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 16,
+    fontFamily: 'Montserrat_400Regular',
+    marginTop: 4,
+  },
+});
 
 type Props = {
   visible: boolean;
@@ -83,8 +42,8 @@ const ModalTitle = ({
   cancelButton = false,
   modalTitle = i18n.t('organizerTitle'),
 }: Props) => {
-  const { theme, isDarkTheme } = useAppSelector(state => state.themeReducer);
-  const styles = createStyles(theme, isDarkTheme);
+  const theme = useAppSelector(state => state.themeReducer.theme);
+  const modalStyles = createModalStyles(theme);
 
   const inputRef = useRef<TextInputInstance>(null);
   const [title, setTitle] = useState(reminderTitle);
@@ -100,30 +59,37 @@ const ModalTitle = ({
     }
   };
 
-  const onGoBack = () => {
+  const onCancel = () => {
     setVisible(false);
+    if (cancelButton || reminderTitle) {
+      setTitle(reminderTitle);
+      return;
+    }
     goBack();
-  };
-
-  const onClose = () => {
-    setTitle(reminderTitle);
-    setVisible(false);
   };
 
   return (
     <Modal
-      animationType="fade"
       transparent
+      animationType="fade"
       visible={visible}
       onShow={() => inputRef.current?.focus()}
-      onRequestClose={onClose}
+      onRequestClose={onCancel}
+      statusBarTranslucent
     >
-      <Pressable style={styles.modalContainer} onPress={() => {}}>
-        <View style={styles.modalContentContainer}>
-          <Text style={styles.modalTitle}>{modalTitle}</Text>
+      <Pressable style={modalStyles.backdrop} onPress={onCancel}>
+        <Pressable style={modalStyles.card} onPress={() => {}}>
+          <Text style={modalStyles.title}>{modalTitle}</Text>
           <TextInput
             ref={inputRef}
-            style={styles.input}
+            style={[
+              styles.input,
+              {
+                color: theme.textColor,
+                backgroundColor: theme.secondaryColor,
+                borderRadius: theme.borderRadiusSmall,
+              },
+            ]}
             onChangeText={setTitle}
             value={title}
             placeholder={i18n.t('insertTitle')}
@@ -132,32 +98,16 @@ const ModalTitle = ({
             onSubmitEditing={saveChanges}
             returnKeyType="done"
           />
-          <View style={styles.buttonsContainer}>
-            {cancelButton || reminderTitle ? (
-              <IconButton
-                containerStyle={styles.button}
-                name="close"
-                onPress={onClose}
-                accessibilityLabel={i18n.t('cancel')}
-              />
-            ) : (
-              <IconButton
-                containerStyle={styles.button}
-                name="arrow-left"
-                onPress={onGoBack}
-                accessibilityLabel={i18n.t('cancel')}
-              />
-            )}
-            <IconButton
-              containerStyle={styles.button}
-              name="check"
+          <View style={modalStyles.actions}>
+            <DialogButton label={i18n.t('cancel')} onPress={onCancel} />
+            <DialogButton
+              label={i18n.t('save')}
               onPress={saveChanges}
-              color={title ? theme.textColor : 'grey'}
+              variant="primary"
               disabled={!title}
-              accessibilityLabel={i18n.t('save')}
             />
           </View>
-        </View>
+        </Pressable>
       </Pressable>
     </Modal>
   );

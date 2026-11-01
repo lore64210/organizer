@@ -12,7 +12,7 @@ import { isAlarmValue, type Item, type Reminder, type Theme } from '../../config
 import { IconButton } from '../atoms';
 import { HomeItem, Layout } from '../molecules';
 import { cancelAlarm } from '../../services/notifications';
-import { confirm } from '../../utils/alerts';
+import { useDialog } from '../../providers/DialogProvider';
 import { deleteFile } from '../../utils/files';
 import { migrateRemindersMedia } from '../../utils/mediaMigration';
 import { moveItem } from '../../utils/reorder';
@@ -74,6 +74,7 @@ const cleanupFiles = (items: Item[]) => {
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const dispatch = useAppDispatch();
+  const dialog = useDialog();
   const { theme, isDarkTheme } = useAppSelector(state => state.themeReducer);
   const reminders = useAppSelector(state => state.remindersReducer.reminders);
   const styles = createStyles(theme, isDarkTheme);
@@ -119,11 +120,12 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   };
 
   const deleteReminder = async (reminder: Reminder) => {
-    const accepted = await confirm({
+    const accepted = await dialog.confirm({
       title: i18n.t('deleteReminderTitle'),
       message: i18n.t('deleteReminderMessage', { title: reminder.title }),
       confirmLabel: i18n.t('delete'),
       cancelLabel: i18n.t('cancel'),
+      destructive: true,
     });
     if (!accepted) {
       return;

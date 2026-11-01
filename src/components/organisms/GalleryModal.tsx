@@ -15,7 +15,7 @@ import { Gallery, fitContainer, useImageResolution, type GalleryRefType } from '
 import i18n from '../../config/i18n';
 import { useAppSelector } from '../../config/redux/hooks';
 import type { Item, Theme } from '../../config/types';
-import { confirm } from '../../utils/alerts';
+import { useDialog } from '../../providers/DialogProvider';
 
 const pageStyles = StyleSheet.create({
   page: {
@@ -157,6 +157,7 @@ type Props = {
 
 const GalleryModal = ({ visible, onClose, items, onDelete, onReorder }: Props) => {
   const theme = useAppSelector(state => state.themeReducer.theme);
+  const dialog = useDialog();
   const styles = createStyles(theme);
   const insets = useSafeAreaInsets();
 
@@ -182,11 +183,12 @@ const GalleryModal = ({ visible, onClose, items, onDelete, onReorder }: Props) =
   );
 
   const confirmDelete = async (item: Item): Promise<boolean> => {
-    const accepted = await confirm({
-      title: i18n.t('deleteItemTitle'),
+    const accepted = await dialog.confirm({
+      title: i18n.t('deleteImageTitle'),
       message: i18n.t('deleteImageMessage'),
       confirmLabel: i18n.t('delete'),
       cancelLabel: i18n.t('cancel'),
+      destructive: true,
     });
     if (!accepted) {
       return false;
