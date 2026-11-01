@@ -10,6 +10,7 @@ import { Montserrat_400Regular } from '@expo-google-fonts/montserrat/400Regular'
 import { Montserrat_700Bold } from '@expo-google-fonts/montserrat/700Bold';
 import StackNavigator from './src/components/templates/StackNavigator';
 import { DialogProvider } from './src/providers/DialogProvider';
+import { OverlayProvider } from './src/providers/OverlayProvider';
 import { store, persistor } from './src/config/redux/store';
 import { useAppSelector } from './src/config/redux/hooks';
 import { configureNotifications } from './src/services/notifications';
@@ -44,10 +45,12 @@ const App = () => {
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
-            <DialogProvider>
-              <ThemedStatusBar />
-              <StackNavigator />
-            </DialogProvider>
+            <OverlayProvider>
+              <DialogProvider>
+                <ThemedStatusBar />
+                <StackNavigator />
+              </DialogProvider>
+            </OverlayProvider>
           </PersistGate>
         </Provider>
       </SafeAreaProvider>

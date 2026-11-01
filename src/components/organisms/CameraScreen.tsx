@@ -51,12 +51,22 @@ const createStyles = (theme: Theme, window: ReturnType<typeof useWindowDimension
       bottom: 0,
       width: '100%',
       left: 0,
+      paddingTop: 12,
+      paddingBottom: 16,
+      backgroundColor: theme.glassBackground,
+      borderTopWidth: 1,
+      borderTopColor: theme.glassBorder,
+      boxShadow: `inset 0 1px 0 ${theme.glassHighlight}`,
     },
     button: {
       position: 'relative',
       right: 0,
       left: 0,
       bottom: 0,
+      backgroundColor: theme.glassBackground,
+      borderWidth: 1,
+      borderColor: theme.glassBorder,
+      boxShadow: `inset 0 1px 0 ${theme.glassHighlight}`,
     },
     takePictureButton: {
       width: 70,
@@ -81,6 +91,10 @@ const createStyles = (theme: Theme, window: ReturnType<typeof useWindowDimension
       position: 'relative',
       left: 0,
       bottom: 0,
+      backgroundColor: theme.glassBackground,
+      borderWidth: 1,
+      borderColor: theme.glassBorder,
+      boxShadow: `inset 0 1px 0 ${theme.glassHighlight}`,
     },
   });
 
@@ -179,8 +193,8 @@ const CameraScreen = ({ navigation }: Props) => {
               style={{ width: '100%', height: '100%' }}
               minimumValue={0}
               maximumValue={1}
-              minimumTrackTintColor={theme.primaryColor}
-              maximumTrackTintColor={theme.backgroundColor}
+              minimumTrackTintColor={theme.accentColor}
+              maximumTrackTintColor={theme.insetColor}
               thumbTintColor={theme.textColor}
               onValueChange={setZoom}
               value={zoom}
@@ -193,6 +207,7 @@ const CameraScreen = ({ navigation }: Props) => {
                 containerStyle={styles.scannedButton}
                 name={dataScannedIcon}
                 onPress={onCodeScannedButtonPress}
+                elevated={false}
                 accessibilityLabel={i18n.t('newItemPlaceholder')}
               />
             </View>
@@ -203,7 +218,8 @@ const CameraScreen = ({ navigation }: Props) => {
               containerStyle={styles.button}
               name="flash"
               onPress={() => setFlash(current => (current === 'on' ? 'off' : 'on'))}
-              color={flash === 'on' ? theme.textColor : theme.secondaryColor}
+              color={flash === 'on' ? theme.accentColor : theme.mutedColor}
+              elevated={false}
               accessibilityLabel={i18n.t('cameraPermission')}
             />
             <IconButton
@@ -211,12 +227,15 @@ const CameraScreen = ({ navigation }: Props) => {
               containerStyle={{ ...styles.button, ...styles.takePictureButton }}
               name="dot-circle-o"
               onPress={takePicture}
+              color={theme.accentColor}
+              elevated={false}
               accessibilityLabel={i18n.t('cameraPermission')}
             />
             <IconButton
               containerStyle={styles.button}
               name="refresh"
               onPress={() => setFacing(current => (current === 'back' ? 'front' : 'back'))}
+              elevated={false}
               accessibilityLabel={i18n.t('cameraPermission')}
             />
           </View>

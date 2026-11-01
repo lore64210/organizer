@@ -22,25 +22,20 @@ import GalleryModal from './GalleryModal';
 import { cancelAlarm, scheduleAlarm } from '../../services/notifications';
 import { useKeyboardOffset } from '../../hooks/useKeyboardOffset';
 import { useDialog } from '../../providers/DialogProvider';
+import { useHeaderHeight } from '../../providers/HeaderHeightContext';
 import { toAlarmDate } from '../../utils/date';
 import { deleteFile, persistFile } from '../../utils/files';
+import { raised } from '../../utils/neumorphic';
 import generateUUID from '../../utils/uuidUtil';
 
-const createStyles = (theme: Theme, isDarkTheme: boolean) =>
+const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme.backgroundColor,
     },
     checkButtonPressed: {
-      backgroundColor: isDarkTheme ? theme.textColor : theme.primaryColor,
-    },
-    button: {
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.25,
-      shadowRadius: 12,
-      elevation: 8,
+      backgroundColor: theme.accentColor,
     },
     emptyListContainer: {
       flex: 1,
@@ -49,7 +44,7 @@ const createStyles = (theme: Theme, isDarkTheme: boolean) =>
       alignItems: 'center',
     },
     emptyListText: {
-      color: isDarkTheme ? theme.textColor : theme.primaryColor,
+      color: theme.textColor,
       fontFamily: 'Montserrat_400Regular',
       textAlign: 'center',
       paddingHorizontal: 24,
@@ -59,11 +54,12 @@ const createStyles = (theme: Theme, isDarkTheme: boolean) =>
       paddingHorizontal: 22,
       paddingVertical: 11,
       borderRadius: theme.borderRadiusButton,
-      backgroundColor: theme.primaryColor,
+      backgroundColor: theme.surfaceColor,
+      ...raised(theme, 'sm'),
     },
     viewImagesButtonText: {
-      color: theme.textColor,
-      fontFamily: 'Montserrat_400Regular',
+      color: theme.accentColor,
+      fontFamily: 'Montserrat_700Bold',
       fontSize: 14,
     },
   });
@@ -71,9 +67,10 @@ const createStyles = (theme: Theme, isDarkTheme: boolean) =>
 const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const dispatch = useAppDispatch();
   const dialog = useDialog();
+  const headerHeight = useHeaderHeight();
   const { theme, isDarkTheme } = useAppSelector(state => state.themeReducer);
   const reminder = useAppSelector(state => state.remindersReducer.currentReminder);
-  const styles = createStyles(theme, isDarkTheme);
+  const styles = createStyles(theme);
   const keyboardOffset = useKeyboardOffset();
 
   const [showButtons, setShowButtons] = useState(false);
@@ -361,7 +358,7 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           />
         </View>
       ) : hasImages ? (
-        <View style={styles.emptyListContainer}>
+        <View style={[styles.emptyListContainer, { paddingTop: headerHeight }]}>
           <Image
             style={{ width: 100, height: 100 }}
             source={
@@ -382,7 +379,7 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           </Pressable>
         </View>
       ) : (
-        <View style={styles.emptyListContainer}>
+        <View style={[styles.emptyListContainer, { paddingTop: headerHeight }]}>
           <Image
             style={{ width: 100, height: 100 }}
             source={
@@ -398,7 +395,9 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       <IconButton
         name={showButtons ? 'minus' : 'plus'}
         onPress={onShowButtonsPress}
-        containerStyle={{ ...styles.button, zIndex: 20, bottom: 20 + keyboardOffset }}
+        color={theme.accentColor}
+        size={24}
+        containerStyle={{ zIndex: 20, bottom: 20 + keyboardOffset }}
         accessibilityLabel={showButtons ? i18n.t('cancel') : i18n.t('insertTitle')}
       />
       <AnimatedIconButton
@@ -455,8 +454,8 @@ const ReminderScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         color={
           reminder.checksEnabled
             ? isDarkTheme
-              ? theme.primaryColor
-              : theme.secondaryColor
+              ? theme.backgroundColor
+              : '#FFFFFF'
             : theme.textColor
         }
         containerStyle={{

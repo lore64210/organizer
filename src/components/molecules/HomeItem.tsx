@@ -13,7 +13,7 @@ const createStyles = (theme: Theme) =>
       marginHorizontal: 12,
     },
     container: {
-      backgroundColor: theme.primaryColor,
+      backgroundColor: theme.surfaceColor,
       minHeight: 56,
       flexDirection: 'row',
       alignItems: 'center',
@@ -66,7 +66,7 @@ const HomeItem = ({ item, onPress, onDelete }: Props) => {
           accessibilityLabel={item.title || i18n.t('openReminder')}
           accessibilityHint={i18n.t('reorderItem')}
         >
-          <FontAwesome name="bars" size={16} color={theme.textColor} style={styles.grip} />
+          <FontAwesome name="bars" size={16} color={theme.mutedColor} style={styles.grip} />
           <Text numberOfLines={2} style={styles.title}>
             {item.title}
           </Text>

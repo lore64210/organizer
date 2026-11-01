@@ -5,32 +5,30 @@ import { IconButton } from '../atoms';
 import i18n from '../../config/i18n';
 import type { Theme } from '../../config/types';
 
-const createStyles = (theme: Theme, isDarkTheme: boolean) =>
+const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
-      backgroundColor: theme.backgroundColor,
+      backgroundColor: 'transparent',
+      backgroundImage: theme.headerBackground,
       alignItems: 'center',
       paddingBottom: 4,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: isDarkTheme ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)',
     },
     title: {
-      color: isDarkTheme ? theme.textColor : theme.primaryColor,
+      color: theme.accentColor,
       fontSize: 17,
       letterSpacing: 0.4,
       paddingBottom: 8,
       fontFamily: 'Montserrat_700Bold',
     },
     themeButton: {
-      bottom: 0,
-      backgroundColor: theme.backgroundColor,
+      bottom: 12,
       width: 40,
       height: 40,
     },
     galleryWrapper: {
       position: 'absolute',
       left: 20,
-      bottom: 0,
+      bottom: 12,
       width: 40,
       height: 40,
     },
@@ -41,7 +39,6 @@ const createStyles = (theme: Theme, isDarkTheme: boolean) =>
       bottom: 0,
       width: 40,
       height: 40,
-      backgroundColor: theme.backgroundColor,
     },
     badge: {
       position: 'absolute',
@@ -51,12 +48,12 @@ const createStyles = (theme: Theme, isDarkTheme: boolean) =>
       height: 18,
       borderRadius: 9,
       paddingHorizontal: 4,
-      backgroundColor: theme.textColor,
+      backgroundColor: theme.accentColor,
       alignItems: 'center',
       justifyContent: 'center',
     },
     badgeText: {
-      color: theme.primaryColor,
+      color: theme.backgroundColor,
       fontSize: 10,
       fontFamily: 'Montserrat_700Bold',
     },
@@ -83,7 +80,7 @@ const Header = ({
   onThemePress,
 }: Props) => {
   const { isDarkTheme, theme } = useAppSelector(state => state.themeReducer);
-  const styles = createStyles(theme, isDarkTheme);
+  const styles = createStyles(theme);
 
   const changeTheme = (event: GestureResponderEvent) => {
     // The circle grows from the point the user tapped.
@@ -110,7 +107,7 @@ const Header = ({
         onPress={changeTheme}
         name={isDarkTheme ? 'moon-o' : 'sun-o'}
         containerStyle={styles.themeButton}
-        color={isDarkTheme ? theme.textColor : theme.primaryColor}
+        color={theme.accentColor}
         accessibilityLabel={i18n.t(isDarkTheme ? 'switchToLight' : 'switchToDark')}
       />
       {imageCount > 0 && onImagesPress ? (
@@ -119,7 +116,7 @@ const Header = ({
             onPress={onImagesPress}
             name="image"
             containerStyle={styles.galleryButton}
-            color={isDarkTheme ? theme.textColor : theme.primaryColor}
+            color={theme.accentColor}
             accessibilityLabel={i18n.t('viewImages')}
           />
           <View style={styles.badge} pointerEvents="none">

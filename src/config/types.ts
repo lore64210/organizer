@@ -25,10 +25,26 @@ export type Reminder = {
 
 export type Theme = {
   textColor: string;
+  mutedColor: string;
   placeholderTextColor: string;
+  accentColor: string;
   backgroundColor: string;
+  /** @deprecated Usar surfaceColor. Se mantiene por compatibilidad: vale lo mismo. */
   primaryColor: string;
+  surfaceColor: string;
+  /** Superficies hundidas (inputs, pistas, estados pressed). */
   secondaryColor: string;
+  insetColor: string;
+  shadowLight: string;
+  shadowDark: string;
+  hairlineColor: string;
+  /** Degradado superior del header: vidrio que se disuelve en el fondo. */
+  headerBackground: string;
+  glassBackground: string;
+  glassBorder: string;
+  glassHighlight: string;
+  glassScrim: string;
+  glassShadow: string;
   buttonSize: number;
   borderRadius: number;
   borderRadiusSmall: number;

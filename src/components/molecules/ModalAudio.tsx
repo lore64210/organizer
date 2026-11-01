@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { useEffect, useId, useRef, useState } from 'react';
+import { BackHandler, Platform, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import {
   RecordingPresets,
   requestRecordingPermissionsAsync,
@@ -11,9 +11,11 @@ import {
 } from 'expo-audio';
 import { IconButton } from '../atoms';
 import DialogButton from '../atoms/DialogButton';
+import GlassOverlay from '../atoms/GlassOverlay';
 import i18n from '../../config/i18n';
 import { useAppSelector } from '../../config/redux/hooks';
 import { useDialog } from '../../providers/DialogProvider';
+import { useOverlay } from '../../providers/OverlayProvider';
 import type { Theme } from '../../config/types';
 import { deleteFile } from '../../utils/files';
 import { formatSeconds } from '../../utils/time';
@@ -37,7 +39,10 @@ const createStyles = (theme: Theme) =>
       width: 72,
       height: 72,
       borderRadius: 36,
-      backgroundColor: theme.secondaryColor,
+      backgroundColor: theme.glassBackground,
+      borderWidth: 1,
+      borderColor: theme.glassBorder,
+      boxShadow: `inset 0 1px 0 ${theme.glassHighlight}`,
     },
     recordingButton: {
       backgroundColor: theme.deleteButtonColor,
@@ -50,7 +55,10 @@ const createStyles = (theme: Theme) =>
       width: 56,
       height: 56,
       borderRadius: 28,
-      backgroundColor: theme.secondaryColor,
+      backgroundColor: theme.glassBackground,
+      borderWidth: 1,
+      borderColor: theme.glassBorder,
+      boxShadow: `inset 0 1px 0 ${theme.glassHighlight}`,
     },
   });
 
@@ -82,6 +90,7 @@ const AudioPreview = ({ uri, theme, containerStyle }: PreviewProps) => {
       name={status.playing ? 'stop' : 'play'}
       onPress={toggle}
       color={theme.textColor}
+      elevated={false}
       accessibilityLabel={i18n.t(status.playing ? 'pauseAudio' : 'playAudio')}
     />
   );
@@ -98,6 +107,8 @@ const ModalAudio = ({ visible, setVisible, saveAudio }: Props) => {
   const modalStyles = createModalStyles(theme);
   const styles = createStyles(theme);
   const dialog = useDialog();
+  const { showOverlay, hideOverlay } = useOverlay();
+  const overlayId = useId();
 
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(recorder, 200);
@@ -219,49 +230,86 @@ const ModalAudio = ({ visible, setVisible, saveAudio }: Props) => {
       ? i18n.t('pressToStartRecording')
       : null;
 
-  return (
-    <Modal
-      animationType="fade"
-      transparent
-      visible={visible}
-      onRequestClose={onClose}
-      statusBarTranslucent
-    >
-      <Pressable style={modalStyles.backdrop} onPress={onClose}>
-        <Pressable style={modalStyles.card} onPress={() => {}}>
-          <Text style={modalStyles.title}>{statusText}</Text>
-          {hint ? <Text style={modalStyles.message}>{hint}</Text> : null}
+  // Handlers always read the latest render; the portal node only rebuilds when
+  // the visible content changes (timer, recording state, theme).
+  const handlersRef = useRef({ onMicPress, onClose, saveChanges });
+  handlersRef.current = { onMicPress, onClose, saveChanges };
 
-          <View style={styles.recorderRow}>
-            <IconButton
-              size={28}
-              containerStyle={[styles.micButton, isRecording && styles.recordingButton]}
-              name={isRecording ? 'stop' : 'microphone'}
-              onPress={onMicPress}
-              disabled={isStarting}
-              color={isRecording ? '#FFFFFF' : theme.textColor}
-              accessibilityLabel={i18n.t(
-                isRecording ? 'releaseToStopRecording' : 'pressToStartRecording',
-              )}
-            />
-            {uri && !isRecording ? (
-              <AudioPreview uri={uri} theme={theme} containerStyle={styles.previewButton} />
-            ) : null}
-          </View>
+  useEffect(() => {
+    if (!visible) {
+      hideOverlay(overlayId);
+      return;
+    }
 
-          <View style={modalStyles.actions}>
-            <DialogButton label={i18n.t('cancel')} onPress={onClose} />
-            <DialogButton
-              label={i18n.t('save')}
-              onPress={saveChanges}
-              variant="primary"
-              disabled={!canSave}
-            />
-          </View>
-        </Pressable>
-      </Pressable>
-    </Modal>
-  );
+    showOverlay(
+      overlayId,
+      <GlassOverlay
+        onDismiss={() => handlersRef.current.onClose()}
+        accessibilityLabel={statusText}
+      >
+        <Text style={modalStyles.title}>{statusText}</Text>
+        {hint ? <Text style={modalStyles.message}>{hint}</Text> : null}
+
+        <View style={styles.recorderRow}>
+          <IconButton
+            size={28}
+            containerStyle={[styles.micButton, isRecording && styles.recordingButton]}
+            name={isRecording ? 'stop' : 'microphone'}
+            onPress={() => handlersRef.current.onMicPress()}
+            disabled={isStarting}
+            color={isRecording ? '#FFFFFF' : theme.textColor}
+            elevated={false}
+            accessibilityLabel={i18n.t(
+              isRecording ? 'releaseToStopRecording' : 'pressToStartRecording',
+            )}
+          />
+          {uri && !isRecording ? (
+            <AudioPreview uri={uri} theme={theme} containerStyle={styles.previewButton} />
+          ) : null}
+        </View>
+
+        <View style={modalStyles.actions}>
+          <DialogButton
+            label={i18n.t('cancel')}
+            onPress={() => handlersRef.current.onClose()}
+          />
+          <DialogButton
+            label={i18n.t('save')}
+            onPress={() => handlersRef.current.saveChanges()}
+            variant="primary"
+            disabled={!canSave}
+          />
+        </View>
+      </GlassOverlay>,
+    );
+  }, [
+    visible,
+    statusText,
+    hint,
+    uri,
+    isRecording,
+    isStarting,
+    canSave,
+    theme,
+    showOverlay,
+    hideOverlay,
+    overlayId,
+  ]);
+
+  useEffect(() => () => hideOverlay(overlayId), [hideOverlay, overlayId]);
+
+  useEffect(() => {
+    if (!visible || Platform.OS !== 'android') {
+      return;
+    }
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      handlersRef.current.onClose();
+      return true;
+    });
+    return () => subscription.remove();
+  }, [visible]);
+
+  return null;
 };
 
 export default ModalAudio;

@@ -24,6 +24,7 @@ import { formatAlarmDate, formatAlarmTime } from '../../utils/date';
 import { moveItem } from '../../utils/reorder';
 import { formatSeconds } from '../../utils/time';
 import { useKeyboardOffset } from '../../hooks/useKeyboardOffset';
+import { useHeaderHeight } from '../../providers/HeaderHeightContext';
 import { Checkbox, IconButton } from '../atoms';
 import SwipeToDelete from './SwipeToDelete';
 
@@ -46,19 +47,30 @@ const createStyles = (theme: Theme) =>
     checkbox: {
       position: 'absolute',
       left: '2.5%',
-      top: 22,
       zIndex: 2,
+    },
+    checkboxText: {
+      top: 22,
+    },
+    checkboxCentered: {
+      top: '50%',
+      marginTop: -11,
     },
     swipeContainer: {
       marginVertical: 10,
       marginRight: '2.5%',
     },
     itemContainer: {
-      backgroundColor: theme.primaryColor,
-      borderRadius: theme.borderRadius,
-      borderCurve: 'continuous',
+      backgroundColor: theme.surfaceColor,
       flexDirection: 'row',
       alignItems: 'center',
+      borderRadius: theme.borderRadius,
+      borderCurve: 'continuous',
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    itemContainerFocused: {
+      borderColor: theme.accentColor,
     },
     grip: {
       alignSelf: 'flex-start',
@@ -81,6 +93,7 @@ const createStyles = (theme: Theme) =>
       lineHeight: TEXT_LINE_HEIGHT,
       minHeight: TEXT_MIN_HEIGHT,
       textAlignVertical: 'top',
+      outlineWidth: 0,
     },
     action: {
       width: 40,
@@ -118,7 +131,7 @@ const createStyles = (theme: Theme) =>
       height: 36,
     },
     audioTime: {
-      color: theme.textColor,
+      color: theme.mutedColor,
       fontFamily: 'Montserrat_400Regular',
       fontSize: 11,
       minWidth: 74,
@@ -166,7 +179,8 @@ const AudioItem = ({ uri, activeId, onActivate, itemId, styles, theme }: AudioIt
         name={status.playing ? 'pause' : 'play'}
         onPress={toggle}
         containerStyle={styles.audioButton}
-        color={theme.textColor}
+        color={theme.accentColor}
+        elevated={false}
         accessibilityLabel={i18n.t(status.playing ? 'pauseAudio' : 'playAudio')}
       />
       <View style={styles.audioSlider}>
@@ -174,8 +188,8 @@ const AudioItem = ({ uri, activeId, onActivate, itemId, styles, theme }: AudioIt
           style={{ width: '100%', height: '100%' }}
           minimumValue={0}
           maximumValue={status.duration > 0 ? status.duration : 1}
-          minimumTrackTintColor={theme.textColor}
-          maximumTrackTintColor={theme.backgroundColor}
+          minimumTrackTintColor={theme.accentColor}
+          maximumTrackTintColor={theme.insetColor}
           thumbTintColor={theme.textColor}
           onSlidingComplete={value => player.seekTo(value)}
           value={status.currentTime}
@@ -225,6 +239,7 @@ const ItemRow = ({
   const styles = createStyles(theme);
   const drag = useReorderableDrag();
   const inputElement = useRef<TextInputInstance | null>(null);
+  const [focused, setFocused] = useState(false);
   // Lets the swipe gesture work even when it starts on the native TextInput.
   const textInputGesture = useNativeGesture({});
 
@@ -253,7 +268,7 @@ const ItemRow = ({
           <FontAwesome
             name="clock-o"
             size={22}
-            color={theme.textColor}
+            color={theme.accentColor}
             style={{ paddingHorizontal: 10 }}
           />
           <View style={{ flex: 1 }}>
@@ -288,7 +303,11 @@ const ItemRow = ({
           multiline
           style={styles.textItem}
           onChangeText={newText => changeItemText(newText, item.id)}
-          onFocus={() => setShowButtons(false)}
+          onFocus={() => {
+            setFocused(true);
+            setShowButtons(false);
+          }}
+          onBlur={() => setFocused(false)}
           placeholderTextColor={theme.placeholderTextColor}
           placeholder={i18n.t('newItemPlaceholder')}
           value={textValue}
@@ -299,9 +318,12 @@ const ItemRow = ({
 
   return (
     <View style={styles.row}>
-      {checksEnabled && item.type !== 'alarm' && item.type !== 'audio' ? (
+      {checksEnabled ? (
         <Checkbox
-          style={styles.checkbox}
+          style={[
+            styles.checkbox,
+            item.type === 'text' ? styles.checkboxText : styles.checkboxCentered,
+          ]}
           isChecked={item.checked}
           onPress={checked => changeItemCheck(checked, item.id)}
         />
@@ -309,13 +331,13 @@ const ItemRow = ({
       <SwipeToDelete
         style={[
           styles.swipeContainer,
-          { width: checksEnabled && item.type === 'text' ? '86%' : '95%' },
+          { width: checksEnabled ? '86%' : '95%' },
         ]}
         onDelete={() => onDelete(item)}
         accessibilityLabel={i18n.t('deleteItem')}
         simultaneousWith={item.type === 'text' ? textInputGesture : undefined}
       >
-        <View style={styles.itemContainer}>
+        <View style={[styles.itemContainer, focused && styles.itemContainerFocused]}>
           <Pressable
             onLongPress={drag}
             delayLongPress={150}
@@ -324,7 +346,7 @@ const ItemRow = ({
             accessibilityLabel={i18n.t('reorderItem')}
             hitSlop={6}
           >
-            <FontAwesome name="reorder" size={15} color={theme.textColor} />
+            <FontAwesome name="reorder" size={15} color={theme.mutedColor} />
           </Pressable>
           <View style={styles.content}>{renderContent()}</View>
           {link ? (
@@ -335,7 +357,7 @@ const ItemRow = ({
               accessibilityRole="link"
               accessibilityLabel={i18n.t('openLink')}
             >
-              <FontAwesome name="external-link" size={16} color={theme.textColor} />
+              <FontAwesome name="external-link" size={16} color={theme.mutedColor} />
             </Pressable>
           ) : null}
         </View>
@@ -374,6 +396,7 @@ const ItemList = ({
   const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
   const { height: windowHeight } = useWindowDimensions();
   const keyboardOffset = useKeyboardOffset();
+  const headerHeight = useHeaderHeight();
 
   useEffect(() => {
     const input = actualItemTextId ? textItemsRef.current[actualItemTextId] : null;
@@ -453,7 +476,7 @@ const ItemList = ({
         ref={listRef}
         data={items}
         keyExtractor={item => item.id}
-        contentContainerStyle={{ paddingBottom: 140 }}
+        contentContainerStyle={{ paddingTop: headerHeight + 8, paddingBottom: 140 }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         style={{ flex: 1 }}

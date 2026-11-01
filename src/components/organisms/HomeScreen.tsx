@@ -13,20 +13,14 @@ import { IconButton } from '../atoms';
 import { HomeItem, Layout } from '../molecules';
 import { cancelAlarm } from '../../services/notifications';
 import { useDialog } from '../../providers/DialogProvider';
+import { useHeaderHeight } from '../../providers/HeaderHeightContext';
 import { deleteFile } from '../../utils/files';
 import { migrateRemindersMedia } from '../../utils/mediaMigration';
 import { moveItem } from '../../utils/reorder';
 import generateUUID from '../../utils/uuidUtil';
 
-const createStyles = (theme: Theme, isDarkTheme: boolean) =>
+const createStyles = (theme: Theme) =>
   StyleSheet.create({
-    button: {
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.25,
-      shadowRadius: 12,
-      elevation: 8,
-    },
     listContainer: {
       flex: 1,
       backgroundColor: theme.backgroundColor,
@@ -38,7 +32,7 @@ const createStyles = (theme: Theme, isDarkTheme: boolean) =>
       alignItems: 'center',
     },
     emptyListText: {
-      color: isDarkTheme ? theme.textColor : theme.primaryColor,
+      color: theme.textColor,
       fontFamily: 'Montserrat_400Regular',
     },
   });
@@ -77,7 +71,8 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const dialog = useDialog();
   const { theme, isDarkTheme } = useAppSelector(state => state.themeReducer);
   const reminders = useAppSelector(state => state.remindersReducer.reminders);
-  const styles = createStyles(theme, isDarkTheme);
+  const headerHeight = useHeaderHeight();
+  const styles = createStyles(theme);
 
   // One-time migration: media used to live in the cache directory.
   const remindersRef = useRef(reminders);
@@ -142,7 +137,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           <ReorderableList
             data={reminders}
             keyExtractor={item => item.id}
-            contentContainerStyle={{ paddingBottom: 120 }}
+            contentContainerStyle={{ paddingTop: headerHeight + 8, paddingBottom: 120 }}
             onReorder={({ from, to }) =>
               dispatch({
                 type: SET_ORDERED_REMINDERS,
@@ -159,7 +154,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           />
         </View>
       ) : (
-        <View style={styles.emptyListContainer}>
+        <View style={[styles.emptyListContainer, { paddingTop: headerHeight }]}>
           <Image
             style={{ width: 100, height: 100 }}
             source={
@@ -172,9 +167,10 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </View>
       )}
       <IconButton
-        containerStyle={styles.button}
         name="plus"
         onPress={createReminder}
+        color={theme.accentColor}
+        size={24}
         accessibilityLabel={i18n.t('insertTitle')}
       />
     </Layout>

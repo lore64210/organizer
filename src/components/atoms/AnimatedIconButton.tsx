@@ -1,7 +1,7 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import {
   Text,
-  TouchableOpacity,
+  Pressable,
   Animated,
   StyleSheet,
   type StyleProp,
@@ -12,23 +12,21 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import type { ComponentProps } from 'react';
 import { useAppSelector } from '../../config/redux/hooks';
 import type { Theme } from '../../config/types';
+import { glassSurface } from '../../utils/neumorphic';
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
-      backgroundColor: theme.primaryColor,
-      borderRadius: theme.borderRadiusButton,
+      ...glassSurface(theme, theme.borderRadiusButton),
       position: 'absolute',
       right: 20,
       width: theme.buttonSize,
       height: theme.buttonSize,
       alignItems: 'center',
       justifyContent: 'center',
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.2,
-      shadowRadius: 8,
-      elevation: 4,
+    },
+    pressed: {
+      opacity: 0.85,
     },
     labeledContainer: {
       width: 'auto',
@@ -90,6 +88,7 @@ const AnimatedIconButton = ({
 }: Props) => {
   const theme = useAppSelector(state => state.themeReducer.theme);
   const styles = createStyles(theme);
+  const [pressed, setPressed] = useState(false);
 
   const showButtonsAnimation = useRef(new Animated.Value(initialPosition)).current;
   const opacityAnimation = useRef(new Animated.Value(showButton ? 1 : 0)).current;
@@ -114,26 +113,30 @@ const AnimatedIconButton = ({
     styles.container,
     hasLabel && styles.labeledContainer,
     containerStyle,
+    pressed && styles.pressed,
     horizontal ? { left: showButtonsAnimation } : { bottom: showButtonsAnimation },
     { opacity: opacityAnimation },
   ];
 
-  const iconColor = color ?? theme.textColor;
+  const iconColor = color ?? theme.accentColor;
+  const labelColor = color ?? theme.textColor;
 
   return (
     <Animated.View
       style={animatedContainerStyle}
       pointerEvents={showButton ? 'auto' : 'none'}
     >
-      <TouchableOpacity
+      <Pressable
         style={[styles.button, hasLabel && styles.labeledButton]}
         onPress={onPress}
         onLongPress={onLongPress}
+        onPressIn={() => setPressed(true)}
+        onPressOut={() => setPressed(false)}
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel ?? label}
       >
         {hasLabel ? (
-          <Text style={[styles.label, { color: iconColor }]} numberOfLines={1}>
+          <Text style={[styles.label, { color: labelColor }]} numberOfLines={1}>
             {label}
           </Text>
         ) : null}
@@ -143,7 +146,7 @@ const AnimatedIconButton = ({
           color={iconColor}
           size={size}
         />
-      </TouchableOpacity>
+      </Pressable>
     </Animated.View>
   );
 };

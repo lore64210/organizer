@@ -1,15 +1,15 @@
-import { StyleSheet, TouchableHighlight, type GestureResponderEvent, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, type GestureResponderEvent, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import type { ComponentProps } from 'react';
 import { useAppSelector } from '../../config/redux/hooks';
 import type { Theme } from '../../config/types';
+import { inset, raised } from '../../utils/neumorphic';
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
-      backgroundColor: theme.primaryColor,
+      backgroundColor: theme.surfaceColor,
       borderRadius: theme.borderRadiusButton,
-      borderColor: theme.backgroundColor,
       position: 'absolute',
       bottom: 20,
       right: 20,
@@ -34,6 +34,8 @@ type Props = {
   containerStyle?: StyleProp<ViewStyle>;
   accessibilityLabel?: string;
   disabled?: boolean;
+  /** Set to false for controls that float over media and must stay flat. */
+  elevated?: boolean;
 };
 
 const IconButton = ({
@@ -48,13 +50,13 @@ const IconButton = ({
   onLongPress,
   accessibilityLabel,
   disabled = false,
+  elevated = true,
 }: Props) => {
   const theme = useAppSelector(state => state.themeReducer.theme);
   const styles = createStyles(theme);
 
   return (
-    <TouchableHighlight
-      underlayColor={theme.backgroundColor}
+    <Pressable
       onPress={disabled ? undefined : onPress}
       onPressIn={disabled ? undefined : onPressIn}
       onPressOut={disabled ? undefined : onPressOut}
@@ -62,10 +64,15 @@ const IconButton = ({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled }}
-      style={[styles.container, containerStyle, disabled && { opacity: 0.5 }]}
+      style={({ pressed }) => [
+        styles.container,
+        containerStyle,
+        elevated && (pressed ? inset(theme, 'md') : raised(theme, 'md')),
+        disabled && { opacity: 0.5 },
+      ]}
     >
       <FontAwesome style={style} name={name} color={color ?? theme.textColor} size={size} />
-    </TouchableHighlight>
+    </Pressable>
   );
 };
 

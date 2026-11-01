@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import type { Theme } from '../../config/types';
+import { raised } from '../../utils/neumorphic';
 
 /** Shared look for every modal/dialog in the app. */
 export const createModalStyles = (theme: Theme) =>
@@ -14,16 +15,17 @@ export const createModalStyles = (theme: Theme) =>
     card: {
       width: '100%',
       maxWidth: 400,
-      backgroundColor: theme.primaryColor,
+      backgroundColor: theme.surfaceColor,
       borderRadius: theme.borderRadiusLarge,
       borderCurve: 'continuous',
       padding: 22,
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 14 },
-      shadowOpacity: 0.32,
-      shadowRadius: 30,
-      elevation: 18,
+      ...raised(theme, 'lg'),
     },
+    /**
+     * Native Modals keep the opaque card: a BlurView inside a native Modal
+     * cannot sample the window behind it on Android, so glass there would be
+     * just a tint over the dimmed backdrop.
+     */
     title: {
       color: theme.textColor,
       fontSize: 19,

@@ -1,20 +1,18 @@
-import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useAppSelector } from '../../config/redux/hooks';
 import type { Theme } from '../../config/types';
+import { inset, raised } from '../../utils/neumorphic';
 
-const createStyles = (theme: Theme, isDarkTheme: boolean) =>
+const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
-      backgroundColor: isDarkTheme ? theme.textColor : theme.primaryColor,
-      borderRadius: 6,
-      zIndex: -5,
-    },
-    emptyCheckbox: {
-      borderRadius: 6,
-      backgroundColor: theme.primaryColor,
-      height: 20,
-      width: 20,
+      backgroundColor: theme.surfaceColor,
+      borderRadius: 7,
+      width: 22,
+      height: 22,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
   });
 
@@ -25,26 +23,24 @@ type Props = {
 };
 
 const Checkbox = ({ isChecked = false, onPress, style }: Props) => {
-  const { theme, isDarkTheme } = useAppSelector(state => state.themeReducer);
-  const styles = createStyles(theme, isDarkTheme);
+  const theme = useAppSelector(state => state.themeReducer.theme);
+  const styles = createStyles(theme);
 
   return (
     <Pressable
       onPress={() => onPress(!isChecked)}
-      style={[styles.container, style]}
+      style={[
+        styles.container,
+        style,
+        isChecked ? inset(theme, 'sm') : raised(theme, 'sm'),
+      ]}
       accessibilityRole="checkbox"
       accessibilityState={{ checked: isChecked }}
       hitSlop={8}
     >
       {isChecked ? (
-        <FontAwesome
-          name="check"
-          color={isDarkTheme ? theme.primaryColor : theme.textColor}
-          size={20}
-        />
-      ) : (
-        <View style={styles.emptyCheckbox} />
-      )}
+        <FontAwesome name="check" color={theme.accentColor} size={14} />
+      ) : null}
     </Pressable>
   );
 };
