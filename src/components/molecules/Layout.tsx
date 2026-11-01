@@ -66,7 +66,7 @@ const Layout = ({ children, headerProps }: Props) => {
 
     Animated.timing(circleScale, {
       toValue: 1,
-      duration: 550,
+      duration: 420,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start(({ finished }) => {
@@ -83,7 +83,7 @@ const Layout = ({ children, headerProps }: Props) => {
       dispatch({ type: CHANGE_THEME, payload: !isDarkTheme });
       Animated.timing(circleOpacity, {
         toValue: 0,
-        duration: 240,
+        duration: 120,
         useNativeDriver: true,
       }).start(() => {
         animatingRef.current = false;
