@@ -1,10 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  FlatList,
   Linking,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
   type TextInputInstance,
 } from 'react-native';
@@ -19,6 +21,7 @@ import { isAlarmValue, type Item, type Theme } from '../../config/types';
 import { formatAlarmDate, formatAlarmTime } from '../../utils/date';
 import { moveItem } from '../../utils/reorder';
 import { formatSeconds } from '../../utils/time';
+import { useKeyboardOffset } from '../../hooks/useKeyboardOffset';
 import { Checkbox, IconButton } from '../atoms';
 import SwipeToDelete from './SwipeToDelete';
 
@@ -194,6 +197,10 @@ type RowProps = {
   inputRef: (input: TextInputInstance | null) => void;
   activeAudioId: string | null;
   onActivateAudio: (id: string | null) => void;
+  index: number;
+  keepVisible: (input: TextInputInstance | null, index: number) => void;
+  onFocusInput: (input: TextInputInstance | null, index: number) => void;
+  onInputBlur: () => void;
 };
 
 const ItemRow = ({
@@ -207,10 +214,15 @@ const ItemRow = ({
   inputRef,
   activeAudioId,
   onActivateAudio,
+  index,
+  keepVisible,
+  onFocusInput,
+  onInputBlur,
 }: RowProps) => {
   const theme = useAppSelector(state => state.themeReducer.theme);
   const styles = createStyles(theme);
   const drag = useReorderableDrag();
+  const inputElement = useRef<TextInputInstance | null>(null);
   // Lets the swipe gesture work even when it starts on the native TextInput.
   const textInputGesture = useNativeGesture({});
 
@@ -354,40 +366,95 @@ const ItemList = ({
   setShowButtons,
 }: Props) => {
   const textItemsRef = useRef<Record<string, TextInputInstance | null>>({});
+  const listRef = useRef<FlatList<Item>>(null);
+  const focusedInput = useRef<{ input: TextInputInstance; index: number } | null>(null);
   const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
+  const { height: windowHeight } = useWindowDimensions();
+  const keyboardOffset = useKeyboardOffset();
 
   useEffect(() => {
     const input = actualItemTextId ? textItemsRef.current[actualItemTextId] : null;
     input?.focus();
   }, [actualItemTextId]);
 
+  const keepVisible = useCallback(
+    (input: TextInputInstance | null, index: number) => {
+      if (!input || focusedInput.current?.input !== input) {
+        return;
+      }
+      input.measureInWindow((_x, y, _width, height) => {
+        const visibleBottom = windowHeight - keyboardOffset - 12;
+        if (y + height > visibleBottom) {
+          listRef.current?.scrollToIndex({
+            index,
+            viewPosition: 0.95,
+            animated: true,
+          });
+        }
+      });
+    },
+    [windowHeight, keyboardOffset],
+  );
+
+  const onFocusInput = useCallback(
+    (input: TextInputInstance | null, index: number) => {
+      focusedInput.current = input ? { input, index } : null;
+      keepVisible(input, index);
+    },
+    [keepVisible],
+  );
+
+  const onInputBlur = useCallback(() => {
+    focusedInput.current = null;
+  }, []);
+
+  // When the keyboard opens (or the window resizes), make sure the caret is visible.
+  useEffect(() => {
+    if (focusedInput.current) {
+      keepVisible(focusedInput.current.input, focusedInput.current.index);
+    }
+  }, [keyboardOffset, windowHeight, keepVisible]);
+
   return (
-    <ReorderableList
-      data={items}
-      keyExtractor={item => item.id}
-      contentContainerStyle={{ paddingBottom: 140 }}
-      keyboardShouldPersistTaps="handled"
-      keyboardDismissMode="on-drag"
-      style={{ flex: 1 }}
-      onReorder={({ from, to }) => onReorder(moveItem(items, from, to))}
-      renderItem={({ item }) => (
-        <ItemRow
-          item={item}
-          checksEnabled={checksEnabled}
-          changeItemText={changeItemText}
-          changeItemCheck={changeItemCheck}
-          onDelete={onDelete}
-          onAlarmPress={onAlarmPress}
-          setShowButtons={setShowButtons}
-          inputRef={input => {
-            textItemsRef.current[item.id] = input;
-          }}
-          activeAudioId={activeAudioId}
-          onActivateAudio={setActiveAudioId}
-        />
-      )}
-      extraData={activeAudioId}
-    />
+    <View style={{ flex: 1, paddingBottom: keyboardOffset }}>
+      <ReorderableList
+        ref={listRef}
+        data={items}
+        keyExtractor={item => item.id}
+        contentContainerStyle={{ paddingBottom: 140 }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        style={{ flex: 1 }}
+        onScrollToIndexFailed={info => {
+          listRef.current?.scrollToOffset({
+            offset: info.averageItemLength * info.index,
+            animated: true,
+          });
+        }}
+        onReorder={({ from, to }) => onReorder(moveItem(items, from, to))}
+        renderItem={({ item, index }) => (
+          <ItemRow
+            item={item}
+            index={index}
+            checksEnabled={checksEnabled}
+            changeItemText={changeItemText}
+            changeItemCheck={changeItemCheck}
+            onDelete={onDelete}
+            onAlarmPress={onAlarmPress}
+            setShowButtons={setShowButtons}
+            inputRef={input => {
+              textItemsRef.current[item.id] = input;
+            }}
+            activeAudioId={activeAudioId}
+            onActivateAudio={setActiveAudioId}
+            keepVisible={keepVisible}
+            onFocusInput={onFocusInput}
+            onInputBlur={onInputBlur}
+          />
+        )}
+        extraData={activeAudioId}
+      />
+    </View>
   );
 };
 

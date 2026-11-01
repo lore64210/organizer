@@ -11,6 +11,7 @@ import {
 import DialogButton from '../atoms/DialogButton';
 import i18n from '../../config/i18n';
 import { useAppSelector } from '../../config/redux/hooks';
+import { useKeyboardOffset } from '../../hooks/useKeyboardOffset';
 import { createModalStyles } from './modalStyles';
 
 const styles = StyleSheet.create({
@@ -44,6 +45,7 @@ const ModalTitle = ({
 }: Props) => {
   const theme = useAppSelector(state => state.themeReducer.theme);
   const modalStyles = createModalStyles(theme);
+  const keyboardOffset = useKeyboardOffset();
 
   const inputRef = useRef<TextInputInstance>(null);
   const [title, setTitle] = useState(reminderTitle);
@@ -77,7 +79,10 @@ const ModalTitle = ({
       onRequestClose={onCancel}
       statusBarTranslucent
     >
-      <Pressable style={modalStyles.backdrop} onPress={onCancel}>
+      <Pressable
+        style={[modalStyles.backdrop, { paddingBottom: 24 + keyboardOffset }]}
+        onPress={onCancel}
+      >
         <Pressable style={modalStyles.card} onPress={() => {}}>
           <Text style={modalStyles.title}>{modalTitle}</Text>
           <TextInput
