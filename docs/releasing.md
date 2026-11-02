@@ -17,6 +17,13 @@ El release se arma con **EAS Build** y se publica solo cuando pusheás un tag `v
 3. Crear un **access token** en <https://expo.dev/settings/access-tokens>.
 4. En GitHub: **Settings → Secrets and variables → Actions → New repository secret**, nombre `EXPO_TOKEN`, valor el token.
 5. Verificar que el perfil `release-apk` exista en `eas.json` (ya está configurado).
+6. **Generar el keystore una vez.** EAS lo pide en la primera compilación:
+
+   ```powershell
+   npx eas-cli build -p android --profile release-apk
+   ```
+
+   Aceptá generar un keystore nuevo. Esa compilación corre en la nube (no hace falta Android Studio) y consume uno de los 15 builds gratuitos. Después, el workflow puede compilar sin preguntas.
 
 ## Publicar
 
