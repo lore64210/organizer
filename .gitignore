@@ -17,6 +17,8 @@ google-service-account*.json
 !.env.example
 *.orig.*
 web-build/
+docs/demo/
+.expo-export-*/
 
 # macOS
 .DS_Store

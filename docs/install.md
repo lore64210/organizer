@@ -12,6 +12,11 @@ Organizer se distribuye como **APK firmado** desde GitHub Releases. No está en 
 
 - Última versión: <https://github.com/lore64210/reminder/releases/latest>
 - Descarga directa del APK: <https://github.com/lore64210/reminder/releases/latest/download/organizer.apk>
+- Portfolio y demo: <https://lore64210.github.io/reminder/>
+
+<p align="center">
+  <img src="assets/qr.png" width="220" alt="Código QR para descargar el APK" />
+</p>
 
 Cada release incluye un archivo `SHA256SUMS.txt` para verificar la descarga.
 

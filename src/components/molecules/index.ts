@@ -5,3 +5,4 @@ export {default as ModalAudio} from './ModalAudio';
 export {default as Layout} from './Layout';
 export {default as ItemList} from './ItemList';
 export {default as SwipeToDelete} from './SwipeToDelete';
+export {default as DemoBanner} from './DemoBanner';

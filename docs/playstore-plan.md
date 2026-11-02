@@ -34,7 +34,7 @@ Lo que falta no es código de la app, sino **identidad, cuenta, cumplimiento y f
 | `expo-doctor` | Según README, 20/20 | Re-ejecutar antes del build |
 | Proyecto EAS | **No vinculado**: falta `extra.eas.projectId` en `app.json` | `eas init` |
 | `eas.json` | Perfiles dev/preview/production | Falta `autoIncrement` y config de submit |
-| Package Android | `com.lore64210.Organizer` (mayúscula) | Definir versión final **antes** del primer upload |
+| Package Android | `com.lore64210.organizer` (minúsculas) | Definido antes del primer build |
 | Versión | `1.1.0`, `versionCode: 1` | Con `appVersionSource: remote`, EAS maneja el versionCode |
 | Permisos declarados | INTERNET, VIBRATE, CAMERA, RECORD_AUDIO, MODIFY_AUDIO_SETTINGS, POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED, READ/WRITE_EXTERNAL_STORAGE (≤ API 32) | Justificar cámara/micrófono en la ficha y la política |
 | `SYSTEM_ALERT_WINDOW` | Viene de la plantilla de Expo, la app no lo usa | Bloquearlo en release (`blockedPermissions`) |
