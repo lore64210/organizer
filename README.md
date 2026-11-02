@@ -17,7 +17,9 @@ Funciona offline: todo se guarda en el dispositivo con AsyncStorage + Redux Pers
 
 [⬇️ Descargar APK](https://github.com/lore64210/reminder/releases/latest) · [Instrucciones de instalación](docs/install.md)
 
-La app no está en Google Play: se publica como APK firmado desde [GitHub Releases](https://github.com/lore64210/reminder/releases). Funciona offline y no requiere cuenta.
+Se distribuye como APK firmado desde [GitHub Releases](https://github.com/lore64210/reminder/releases). Funciona offline y no requiere cuenta.
+
+> La primera versión se publica en cuanto se configure EAS. Ver [`docs/releasing.md`](docs/releasing.md).
 
 ## Requisitos
 
@@ -73,18 +75,21 @@ index.ts                  registerRootComponent
 App.tsx                   providers, splash, fuentes, notificaciones
 src/
   components/
-    atoms/                IconButton, AnimatedIconButton, Checkbox
-    molecules/            Header, Layout, ItemList, ImageItemList, modales
-    organisms/            HomeScreen, ReminderScreen, CameraScreen
+    atoms/                IconButton, Checkbox, DialogButton, Glass*
+    molecules/            Header, Layout, ItemList, HomeItem, ModalAudio, ModalTitle
+    organisms/            HomeScreen, ReminderScreen, CameraScreen, GalleryModal
     templates/            StackNavigator
   config/
     i18n.ts               i18n-js v4 + expo-localization
+    translations.ts       textos es/en
     theme.ts              temas claro/oscuro
     types.ts              modelos y tipos del store
     redux/                actions, reducers, store, hooks tipados
+  hooks/                  useKeyboardOffset
+  providers/              diálogos, overlays, blur y altura del header
   services/
     notifications.ts      permisos, canal Android, agendar/cancelar alarmas
-  utils/                  fechas, archivos, confirmaciones, reorder, uuid
+  utils/                  fechas, archivos, migración de medios, reorder, uuid
 ```
 
 ## Notas de la actualización (SDK 44 → 58)
