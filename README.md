@@ -9,6 +9,16 @@ Funciona offline: todo se guarda en el dispositivo con AsyncStorage + Redux Pers
 - Listas reordenables: `react-native-reorderable-list` (Reanimated 4)
 - Audio: `expo-audio` · Cámara: `expo-camera` (`CameraView`) · Notificaciones: `expo-notifications`
 
+## Descargar
+
+[![Android 7.0+](https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white)](https://github.com/lore64210/reminder/releases/latest)
+[![Expo SDK 58](https://img.shields.io/badge/Expo-SDK%2058-000020?logo=expo&logoColor=white)](https://expo.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+
+[⬇️ Descargar APK](https://github.com/lore64210/reminder/releases/latest) · [Instrucciones de instalación](docs/install.md)
+
+La app no está en Google Play: se publica como APK firmado desde [GitHub Releases](https://github.com/lore64210/reminder/releases). Funciona offline y no requiere cuenta.
+
 ## Requisitos
 
 | Herramienta | Versión |
@@ -94,3 +104,15 @@ src/
 
 - El selector de fecha/hora usa el diálogo nativo de Android; en iOS se muestra inline (falta envolverlo en un modal propio).
 - Sin tests automatizados ni ESLint todavía.
+
+## Publicación
+
+- El APK se compila con el perfil `release-apk` de EAS y se publica en GitHub Releases al pushear un tag `v*`.
+- Guía paso a paso: [`docs/releasing.md`](docs/releasing.md).
+- Instalación en Android: [`docs/install.md`](docs/install.md).
+- Privacidad: [`PRIVACY.md`](PRIVACY.md).
+- Plan de Play Store (referencia): [`docs/playstore-plan.md`](docs/playstore-plan.md).
+
+## Licencia
+
+Código publicado con fines de portfolio. Todos los derechos reservados. Si querés reutilizarlo, abrí un issue.

@@ -9,6 +9,12 @@ npm-debug.*
 *.p12
 *.key
 *.mobileprovision
+*.apk
+*.aab
+google-service-account*.json
+.env
+.env.*
+!.env.example
 *.orig.*
 web-build/
 
