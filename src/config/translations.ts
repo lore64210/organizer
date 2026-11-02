@@ -47,6 +47,11 @@ const en = {
   actionGallery: 'Gallery',
   actionAlarm: 'Alarm',
   actionChecklist: 'Checklist',
+  tagImages: '%{count} image(s)',
+  tagAudios: '%{count} audio item(s)',
+  tagAlarms: '%{count} alarm(s)',
+  tagTexts: '%{count} text item(s)',
+  tagChecklist: 'Checklist, %{checked} of %{total} checked',
 };
 
 const es = {
@@ -98,6 +103,11 @@ const es = {
   actionGallery: 'Galería',
   actionAlarm: 'Alarma',
   actionChecklist: 'Checklist',
+  tagImages: '%{count} imagen(es)',
+  tagAudios: '%{count} audio(s)',
+  tagAlarms: '%{count} alarma(s)',
+  tagTexts: '%{count} item(s) de texto',
+  tagChecklist: 'Checklist, %{checked} de %{total} marcados',
 };
 
 export { en, es };

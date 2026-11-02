@@ -12,6 +12,8 @@ La maqueta aprobable está en `design/neumorphism-preview.html`.
 - [x] Fase 5a · `DialogProvider` como overlay en la misma ventana + blur real (iOS/Android 12+)
 - [x] Fase 5b · Menú de acciones y chrome de cámara con vidrio
 - [x] Fase 5c · `ModalTitle` / `ModalAudio` movidos a un portal glass en la raíz
+- [x] Fase 5d · Galería de imágenes en el portal, con `GlassBackdrop` y visor negro
+- [x] Transición de tema por crossfade nativo (mismo comportamiento en web y mobile)
 - [ ] Fase 4 · Ajuste fino en dispositivo (Android viejo, contraste, animación de tema)
 
 ---
@@ -273,8 +275,9 @@ Se eligió el primer camino y ya está implementado:
 2. **Alternativa descartada**: mantener `Modal` y usar vidrio sin blur en Android
    (`blurMethod="none"` + tinte + borde). Se ve aceptable, pero no es vidrio real.
 
-`ModalTitle` y `ModalAudio` ya usan el portal (`GlassOverlay`). `GalleryModal` sigue siendo
-un `Modal` nativo a propósito: su visor es negro a pantalla completa y no necesita vidrio.
+`ModalTitle`, `ModalAudio` y `GalleryModal` ya usan el portal (`GlassOverlay` /
+`GlassBackdrop`). La galería usa `GlassBackdrop` para el fondo y mantiene el visor de
+imágenes en negro para no alterar los colores de las fotos.
 
 ### Cámara
 
@@ -297,11 +300,13 @@ El borde superior claro + el tinte ya leen como vidrio sobre la imagen.
 | Archivo | Cambio |
 | --- | --- |
 | `src/components/atoms/GlassOverlay.tsx` (nuevo) | Tarjeta glass + backdrop para overlays en la raíz |
+| `src/components/atoms/GlassBackdrop.tsx` (nuevo) | Fondo full-screen con blur para overlays de pantalla completa |
 | `src/providers/OverlayProvider.tsx` (nuevo) | Portal: acciones estables y host que renderiza los overlays |
 | `src/providers/BlurTargetContext.tsx` (nuevo) | Ref compartida del `BlurTargetView` |
 | `src/config/theme.ts` / `types.ts` | Tokens `glass*` |
 | `src/providers/DialogProvider.tsx` | `Modal` → overlay + `BlurTargetView` + `OverlayHost` |
 | `src/components/molecules/ModalTitle.tsx` / `ModalAudio.tsx` | `Modal` → portal glass |
+| `src/components/organisms/GalleryModal.tsx` | `Modal` → portal con `GlassBackdrop`; visor negro |
 | `src/components/organisms/CameraScreen.tsx` | Chrome glass sin blur |
 | `src/components/molecules/Header.tsx` | Sin cambios (base neumórfica) |
 

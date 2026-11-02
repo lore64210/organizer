@@ -1,5 +1,4 @@
 import { View, Text, StyleSheet, Image } from 'react-native';
-import type { GestureResponderEvent } from 'react-native';
 import { useAppSelector } from '../../config/redux/hooks';
 import { IconButton } from '../atoms';
 import i18n from '../../config/i18n';
@@ -69,7 +68,7 @@ type Props = {
   onTitlePress?: () => void;
   imageCount?: number;
   onImagesPress?: () => void;
-  onThemePress?: (point: { x: number; y: number }) => void;
+  onThemePress?: () => void;
 };
 
 const Header = ({
@@ -82,12 +81,8 @@ const Header = ({
   const { isDarkTheme, theme } = useAppSelector(state => state.themeReducer);
   const styles = createStyles(theme);
 
-  const changeTheme = (event: GestureResponderEvent) => {
-    // The circle grows from the point the user tapped.
-    onThemePress?.({
-      x: event.nativeEvent.pageX,
-      y: event.nativeEvent.pageY,
-    });
+  const changeTheme = () => {
+    onThemePress?.();
   };
 
   return (

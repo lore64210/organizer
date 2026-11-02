@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { Directory, File, Paths } from 'expo-file-system';
 
 const MEDIA_DIRECTORY = 'media';
@@ -12,15 +13,20 @@ const getMediaDirectory = (): Directory => {
 
 /** True when the uri already points inside the app's persistent directory. */
 export const isPersistedFile = (uri: string): boolean =>
-  uri.startsWith(Paths.document.uri);
+  Platform.OS === 'web' ? true : uri.startsWith(Paths.document.uri);
 
 /**
  * Copies a file produced by the camera, the image picker or the recorder
  * (all of them live in the cache) into the app's document directory, which
  * the OS is allowed to clear. Returns the new uri, or the original one if it
  * cannot be persisted.
+ *
+ * On web there is no document directory, so the original uri is kept.
  */
 export const persistFile = async (uri: string): Promise<string> => {
+  if (Platform.OS === 'web') {
+    return uri;
+  }
   if (!uri || !uri.startsWith('file://') || isPersistedFile(uri)) {
     return uri;
   }
@@ -44,7 +50,7 @@ export const persistFile = async (uri: string): Promise<string> => {
 
 /** Deletes a local file (audio recording, picked image, etc.) ignoring missing files. */
 export const deleteFile = (uri?: string | null) => {
-  if (!uri || !uri.startsWith('file://')) {
+  if (Platform.OS === 'web' || !uri || !uri.startsWith('file://')) {
     return;
   }
   try {

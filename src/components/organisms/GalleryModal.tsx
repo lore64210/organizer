@@ -1,7 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
+import {
+  Animated,
+  BackHandler,
+  Easing,
   Image,
-  Modal,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -10,19 +20,22 @@ import {
 } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { useAnimatedRef } from 'react-native-reanimated';
+import Reanimated, { useAnimatedRef } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Sortable from 'react-native-sortables';
 import { Gallery, fitContainer, useImageResolution, type GalleryRefType } from 'react-native-zoom-toolkit';
+import GlassBackdrop from '../atoms/GlassBackdrop';
 import i18n from '../../config/i18n';
 import { useAppSelector } from '../../config/redux/hooks';
 import type { Item, Theme } from '../../config/types';
 import { useDialog } from '../../providers/DialogProvider';
+import { useOverlay } from '../../providers/OverlayProvider';
 import { moveItem } from '../../utils/reorder';
 
 const GRID_COLUMNS = 3;
 const GRID_GAP = 6;
 const GRID_PADDING = 8;
+const TOP_BAR_HEIGHT = 64;
 
 const pageStyles = StyleSheet.create({
   page: {
@@ -32,18 +45,36 @@ const pageStyles = StyleSheet.create({
   },
 });
 
+const overlayStyles = StyleSheet.create({
+  fill: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  },
+});
+
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     root: {
       flex: 1,
-      backgroundColor: theme.backgroundColor,
     },
     topBar: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 2,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: 16,
       paddingBottom: 12,
+      backgroundColor: theme.glassBackground,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.glassBorder,
+      boxShadow: `inset 0 1px 0 ${theme.glassHighlight}`,
     },
     title: {
       color: theme.textColor,
@@ -55,6 +86,9 @@ const createStyles = (theme: Theme) =>
       height: 40,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    scroll: {
+      flex: 1,
     },
     gridContent: {
       padding: GRID_PADDING,
@@ -72,6 +106,8 @@ const createStyles = (theme: Theme) =>
       borderCurve: 'continuous',
       overflow: 'hidden',
       backgroundColor: theme.secondaryColor,
+      borderWidth: 1,
+      borderColor: theme.glassBorder,
     },
     thumbImage: {
       width: '100%',
@@ -88,11 +124,15 @@ const createStyles = (theme: Theme) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
+    emptyWrapper: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     empty: {
       color: theme.textColor,
       fontFamily: 'Montserrat_400Regular',
       textAlign: 'center',
-      marginTop: 40,
     },
     viewer: {
       flex: 1,
@@ -115,7 +155,10 @@ const createStyles = (theme: Theme) =>
       borderRadius: 22,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: 'rgba(0,0,0,0.45)',
+      backgroundColor: 'rgba(8,20,30,0.45)',
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.18)',
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18)',
     },
     viewerButtonDisabled: {
       opacity: 0.35,
@@ -156,6 +199,45 @@ const GalleryImage = ({ uri }: GalleryImageProps) => {
   );
 };
 
+type GalleryOverlayProps = {
+  children: ReactNode;
+  glass: boolean;
+};
+
+/**
+ * Full-screen animated container. The blur lives outside the BlurTargetView
+ * (the overlay host renders it), so the app behind the gallery is sampled.
+ */
+const GalleryOverlay = ({ children, glass }: GalleryOverlayProps) => {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(18)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 180,
+        useNativeDriver: true,
+      }),
+      Animated.timing(translateY, {
+        toValue: 0,
+        duration: 240,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [opacity, translateY]);
+
+  return (
+    <Animated.View
+      style={[overlayStyles.fill, { opacity, transform: [{ translateY }] }]}
+    >
+      {glass ? <GlassBackdrop /> : null}
+      {children}
+    </Animated.View>
+  );
+};
+
 type Props = {
   visible: boolean;
   onClose: () => void;
@@ -170,10 +252,12 @@ const GalleryModal = ({ visible, onClose, items, onDelete, onReorder }: Props) =
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const dialog = useDialog();
+  const { showOverlay, hideOverlay } = useOverlay();
+  const overlayId = useId();
 
   const thumbSize =
     (width - GRID_PADDING * 2 - GRID_GAP * (GRID_COLUMNS - 1)) / GRID_COLUMNS;
-  const scrollableRef = useAnimatedRef<Animated.ScrollView>();
+  const scrollableRef = useAnimatedRef<Reanimated.ScrollView>();
 
   const galleryRef = useRef<GalleryRefType>(null);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
@@ -249,146 +333,207 @@ const GalleryModal = ({ visible, onClose, items, onDelete, onReorder }: Props) =
     galleryRef.current?.setIndex(to);
   };
 
-  return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      onRequestClose={viewerIndex === null ? close : () => setViewerIndex(null)}
-      statusBarTranslucent
-    >
-      <GestureHandlerRootView style={styles.root}>
-        {viewerIndex === null ? (
-          <>
-            <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
-              <Text style={styles.title}>
-                {i18n.t('imagesTitle', { count: items.length })}
-              </Text>
-              <Pressable
-                onPress={close}
-                style={styles.closeButton}
-                hitSlop={8}
-                accessibilityRole="button"
-                accessibilityLabel={i18n.t('cancel')}
-              >
-                <FontAwesome name="times" size={22} color={theme.textColor} />
-              </Pressable>
-            </View>
+  // Handlers always read the latest render while the portal node is only
+  // rebuilt when the visible gallery content changes.
+  const handlersRef = useRef({
+    close,
+    openViewer,
+    deleteFromGrid,
+    deleteCurrent,
+    moveImage,
+    onReorder,
+  });
+  handlersRef.current = {
+    close,
+    openViewer,
+    deleteFromGrid,
+    deleteCurrent,
+    moveImage,
+    onReorder,
+  };
 
-            {items.length ? (
-              <Animated.ScrollView
-                ref={scrollableRef}
-                contentContainerStyle={styles.gridContent}
-              >
-                <Sortable.Grid
-                  data={items}
-                  columns={GRID_COLUMNS}
-                  rowGap={GRID_GAP}
-                  columnGap={GRID_GAP}
-                  keyExtractor={item => item.id}
-                  scrollableRef={scrollableRef}
-                  onDragEnd={({ data }) => onReorder(data)}
-                  renderItem={({ item, index }) => (
-                    <View
-                      style={[styles.thumbCell, { width: thumbSize, height: thumbSize }]}
-                    >
-                      <Sortable.Touchable
-                        style={styles.thumbTouchable}
-                        onTap={() => openViewer(index)}
-                      >
-                        <View style={styles.thumbInner}>
-                          <Image
-                            source={{ uri: String(item.value) }}
-                            style={styles.thumbImage}
-                            resizeMode="cover"
-                          />
-                        </View>
-                      </Sortable.Touchable>
+  useEffect(() => {
+    if (!visible) {
+      hideOverlay(overlayId);
+      return;
+    }
 
-                      <Sortable.Touchable
-                        style={styles.removeBadge}
-                        onTap={() => deleteFromGrid(item)}
-                      >
-                        <FontAwesome name="times" size={12} color="#FFFFFF" />
-                      </Sortable.Touchable>
-                    </View>
-                  )}
-                />
-              </Animated.ScrollView>
-            ) : (
-              <Text style={styles.empty}>{i18n.t('noImages')}</Text>
-            )}
-          </>
-        ) : (
-          <View style={styles.viewer}>
-            <Gallery
-              ref={galleryRef}
-              data={items}
-              keyExtractor={item => item.id}
-              initialIndex={viewerIndex}
-              maxScale={4}
-              onIndexChange={setCurrentIndex}
-              renderItem={renderItem}
-            />
-
-            <View
-              style={[styles.viewerTop, { paddingTop: insets.top + 8 }]}
-              pointerEvents="box-none"
-            >
-              <Pressable
-                onPress={() => setViewerIndex(null)}
-                style={styles.viewerButton}
-                hitSlop={8}
-                accessibilityRole="button"
-                accessibilityLabel={i18n.t('cancel')}
-              >
-                <FontAwesome name="chevron-left" size={18} color="#FFFFFF" />
-              </Pressable>
-              <Text style={styles.counter} pointerEvents="none">
-                {currentIndex + 1} / {items.length}
-              </Text>
-              <View style={styles.viewerActions}>
+    showOverlay(
+      overlayId,
+      <GalleryOverlay glass={viewerIndex === null}>
+        <GestureHandlerRootView style={styles.root}>
+          {viewerIndex === null ? (
+            <>
+              <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
+                <Text style={styles.title}>
+                  {i18n.t('imagesTitle', { count: items.length })}
+                </Text>
                 <Pressable
-                  onPress={() => moveImage(-1)}
-                  disabled={currentIndex === 0}
-                  style={[
-                    styles.viewerButton,
-                    currentIndex === 0 && styles.viewerButtonDisabled,
-                  ]}
+                  onPress={() => handlersRef.current.close()}
+                  style={styles.closeButton}
                   hitSlop={8}
                   accessibilityRole="button"
-                  accessibilityLabel={i18n.t('moveImageLeft')}
+                  accessibilityLabel={i18n.t('cancel')}
                 >
-                  <FontAwesome name="arrow-left" size={16} color="#FFFFFF" />
+                  <FontAwesome name="times" size={22} color={theme.textColor} />
                 </Pressable>
-                <Pressable
-                  onPress={() => moveImage(1)}
-                  disabled={currentIndex >= items.length - 1}
-                  style={[
-                    styles.viewerButton,
-                    currentIndex >= items.length - 1 && styles.viewerButtonDisabled,
+              </View>
+
+              {items.length ? (
+                <Reanimated.ScrollView
+                  ref={scrollableRef}
+                  style={styles.scroll}
+                  contentContainerStyle={[
+                    styles.gridContent,
+                    {
+                      paddingTop:
+                        insets.top + TOP_BAR_HEIGHT + GRID_PADDING,
+                    },
                   ]}
-                  hitSlop={8}
-                  accessibilityRole="button"
-                  accessibilityLabel={i18n.t('moveImageRight')}
                 >
-                  <FontAwesome name="arrow-right" size={16} color="#FFFFFF" />
-                </Pressable>
+                  <Sortable.Grid
+                    data={items}
+                    columns={GRID_COLUMNS}
+                    rowGap={GRID_GAP}
+                    columnGap={GRID_GAP}
+                    keyExtractor={item => item.id}
+                    scrollableRef={scrollableRef}
+                    onDragEnd={({ data }) => handlersRef.current.onReorder(data)}
+                    renderItem={({ item, index }) => (
+                      <View
+                        style={[styles.thumbCell, { width: thumbSize, height: thumbSize }]}
+                      >
+                        <Sortable.Touchable
+                          style={styles.thumbTouchable}
+                          onTap={() => handlersRef.current.openViewer(index)}
+                        >
+                          <View style={styles.thumbInner}>
+                            <Image
+                              source={{ uri: String(item.value) }}
+                              style={styles.thumbImage}
+                              resizeMode="cover"
+                            />
+                          </View>
+                        </Sortable.Touchable>
+
+                        <Sortable.Touchable
+                          style={styles.removeBadge}
+                          onTap={() => handlersRef.current.deleteFromGrid(item)}
+                        >
+                          <FontAwesome name="times" size={12} color="#FFFFFF" />
+                        </Sortable.Touchable>
+                      </View>
+                    )}
+                  />
+                </Reanimated.ScrollView>
+              ) : (
+                <View style={[styles.emptyWrapper, { paddingTop: insets.top + TOP_BAR_HEIGHT }]}>
+                  <Text style={styles.empty}>{i18n.t('noImages')}</Text>
+                </View>
+              )}
+            </>
+          ) : (
+            <View style={styles.viewer}>
+              <Gallery
+                ref={galleryRef}
+                data={items}
+                keyExtractor={item => item.id}
+                initialIndex={viewerIndex}
+                maxScale={4}
+                onIndexChange={setCurrentIndex}
+                renderItem={renderItem}
+              />
+
+              <View
+                style={[styles.viewerTop, { paddingTop: insets.top + 8 }]}
+                pointerEvents="box-none"
+              >
                 <Pressable
-                  onPress={deleteCurrent}
+                  onPress={() => setViewerIndex(null)}
                   style={styles.viewerButton}
                   hitSlop={8}
                   accessibilityRole="button"
-                  accessibilityLabel={i18n.t('delete')}
+                  accessibilityLabel={i18n.t('cancel')}
                 >
-                  <FontAwesome name="trash" size={18} color="#FFFFFF" />
+                  <FontAwesome name="chevron-left" size={18} color="#FFFFFF" />
                 </Pressable>
+                <Text style={styles.counter} pointerEvents="none">
+                  {currentIndex + 1} / {items.length}
+                </Text>
+                <View style={styles.viewerActions}>
+                  <Pressable
+                    onPress={() => handlersRef.current.moveImage(-1)}
+                    disabled={currentIndex === 0}
+                    style={[
+                      styles.viewerButton,
+                      currentIndex === 0 && styles.viewerButtonDisabled,
+                    ]}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel={i18n.t('moveImageLeft')}
+                  >
+                    <FontAwesome name="arrow-left" size={16} color="#FFFFFF" />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => handlersRef.current.moveImage(1)}
+                    disabled={currentIndex >= items.length - 1}
+                    style={[
+                      styles.viewerButton,
+                      currentIndex >= items.length - 1 && styles.viewerButtonDisabled,
+                    ]}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel={i18n.t('moveImageRight')}
+                  >
+                    <FontAwesome name="arrow-right" size={16} color="#FFFFFF" />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => handlersRef.current.deleteCurrent()}
+                    style={styles.viewerButton}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel={i18n.t('delete')}
+                  >
+                    <FontAwesome name="trash" size={18} color="#FFFFFF" />
+                  </Pressable>
+                </View>
               </View>
             </View>
-          </View>
-        )}
-      </GestureHandlerRootView>
-    </Modal>
-  );
+          )}
+        </GestureHandlerRootView>
+      </GalleryOverlay>,
+    );
+  }, [
+    visible,
+    viewerIndex,
+    currentIndex,
+    items,
+    theme,
+    insets,
+    thumbSize,
+    showOverlay,
+    hideOverlay,
+    overlayId,
+  ]);
+
+  useEffect(() => () => hideOverlay(overlayId), [hideOverlay, overlayId]);
+
+  useEffect(() => {
+    if (!visible || Platform.OS !== 'android') {
+      return;
+    }
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (viewerIndex !== null) {
+        setViewerIndex(null);
+      } else {
+        onClose();
+      }
+      return true;
+    });
+    return () => subscription.remove();
+  }, [visible, viewerIndex, onClose]);
+
+  return null;
 };
 
 export default GalleryModal;

@@ -1,5 +1,12 @@
 import { useRef, useState, type ReactNode } from 'react';
-import { Animated, Easing, Platform, StyleSheet, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
+import {
+  Animated,
+  Easing,
+  Platform,
+  StyleSheet,
+  useWindowDimensions,
+  type LayoutChangeEvent,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppDispatch, useAppSelector } from '../../config/redux/hooks';
 import { CHANGE_THEME } from '../../config/redux/actions';
@@ -22,13 +29,6 @@ const styles = StyleSheet.create({
   },
 });
 
-type Circle = {
-  x: number;
-  y: number;
-  radius: number;
-  color: string;
-};
-
 type Props = {
   children: ReactNode;
   headerProps?: {
@@ -42,70 +42,89 @@ type Props = {
 const Layout = ({ children, headerProps }: Props) => {
   const dispatch = useAppDispatch();
   const { theme, isDarkTheme } = useAppSelector(state => state.themeReducer);
-  const { width, height } = useWindowDimensions();
+  const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
 
-  const circleScale = useRef(new Animated.Value(0)).current;
-  const circleOpacity = useRef(new Animated.Value(1)).current;
+  const contentOpacity = useRef(new Animated.Value(1)).current;
+  const washOpacity = useRef(new Animated.Value(0)).current;
   const animatingRef = useRef(false);
   const [animating, setAnimating] = useState(false);
-  const [circle, setCircle] = useState<Circle | null>(null);
   const [headerHeight, setHeaderHeight] = useState(DEFAULT_HEADER_HEIGHT);
+  const [washColor, setWashColor] = useState(theme.backgroundColor);
 
   const onHeaderLayout = (event: LayoutChangeEvent) => {
-    const height = event.nativeEvent.layout.height;
-    if (height > 0 && Math.abs(height - headerHeight) > 0.5) {
-      setHeaderHeight(height);
+    const layoutHeight = event.nativeEvent.layout.height;
+    if (layoutHeight > 0 && Math.abs(layoutHeight - headerHeight) > 0.5) {
+      setHeaderHeight(layoutHeight);
     }
   };
 
-  const changeTheme = (point: { x: number; y: number }) => {
+  /**
+   * Crossfade: the content dims (but stays visible), the palette swaps at the
+   * midpoint and the content fades back in. Only opacity is animated, so it
+   * runs on the native driver and the same code works on web and native.
+   */
+  const changeTheme = () => {
     if (animatingRef.current) {
       return;
     }
     animatingRef.current = true;
     setAnimating(true);
 
-    // Radius needed to cover the farthest corner from the tap point.
-    const radius = Math.hypot(
-      Math.max(point.x, width - point.x),
-      Math.max(point.y, height - point.y),
-    );
+    const nextIsDark = !isDarkTheme;
+    setWashColor(nextIsDark ? darkTheme.backgroundColor : ligthTheme.backgroundColor);
+    contentOpacity.setValue(1);
+    washOpacity.setValue(0);
 
-    circleScale.setValue(0);
-    circleOpacity.setValue(1);
-    setCircle({
-      x: point.x,
-      y: point.y,
-      radius,
-      color: isDarkTheme ? ligthTheme.backgroundColor : darkTheme.backgroundColor,
-    });
-
-    Animated.timing(circleScale, {
-      toValue: 1,
-      duration: 420,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }).start(({ finished }) => {
+    Animated.parallel([
+      Animated.timing(contentOpacity, {
+        toValue: 0.5,
+        duration: 160,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(washOpacity, {
+        toValue: 0.3,
+        duration: 160,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start(({ finished }) => {
       if (!finished) {
+        contentOpacity.setValue(1);
+        washOpacity.setValue(0);
         animatingRef.current = false;
         setAnimating(false);
-        setCircle(null);
         return;
       }
 
-      // The circle covers the screen: the palette is already swapped underneath,
-      // so we only fade the circle out instead of the content (fading the content
-      // would make cards translucent and reveal the swipe actions behind them).
-      dispatch({ type: CHANGE_THEME, payload: !isDarkTheme });
-      Animated.timing(circleOpacity, {
-        toValue: 0,
-        duration: 120,
-        useNativeDriver: true,
-      }).start(() => {
-        animatingRef.current = false;
-        setAnimating(false);
-        setCircle(null);
+      dispatch({ type: CHANGE_THEME, payload: nextIsDark });
+
+      // Let React commit the new palette before starting the fade back in.
+      // Otherwise the JS re-render competes with the animation and it looks
+      // like a stutter.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          Animated.parallel([
+            Animated.timing(contentOpacity, {
+              toValue: 1,
+              duration: 240,
+              easing: Easing.out(Easing.cubic),
+              useNativeDriver: true,
+            }),
+            Animated.timing(washOpacity, {
+              toValue: 0,
+              duration: 240,
+              easing: Easing.in(Easing.quad),
+              useNativeDriver: true,
+            }),
+          ]).start(() => {
+            contentOpacity.setValue(1);
+            washOpacity.setValue(0);
+            animatingRef.current = false;
+            setAnimating(false);
+          });
+        });
       });
     });
   };
@@ -123,34 +142,30 @@ const Layout = ({ children, headerProps }: Props) => {
       ]}
       pointerEvents={animating ? 'none' : 'auto'}
     >
-      <Animated.View style={[styles.content, { paddingTop: insets.top }]}>
+      <Animated.View
+        style={[styles.content, { paddingTop: insets.top, opacity: contentOpacity }]}
+      >
         <HeaderHeightProvider value={headerHeight}>{children}</HeaderHeightProvider>
       </Animated.View>
 
       <Animated.View
-        style={[styles.headerLayer, { top: insets.top }]}
+        style={[styles.headerLayer, { top: insets.top, opacity: contentOpacity }]}
         onLayout={onHeaderLayout}
       >
         <Header {...headerProps} onThemePress={changeTheme} />
       </Animated.View>
 
-      {circle ? (
-        <Animated.View
-          pointerEvents="none"
-          style={{
-            position: 'absolute',
-            left: circle.x - circle.radius,
-            top: circle.y - circle.radius,
-            width: circle.radius * 2,
-            height: circle.radius * 2,
-            borderRadius: circle.radius,
-            backgroundColor: circle.color,
-            opacity: circleOpacity,
-            transform: [{ scale: circleScale }],
-            zIndex: 20,
-          }}
-        />
-      ) : null}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            backgroundColor: washColor,
+            opacity: washOpacity,
+            zIndex: 30,
+          },
+        ]}
+      />
     </Animated.View>
   );
 };

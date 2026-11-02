@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { persistFile } from './files';
 import type { Item, Reminder } from '../config/types';
 
@@ -34,6 +35,10 @@ const migrateItems = async (items: Item[]): Promise<MigrateItemsResult> => {
  * caller can skip dispatching.
  */
 export const migrateRemindersMedia = async (reminders: Reminder[]): Promise<Reminder[]> => {
+  if (Platform.OS === 'web') {
+    return reminders;
+  }
+
   let anyChanged = false;
   const migrated: Reminder[] = [];
 
