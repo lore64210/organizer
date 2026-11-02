@@ -57,7 +57,7 @@ jobs:
 
           cat build.json
 
-          APK_URL=$(jq -r '.[0].artifacts.buildUrl // empty' build.json)
+          APK_URL=$(jq -r 'if type == "array" then .[0] else . end | .artifacts.buildUrl // empty' build.json)
           if [ -z "$APK_URL" ]; then
             echo "No se encontró la URL del APK en la salida de EAS." >&2
             exit 1
