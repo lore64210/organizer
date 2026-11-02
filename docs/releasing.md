@@ -12,7 +12,7 @@ El release se arma con **EAS Build** y se publica solo cuando pusheás un tag `v
    npx eas-cli@latest init
    ```
 
-   `eas init` agrega `extra.eas.projectId` y `owner` en `app.json`. Sin eso, el workflow falla.
+   `eas init` agrega `extra.eas.projectId` y `owner` en `app.json`. Sin eso, el workflow falla. Commiteá y pusheá ese cambio antes de crear el primer tag.
 
 3. Crear un **access token** en <https://expo.dev/settings/access-tokens>.
 4. En GitHub: **Settings → Secrets and variables → Actions → New repository secret**, nombre `EXPO_TOKEN`, valor el token.
