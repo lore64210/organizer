@@ -37,7 +37,7 @@ const StackNavigator = () => {
         <Screen
           name="CameraScreen"
           component={CameraScreen}
-          options={{ animation: 'fade' }}
+          options={{ animation: 'none', gestureEnabled: false }}
         />
       </Navigator>
     </NavigationContainer>
