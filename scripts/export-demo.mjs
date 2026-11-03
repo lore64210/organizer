@@ -17,7 +17,7 @@ const result = spawnSync(
     env: {
       ...process.env,
       EXPO_PUBLIC_DEMO: '1',
-      EXPO_BASE_URL: '/reminder/demo',
+      EXPO_BASE_URL: '/organizer/demo',
     },
   },
 );

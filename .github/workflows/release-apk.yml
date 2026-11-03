@@ -177,15 +177,15 @@ jobs:
 
           Escaneá el QR desde el teléfono:
 
-          <img src="https://lore64210.github.io/reminder/assets/qr.png" width="220" alt="QR para descargar el APK" />
+          <img src="https://lore64210.github.io/organizer/assets/qr.png" width="220" alt="QR para descargar el APK" />
 
           O abrí este link desde el celular:
 
-          https://github.com/lore64210/reminder/releases/latest/download/organizer.apk
+          https://github.com/lore64210/organizer/releases/latest/download/organizer.apk
 
           **Instalación:** Android 7.0 o superior. Permití instalar apps de origen desconocido.
           **Verificación:** el release incluye SHA256SUMS.txt.
-          **Instrucciones:** https://github.com/lore64210/reminder/blob/master/docs/install.md
+          **Instrucciones:** https://github.com/lore64210/organizer/blob/master/docs/install.md
 
           ---
 

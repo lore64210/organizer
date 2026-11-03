@@ -50,4 +50,4 @@ Si en el futuro se agrega una función que implique enviar datos (por ejemplo, b
 
 ## Contacto
 
-Para consultas sobre privacidad, abrí un issue en <https://github.com/lore64210/reminder/issues>.
+Para consultas sobre privacidad, abrí un issue en <https://github.com/lore64210/organizer/issues>.

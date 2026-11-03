@@ -11,13 +11,13 @@ Funciona offline: todo se guarda en el dispositivo con AsyncStorage + Redux Pers
 
 ## Descargar
 
-[![Android 7.0+](https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white)](https://github.com/lore64210/reminder/releases/latest)
+[![Android 7.0+](https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white)](https://github.com/lore64210/organizer/releases/latest)
 [![Expo SDK 58](https://img.shields.io/badge/Expo-SDK%2058-000020?logo=expo&logoColor=white)](https://expo.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-[⬇️ Descargar APK](https://github.com/lore64210/reminder/releases/latest) · [🖥️ Demo web](https://lore64210.github.io/reminder/demo.html) · [🌐 Portfolio](https://lore64210.github.io/reminder/) · [Instrucciones de instalación](docs/install.md)
+[⬇️ Descargar APK](https://github.com/lore64210/organizer/releases/latest) · [🖥️ Demo web](https://lore64210.github.io/organizer/demo.html) · [🌐 Portfolio](https://lore64210.github.io/organizer/) · [Instrucciones de instalación](docs/install.md)
 
-Se distribuye como APK firmado desde [GitHub Releases](https://github.com/lore64210/reminder/releases). Funciona offline y no requiere cuenta.
+Se distribuye como APK firmado desde [GitHub Releases](https://github.com/lore64210/organizer/releases). Funciona offline y no requiere cuenta.
 
 <p align="center">
   <img src="docs/assets/qr.png" width="160" alt="QR para descargar el APK" />

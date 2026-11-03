@@ -48,8 +48,8 @@ El workflow está en [`.github/workflows/release-apk.yml`](../.github/workflows/
 4. Seguilo en **Actions → Release APK**.
 5. Cuando termina, el APK queda en:
 
-   - Página del release: `https://github.com/lore64210/reminder/releases/latest`
-   - Descarga directa: `https://github.com/lore64210/reminder/releases/latest/download/organizer.apk`
+   - Página del release: `https://github.com/lore64210/organizer/releases/latest`
+   - Descarga directa: `https://github.com/lore64210/organizer/releases/latest/download/organizer.apk`
    - Checksum: `SHA256SUMS.txt` adjunto al release.
 
 No hace falta crear el tag a mano: lo crea el workflow apuntando al commit que pusheaste.

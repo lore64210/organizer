@@ -10,10 +10,10 @@ Organizer se distribuye como **APK firmado** desde GitHub Releases. No está en 
 
 ## Descargar
 
-- Última versión: <https://github.com/lore64210/reminder/releases/latest>
-- Descarga directa del APK: <https://github.com/lore64210/reminder/releases/latest/download/organizer.apk>
-- Portfolio: <https://lore64210.github.io/reminder/>
-- Demo web: <https://lore64210.github.io/reminder/demo.html>
+- Última versión: <https://github.com/lore64210/organizer/releases/latest>
+- Descarga directa del APK: <https://github.com/lore64210/organizer/releases/latest/download/organizer.apk>
+- Portfolio: <https://lore64210.github.io/organizer/>
+- Demo web: <https://lore64210.github.io/organizer/demo.html>
 
 <p align="center">
   <img src="assets/qr.png" width="220" alt="Código QR para descargar el APK" />
@@ -71,4 +71,4 @@ Organizer funciona **offline**. Las listas, notas, fotos y audios se guardan ún
 
 ## Código
 
-El código fuente está en <https://github.com/lore64210/reminder>. Es un proyecto de portfolio; todos los derechos reservados.
+El código fuente está en <https://github.com/lore64210/organizer>. Es un proyecto de portfolio; todos los derechos reservados.

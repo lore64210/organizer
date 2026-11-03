@@ -5,7 +5,7 @@ import { DEMO_MODE } from '../../config/demo';
 import { useAppSelector } from '../../config/redux/hooks';
 import type { Theme } from '../../config/types';
 
-const INSTALL_URL = 'https://github.com/lore64210/reminder/releases/latest';
+const INSTALL_URL = 'https://github.com/lore64210/organizer/releases/latest';
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
