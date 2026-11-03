@@ -1,6 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { useSharedValue } from 'react-native-reanimated';
+import { runOnJS } from 'react-native-worklets';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import {
   CameraView,
@@ -46,39 +49,21 @@ const createStyles = (theme: Theme) =>
       right: 0,
       bottom: 0,
     },
-    topBar: {
+    backButton: {
       position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      paddingHorizontal: 14,
-      zIndex: 20,
-    },
-    topBarGlass: {
-      flexDirection: 'row',
+      left: 14,
+      right: 'auto',
+      bottom: 'auto',
+      width: 46,
+      height: 46,
       alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: 8,
-      paddingVertical: 8,
-      borderRadius: theme.borderRadiusLarge,
+      justifyContent: 'center',
+      borderRadius: 23,
       backgroundColor: theme.glassBackground,
       borderWidth: 1,
       borderColor: theme.glassBorder,
       boxShadow: `inset 0 1px 0 ${theme.glassHighlight}, 0 12px 30px ${theme.glassShadow}`,
       elevation: 8,
-    },
-    topActions: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 2,
-    },
-    title: {
-      flex: 1,
-      textAlign: 'center',
-      color: theme.textColor,
-      fontFamily: 'Montserrat_700Bold',
-      fontSize: 11,
-      letterSpacing: 2,
     },
     controlButton: {
       position: 'relative',
@@ -91,7 +76,7 @@ const createStyles = (theme: Theme) =>
       borderWidth: 0,
       boxShadow: 'none',
     },
-    zoomRail: {
+    rightRail: {
       position: 'absolute',
       right: 14,
       zIndex: 20,
@@ -104,6 +89,12 @@ const createStyles = (theme: Theme) =>
       borderColor: theme.glassBorder,
       boxShadow: `inset 0 1px 0 ${theme.glassHighlight}, 0 12px 30px ${theme.glassShadow}`,
       elevation: 8,
+    },
+    divider: {
+      width: 28,
+      height: 1,
+      marginVertical: 6,
+      backgroundColor: theme.hairlineColor,
     },
     zoomSliderBox: {
       width: 44,
@@ -156,10 +147,10 @@ const createStyles = (theme: Theme) =>
       alignItems: 'center',
       zIndex: 20,
     },
-    dockGlass: {
-      width: 92,
-      height: 92,
-      borderRadius: 46,
+    shutterDock: {
+      width: 168,
+      height: 84,
+      borderRadius: 42,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: theme.glassBackground,
@@ -169,17 +160,21 @@ const createStyles = (theme: Theme) =>
       elevation: 10,
     },
     shutter: {
-      position: 'relative',
-      left: 0,
-      right: 'auto',
-      bottom: 0,
-      width: 70,
-      height: 70,
-      borderRadius: 35,
-      backgroundColor: 'rgba(236,179,101,0.14)',
-      borderWidth: 1,
-      borderColor: theme.accentColor,
-      boxShadow: `inset 0 0 0 7px ${theme.glassBackground}`,
+      width: 62,
+      height: 62,
+      borderRadius: 31,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.textColor,
+      borderWidth: 3,
+      borderColor: 'rgba(255,255,255,0.35)',
+    },
+    shutterPressed: {
+      transform: [{ scale: 0.94 }],
+      opacity: 0.85,
+    },
+    shutterDisabled: {
+      opacity: 0.45,
     },
     hint: {
       marginTop: 10,
@@ -231,6 +226,32 @@ const CameraScreen = ({ navigation }: Props) => {
   const [leaving, setLeaving] = useState(false);
 
   const cameraRef = useRef<CameraView>(null);
+  const zoomShared = useSharedValue(0);
+  const pinchStart = useSharedValue(0);
+
+  useEffect(() => {
+    zoomShared.value = zoom;
+  }, [zoom, zoomShared]);
+
+  const pinchGesture = useMemo(
+    () =>
+      Gesture.Pinch()
+        .onStart(() => {
+          pinchStart.value = zoomShared.value;
+        })
+        .onUpdate(event => {
+          const next = Math.min(
+            1,
+            Math.max(
+              0,
+              pinchStart.value + Math.log2(Math.max(event.scale, 0.01)) * 0.45,
+            ),
+          );
+          zoomShared.value = next;
+          runOnJS(setZoom)(next);
+        }),
+    [pinchStart, zoomShared],
+  );
 
   const pausePreview = () => {
     cameraRef.current?.pausePreview().catch(() => {});
@@ -349,52 +370,50 @@ const CameraScreen = ({ navigation }: Props) => {
   return (
     <View style={styles.container}>
       {!leaving ? (
-        <CameraView
-          ref={cameraRef}
-          style={styles.camera}
-          facing={facing}
-          flash={flash}
-          zoom={zoom}
-          barcodeScannerSettings={{ barcodeTypes: BARCODE_TYPES }}
-          onBarcodeScanned={dataScanned ? undefined : handleBarCodeScanned}
-        />
+        <GestureDetector gesture={pinchGesture}>
+          <View style={styles.camera}>
+            <CameraView
+              ref={cameraRef}
+              style={styles.camera}
+              facing={facing}
+              flash={flash}
+              zoom={zoom}
+              barcodeScannerSettings={{ barcodeTypes: BARCODE_TYPES }}
+              onBarcodeScanned={dataScanned ? undefined : handleBarCodeScanned}
+            />
+          </View>
+        </GestureDetector>
       ) : null}
 
       {!leaving ? (
         <>
-          <View style={[styles.topBar, { paddingTop: insets.top + 10 }]}>
-            <View style={styles.topBarGlass}>
-              <IconButton
-                name="chevron-left"
-                onPress={closeCamera}
-                containerStyle={styles.controlButton}
-                color={theme.textColor}
-                elevated={false}
-                accessibilityLabel={i18n.t('closeCamera')}
-              />
-              <Text style={styles.title}>{i18n.t('cameraTitle').toUpperCase()}</Text>
-              <View style={styles.topActions}>
-                <IconButton
-                  name="flash"
-                  onPress={() => setFlash(current => (current === 'on' ? 'off' : 'on'))}
-                  containerStyle={styles.controlButton}
-                  color={flash === 'on' ? theme.accentColor : theme.mutedColor}
-                  elevated={false}
-                  accessibilityLabel={i18n.t('toggleFlash')}
-                />
-                <IconButton
-                  name="refresh"
-                  onPress={() => setFacing(current => (current === 'back' ? 'front' : 'back'))}
-                  containerStyle={styles.controlButton}
-                  color={theme.textColor}
-                  elevated={false}
-                  accessibilityLabel={i18n.t('flipCamera')}
-                />
-              </View>
-            </View>
-          </View>
+          <IconButton
+            name="chevron-left"
+            onPress={closeCamera}
+            containerStyle={[styles.backButton, { top: insets.top + 10 }]}
+            color={theme.textColor}
+            elevated={false}
+            accessibilityLabel={i18n.t('closeCamera')}
+          />
 
-          <View style={[styles.zoomRail, { top: insets.top + 96 }]}>
+          <View style={[styles.rightRail, { top: insets.top + 10 }]}>
+            <IconButton
+              name="flash"
+              onPress={() => setFlash(current => (current === 'on' ? 'off' : 'on'))}
+              containerStyle={styles.controlButton}
+              color={flash === 'on' ? theme.accentColor : theme.mutedColor}
+              elevated={false}
+              accessibilityLabel={i18n.t('toggleFlash')}
+            />
+            <IconButton
+              name="refresh"
+              onPress={() => setFacing(current => (current === 'back' ? 'front' : 'back'))}
+              containerStyle={styles.controlButton}
+              color={theme.textColor}
+              elevated={false}
+              accessibilityLabel={i18n.t('flipCamera')}
+            />
+            <View style={styles.divider} />
             <IconButton
               name="plus"
               onPress={() => changeZoom(0.1)}
@@ -442,16 +461,18 @@ const CameraScreen = ({ navigation }: Props) => {
           ) : null}
 
           <View style={[styles.bottomDock, { paddingBottom: insets.bottom + 18 }]}>
-            <View style={styles.dockGlass}>
-              <IconButton
-                containerStyle={styles.shutter}
-                name="dot-circle-o"
-                size={56}
+            <View style={styles.shutterDock}>
+              <Pressable
                 onPress={takePicture}
-                color={theme.accentColor}
-                elevated={false}
                 disabled={capturing}
+                accessibilityRole="button"
                 accessibilityLabel={i18n.t('takePhoto')}
+                accessibilityState={{ disabled: capturing }}
+                style={({ pressed }) => [
+                  styles.shutter,
+                  pressed && styles.shutterPressed,
+                  capturing && styles.shutterDisabled,
+                ]}
               />
             </View>
             <Text style={styles.hint}>{i18n.t('cameraHint')}</Text>
