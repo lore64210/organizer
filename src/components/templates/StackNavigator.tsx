@@ -34,7 +34,11 @@ const StackNavigator = () => {
       <Navigator id="root" screenOptions={{ headerShown: false }} initialRouteName="HomeScreen">
         <Screen name="HomeScreen" component={HomeScreen} />
         <Screen name="ReminderScreen" component={ReminderScreen} />
-        <Screen name="CameraScreen" component={CameraScreen} />
+        <Screen
+          name="CameraScreen"
+          component={CameraScreen}
+          options={{ animation: 'fade' }}
+        />
       </Navigator>
     </NavigationContainer>
   );

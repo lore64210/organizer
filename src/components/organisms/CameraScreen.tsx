@@ -116,6 +116,8 @@ const CameraScreen = ({ navigation }: Props) => {
   const [flash, setFlash] = useState<FlashMode>('off');
   const [dataScanned, setDataScanned] = useState<string | null>(null);
   const [dataScannedIcon, setDataScannedIcon] = useState<'qrcode' | 'barcode'>('qrcode');
+  const [capturing, setCapturing] = useState(false);
+  const [leaving, setLeaving] = useState(false);
 
   const cameraRef = useRef<CameraView>(null);
 
@@ -133,21 +135,51 @@ const CameraScreen = ({ navigation }: Props) => {
     }
   }, [permission]);
 
-  const takePicture = async () => {
-    const photo = await cameraRef.current?.takePictureAsync({ quality: 0.8 });
-    if (!photo?.uri || !reminder) {
+  // Wait for the camera surface to unmount before navigating back. On Android
+  // the preview can otherwise stay on top during the transition and leave a
+  // black rectangle over half of the previous screen.
+  useEffect(() => {
+    if (!leaving) {
       return;
     }
-    const newImage: Item = {
-      id: generateUUID(),
-      value: await persistFile(photo.uri),
-      type: 'image',
-    };
-    dispatch({
-      type: SET_CURRENT_REMINDER,
-      payload: { ...reminder, imageItems: [newImage, ...reminder.imageItems] },
-    });
-    navigation.goBack();
+    const frame = requestAnimationFrame(() => navigation.goBack());
+    return () => cancelAnimationFrame(frame);
+  }, [leaving, navigation]);
+
+  const pausePreview = () => {
+    cameraRef.current?.pausePreview().catch(() => {});
+  };
+
+  const takePicture = async () => {
+    if (!cameraRef.current || !reminder || capturing) {
+      return;
+    }
+
+    setCapturing(true);
+    try {
+      const photo = await cameraRef.current.takePictureAsync({ quality: 0.8 });
+      if (!photo?.uri) {
+        setCapturing(false);
+        return;
+      }
+
+      // Freeze the preview while the file is copied and the screen leaves.
+      await cameraRef.current.pausePreview().catch(() => {});
+
+      const newImage: Item = {
+        id: generateUUID(),
+        value: await persistFile(photo.uri),
+        type: 'image',
+      };
+      dispatch({
+        type: SET_CURRENT_REMINDER,
+        payload: { ...reminder, imageItems: [newImage, ...reminder.imageItems] },
+      });
+      setLeaving(true);
+    } catch (error) {
+      console.warn('Could not take picture', error);
+      setCapturing(false);
+    }
   };
 
   const handleBarCodeScanned = ({ type, data }: BarcodeScanningResult) => {
@@ -169,10 +201,11 @@ const CameraScreen = ({ navigation }: Props) => {
       type: SET_CURRENT_REMINDER,
       payload: { ...reminder, items: [newItem, ...reminder.items] },
     });
-    navigation.goBack();
+    pausePreview();
+    setLeaving(true);
   };
 
-  if (!permission?.granted) {
+  if (!permission?.granted || leaving) {
     return <View style={styles.container} />;
   }
 
@@ -229,6 +262,7 @@ const CameraScreen = ({ navigation }: Props) => {
               onPress={takePicture}
               color={theme.accentColor}
               elevated={false}
+              disabled={capturing}
               accessibilityLabel={i18n.t('cameraPermission')}
             />
             <IconButton
