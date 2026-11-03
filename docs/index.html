@@ -347,13 +347,13 @@
       .product-grid {
         display: grid;
         grid-template-columns: 1.05fr 0.95fr;
-        gap: 28px;
+        gap: 52px;
         align-items: start;
       }
 
       .feature-list {
         display: grid;
-        gap: 12px;
+        gap: 18px;
       }
 
       .feature-row {
@@ -409,7 +409,11 @@
 
       .tech-panel {
         display: grid;
-        gap: 14px;
+        gap: 16px;
+        padding: 24px;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.02);
       }
 
       /* ---------- Showcase ---------- */
@@ -548,7 +552,7 @@
 
       .tech-list {
         display: grid;
-        gap: 14px;
+        gap: 0;
         margin: 0;
         padding: 0;
         list-style: none;
@@ -557,11 +561,21 @@
       .tech-list li {
         display: flex;
         gap: 12px;
-        padding: 14px 16px;
-        border: 1px solid var(--line);
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.02);
+        padding: 12px 0;
+        border: 0;
+        border-bottom: 1px solid var(--line);
+        border-radius: 0;
+        background: transparent;
         font-size: 13px;
+      }
+
+      .tech-list li:first-child {
+        padding-top: 0;
+      }
+
+      .tech-list li:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
       }
 
       .tech-list strong {
@@ -728,6 +742,7 @@
 
         .product-grid {
           grid-template-columns: 1fr;
+          gap: 32px;
         }
 
         .showcase,
