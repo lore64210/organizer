@@ -1,16 +1,22 @@
 name: Release APK
 
-# Requisitos (una sola vez):
-#   1. npx eas-cli login
-#   2. npx eas-cli init            (agrega extra.eas.projectId en app.json)
-#   3. Crear un token en https://expo.dev/settings/access-tokens
-#   4. Guardarlo como secreto EXPO_TOKEN en GitHub:
-#      Settings → Secrets and variables → Actions → New repository secret
+# Se dispara de dos formas:
+#   1. Push a master: si cambió expo.version en app.json, crea el tag v<version>
+#      y publica el release automáticamente.
+#   2. Push de un tag v*: publica ese tag (sirve para releases manuales).
 #
-# Cada tag v* compila el APK y crea/actualiza el release de GitHub.
+# Requisitos (una sola vez):
+#   - npx eas-cli login && npx eas-cli init
+#   - Secreto EXPO_TOKEN en GitHub
+#   - Keystore generado con un primer build interactivo
+#
+# La versión vive en app.json (expo.version). package.json puede acompañar,
+# pero el workflow lee app.json.
 
 on:
   push:
+    branches:
+      - master
     tags:
       - 'v*'
 
@@ -18,12 +24,90 @@ permissions:
   contents: write
 
 concurrency:
-  group: release-apk-${{ github.ref }}
-  cancel-in-progress: true
+  group: release-apk
+  cancel-in-progress: false
 
 jobs:
+  check:
+    name: Detectar cambio de versión
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      should_release: ${{ steps.version.outputs.should_release }}
+      tag: ${{ steps.version.outputs.tag }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Detectar versión
+        id: version
+        shell: bash
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+
+          read_version() {
+            node -e "let data='';process.stdin.on('data',chunk=>data+=chunk).on('end',()=>{try{const c=JSON.parse(data);process.stdout.write(c.expo?.version ?? '')}catch{}})"
+          }
+
+          # Un push de tag siempre publica ese tag.
+          if [ "$REF_TYPE" = "tag" ]; then
+            echo "Push de tag: $REF_NAME"
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "tag=$REF_NAME" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          CURRENT=$(node -p "require('./app.json').expo.version")
+
+          PREVIOUS=""
+          if [ -n "$BEFORE_SHA" ] && [ "$BEFORE_SHA" != "0000000000000000000000000000000000000000" ] && git cat-file -e "$BEFORE_SHA:app.json" 2>/dev/null; then
+            PREVIOUS=$(git show "$BEFORE_SHA:app.json" | read_version)
+          elif git cat-file -e "HEAD^:app.json" 2>/dev/null; then
+            PREVIOUS=$(git show "HEAD^:app.json" | read_version)
+          fi
+
+          echo "Versión actual:  ${CURRENT:-<vacía>}"
+          echo "Versión anterior: ${PREVIOUS:-<sin dato>}"
+
+          if [ -z "$CURRENT" ]; then
+            echo "No se pudo leer expo.version desde app.json." >&2
+            exit 1
+          fi
+
+          if [ "$CURRENT" = "$PREVIOUS" ]; then
+            echo "La versión no cambió; no se publica nada."
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          TAG="v$CURRENT"
+          if git rev-parse "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "El tag $TAG ya existe; no se publica de nuevo."
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Se va a crear el release $TAG."
+          echo "should_release=true" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
   build-and-release:
     name: Build APK and publish release
+    needs: check
+    if: needs.check.outputs.should_release == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
@@ -39,6 +123,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
 
       - name: Setup EAS
         uses: expo/expo-github-action@v8
@@ -73,7 +160,9 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: Organizer ${{ github.ref_name }}
+          tag_name: ${{ needs.check.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: Organizer ${{ needs.check.outputs.tag }}
           files: |
             organizer.apk
             SHA256SUMS.txt

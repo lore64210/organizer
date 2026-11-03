@@ -121,7 +121,8 @@ src/
 
 ## Publicación
 
-- El APK se compila con el perfil `release-apk` de EAS y se publica en GitHub Releases al pushear un tag `v*`.
+- Al cambiar `expo.version` en `app.json` y pushear a `master`, el workflow crea el tag `v<version>` y publica el APK en GitHub Releases.
+- También se puede publicar un tag `v*` manualmente.
 - Guía paso a paso: [`docs/releasing.md`](docs/releasing.md).
 - Instalación en Android: [`docs/install.md`](docs/install.md).
 - Privacidad: [`PRIVACY.md`](PRIVACY.md).
