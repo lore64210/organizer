@@ -104,6 +104,29 @@ gh release create v1.2.0 .\organizer.apk `
   Elegí Android → Keystore → descargar.
 - El package (`com.lore64210.organizer`) y la firma deben mantenerse iguales en todas las versiones.
 
+## Tamaño del APK
+
+El APK de `v1.1.0` pesó **113,6 MB** porque era universal e incluía cuatro arquitecturas:
+
+| ABI | Tamaño de libs |
+|---|---|
+| `x86` | 28,3 MB |
+| `x86_64` | 27,7 MB |
+| `arm64-v8a` | 26,3 MB |
+| `armeabi-v7a` | 18,0 MB |
+
+`x86` y `x86_64` solo sirven para emuladores; los teléfonos reales son ARM. Además, las librerías nativas iban sin comprimir.
+
+La configuración actual de `expo-build-properties` (en `app.json`) hace que el perfil `release-apk`:
+
+- compile solo `arm64-v8a` y `armeabi-v7a`;
+- comprima las libs nativas en el APK (`useLegacyPackaging`);
+- aplique R8 y eliminación de recursos (`enableMinifyInReleaseBuilds` + `enableShrinkResourcesInReleaseBuilds`).
+
+El próximo build debería quedar bastante por debajo de 114 MB (estimado **30–45 MB**). Confirmá el tamaño en el release y probá el APK en un dispositivo antes de compartirlo. Si R8 rompe algo, quitá `enableMinifyInReleaseBuilds`/`enableShrinkResourcesInReleaseBuilds` y volvé a compilar.
+
+Si alguna vez necesitás un APK para emulador, agregá `x86_64` a `buildArchs` en un perfil de build aparte. El escáner de códigos (ML Kit) agrega ~5 MB por ABI; si se quita esa función, el APK baja otro poco.
+
 ## Límites y costos
 
 - **GitHub Releases**: gratis, sin límite de bandwidth; hasta 1.000 archivos por release y 2 GiB por archivo.
