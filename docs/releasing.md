@@ -54,6 +54,8 @@ El workflow está en [`.github/workflows/release-apk.yml`](../.github/workflows/
 
 No hace falta crear el tag a mano: lo crea el workflow apuntando al commit que pusheaste.
 
+Cada release incluye en las notas un **QR** que apunta a `releases/latest/download/organizer.apk`. Sirve para abrir el release en la computadora y escanearlo con el teléfono para descargar el APK sin pasarlo por cable ni por chat.
+
 ### Cómo detecta el cambio
 
 - Lee `expo.version` de `app.json` (esa es la fuente de verdad).

@@ -114,6 +114,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -157,14 +160,48 @@ jobs:
       - name: Generate checksum
         run: sha256sum organizer.apk > SHA256SUMS.txt
 
+      - name: Prepare release notes
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || true)
+          if [ -n "$PREV_TAG" ]; then
+            CHANGES=$(git log --pretty=format:'- %s' "$PREV_TAG..HEAD")
+          else
+            CHANGES=$(git log --pretty=format:'- %s' -10)
+          fi
+          if [ -z "$CHANGES" ]; then
+            CHANGES="- Sin cambios detallados."
+          fi
+
+          cat > release-body.md <<EOF
+          ## 📱 Descargar en Android
+
+          Escaneá el QR desde el teléfono:
+
+          <img src="https://lore64210.github.io/reminder/assets/qr.png" width="220" alt="QR para descargar el APK" />
+
+          O abrí este link desde el celular:
+
+          https://github.com/lore64210/reminder/releases/latest/download/organizer.apk
+
+          **Instalación:** Android 7.0 o superior. Permití instalar apps de origen desconocido.
+          **Verificación:** el release incluye SHA256SUMS.txt.
+          **Instrucciones:** https://github.com/lore64210/reminder/blob/master/docs/install.md
+
+          ---
+
+          ### Cambios
+
+          $CHANGES
+          EOF
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.check.outputs.tag }}
           target_commitish: ${{ github.sha }}
           name: Organizer ${{ needs.check.outputs.tag }}
+          body_path: release-body.md
           files: |
             organizer.apk
             SHA256SUMS.txt
-          generate_release_notes: true
           fail_on_unmatched_files: true

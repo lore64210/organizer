@@ -19,7 +19,9 @@ Funciona offline: todo se guarda en el dispositivo con AsyncStorage + Redux Pers
 
 Se distribuye como APK firmado desde [GitHub Releases](https://github.com/lore64210/reminder/releases). Funciona offline y no requiere cuenta.
 
-> La primera versión se publica en cuanto se configure EAS. Ver [`docs/releasing.md`](docs/releasing.md).
+<p align="center">
+  <img src="docs/assets/qr.png" width="160" alt="QR para descargar el APK" />
+</p>
 
 ### Demo web
 
