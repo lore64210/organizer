@@ -239,9 +239,16 @@
         background: var(--accent);
       }
 
+      .phone-column {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 0 0 auto;
+      }
+
       .phone {
         position: relative;
-        height: min(844px, calc(100dvh - 148px));
+        width: min(440px, 92vw);
         aspect-ratio: 390 / 844;
         padding: 9px;
         border-radius: 46px;
@@ -251,6 +258,27 @@
           0 40px 90px rgba(0, 0, 0, 0.55),
           inset 0 1px 0 rgba(255, 255, 255, 0.18);
         flex: 0 0 auto;
+      }
+
+      .under-phone {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 7px;
+        margin-top: 18px;
+      }
+
+      .under-phone .btn {
+        padding: 13px 22px;
+        font-size: 13px;
+      }
+
+      .under-note {
+        color: var(--muted);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
       }
 
       .phone iframe {
@@ -292,7 +320,7 @@
         display: none;
       }
 
-      @media (max-width: 1120px) {
+      @media (max-width: 1260px) {
         .stage {
           grid-template-columns: 1fr;
           gap: 26px;
@@ -318,10 +346,6 @@
 
         .side .actions {
           justify-content: center;
-        }
-
-        .phone {
-          height: min(760px, calc(100dvh - 120px));
         }
       }
 
@@ -356,8 +380,14 @@
         }
 
         .intro,
-        .side {
+        .side,
+        .under-phone {
           display: none;
+        }
+
+        .phone-column {
+          display: block;
+          width: 100%;
         }
 
         .phone {
@@ -415,13 +445,24 @@
         </div>
       </section>
 
-      <div class="phone">
-        <iframe
-          id="demo-frame"
-          src="demo/"
-          title="Demo de Organizer"
-          allow="camera; microphone; clipboard-write"
-        ></iframe>
+      <div class="phone-column">
+        <div class="phone">
+          <iframe
+            id="demo-frame"
+            src="demo/?embedded=1"
+            title="Demo de Organizer"
+            allow="camera; microphone; clipboard-write"
+          ></iframe>
+        </div>
+        <div class="under-phone">
+          <a
+            class="btn btn-primary"
+            href="https://github.com/lore64210/reminder/releases/latest/download/organizer.apk"
+          >
+            Descargar app para Android
+          </a>
+          <span class="under-note">APK firmado · Android 7.0+</span>
+        </div>
       </div>
 
       <section class="side">
@@ -432,12 +473,6 @@
           completas.
         </p>
         <div class="actions">
-          <a
-            class="btn btn-primary"
-            href="https://github.com/lore64210/reminder/releases/latest/download/organizer.apk"
-          >
-            Descargar APK
-          </a>
           <button class="btn btn-secondary" type="button" id="reset-demo">
             Reiniciar demo
           </button>
@@ -454,6 +489,28 @@
     <script>
       const frame = document.getElementById('demo-frame');
       const reset = document.getElementById('reset-demo');
+
+      // El iframe es same-origin: ocultamos el scrollbar nativo del navegador
+      // para que la demo se vea como una app, no como una página web.
+      const hideScrollbars = () => {
+        try {
+          const doc = frame?.contentDocument;
+          if (!doc || doc.getElementById('demo-no-scrollbars')) {
+            return;
+          }
+          const style = doc.createElement('style');
+          style.id = 'demo-no-scrollbars';
+          style.textContent =
+            '::-webkit-scrollbar{width:0!important;height:0!important;background:transparent}' +
+            '*{scrollbar-width:none!important;-ms-overflow-style:none!important}';
+          doc.head.appendChild(style);
+        } catch {
+          // Si el navegador bloquea el acceso, la demo sigue funcionando.
+        }
+      };
+
+      frame?.addEventListener('load', hideScrollbars);
+      hideScrollbars();
 
       reset?.addEventListener('click', () => {
         try {

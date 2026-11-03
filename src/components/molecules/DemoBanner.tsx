@@ -1,4 +1,4 @@
-import { Linking, Pressable, StyleSheet, Text } from 'react-native';
+import { Linking, Platform, Pressable, StyleSheet, Text } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import i18n from '../../config/i18n';
 import { DEMO_MODE } from '../../config/demo';
@@ -40,7 +40,12 @@ const DemoBanner = () => {
   const theme = useAppSelector(state => state.themeReducer.theme);
   const styles = createStyles(theme);
 
-  if (!DEMO_MODE) {
+  const isEmbedded =
+    Platform.OS === 'web' &&
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('embedded') === '1';
+
+  if (!DEMO_MODE || isEmbedded) {
     return null;
   }
 
