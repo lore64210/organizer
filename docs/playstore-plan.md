@@ -1,109 +1,109 @@
-# Plan de publicación en Google Play — Organizer
+# Google Play publishing plan — Organizer
 
-_Última revisión: 2 de noviembre de 2026._
+_Last reviewed: November 2, 2026._
 
-> **Estado (nov 2026):** la distribución activa es **GitHub Releases**. Este documento queda como referencia para una futura publicación en tiendas. Ver [`install.md`](install.md) y [`releasing.md`](releasing.md).
+> **Status (Nov 2026):** the active distribution channel is **GitHub Releases**. This document remains as a reference for a future store release. See [`install.md`](install.md) and [`releasing.md`](releasing.md).
 
-## 0. Resumen ejecutivo
+## 0. Executive summary
 
-La app está técnicamente lista para Android: Expo SDK 58 compila con **target SDK 36 (Android 16)**, que es el mínimo que Google Play exige para apps nuevas desde el 31/08/2026. `npm run typecheck` pasa.
+The app is technically ready for Android: Expo SDK 58 builds with **target SDK 36 (Android 16)**, the minimum Google Play requires for new apps since 2026-08-31. `npm run typecheck` passes.
 
-Lo que falta no es código de la app, sino **identidad, cuenta, cumplimiento y ficha**:
+What is missing is not app code, but **identity, account, compliance and listing**:
 
-1. Cuenta de Google Play Developer verificada ($25 única vez).
-2. Definir **package name definitivo** y nombre comercial.
-3. Vincular el proyecto a EAS (`eas init`) y ajustar la config de build.
-4. Política de privacidad pública.
-5. Ficha de Play (textos + icono 512 + feature graphic + capturas).
-6. Formularios: Data Safety, clasificación de contenido, público objetivo, permisos.
-7. Build AAB → internal testing → closed testing (12 testers / 14 días si la cuenta es personal nueva) → producción.
+1. Verified Google Play Developer account ($25 one-time).
+2. Decide the **final package name** and trade name.
+3. Link the project to EAS (`eas init`) and adjust the build config.
+4. Public privacy policy.
+5. Play listing (copy + 512 icon + feature graphic + screenshots).
+6. Forms: Data Safety, content rating, target audience, permissions.
+7. AAB build → internal testing → closed testing (12 testers / 14 days if the account is a new personal one) → production.
 
-**Tiempo estimado:** 4–6 semanas si la cuenta es personal nueva (el camino crítico son los 14 días de closed testing). 1–2 semanas si la cuenta ya tiene acceso a producción.
+**Estimated time:** 4–6 weeks if the account is a new personal one (the critical path is the 14 days of closed testing). 1–2 weeks if the account already has production access.
 
-**Costo:** $25 (cuenta) + hosting de la política (gratis con GitHub Pages/Notion) + EAS (el plan gratuito suele alcanzar; tiene límites de cola).
+**Cost:** $25 (account) + policy hosting (free with GitHub Pages/Notion) + EAS (the free plan is usually enough; it has queue limits).
 
 ---
 
-## 1. Diagnóstico del repo
+## 1. Repo assessment
 
-| Punto | Estado | Acción |
+| Item | Status | Action |
 |---|---|---|
 | Expo SDK 58 / RN 0.88 / React 19 | OK | — |
-| target SDK | **36** (`expo-modules-core` default) | Cumple el requisito de API 36 |
-| Typecheck | Pasa (`tsc --noEmit`) | — |
-| `expo-doctor` | Según README, 20/20 | Re-ejecutar antes del build |
-| Proyecto EAS | **No vinculado**: falta `extra.eas.projectId` en `app.json` | `eas init` |
-| `eas.json` | Perfiles dev/preview/production | Falta `autoIncrement` y config de submit |
-| Package Android | `com.lore64210.organizer` (minúsculas) | Definido antes del primer build |
-| Versión | `1.1.0`, `versionCode: 1` | Con `appVersionSource: remote`, EAS maneja el versionCode |
-| Permisos declarados | INTERNET, VIBRATE, CAMERA, RECORD_AUDIO, MODIFY_AUDIO_SETTINGS, POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED, READ/WRITE_EXTERNAL_STORAGE (≤ API 32) | Justificar cámara/micrófono en la ficha y la política |
-| `SYSTEM_ALERT_WINDOW` | Viene de la plantilla de Expo, la app no lo usa | Bloquearlo en release (`blockedPermissions`) |
-| `FOREGROUND_SERVICE_MEDIA_PLAYBACK` | Lo agrega `expo-audio` porque `enableBackgroundPlayback` es `true` por defecto | Ponerlo en `false`; evita declarar foreground service en Play |
-| Alarmas exactas | **No** se declara `SCHEDULE_EXACT_ALARM` → en Doze se usa `setAndAllowWhileIdle` (inexacta) | Agregar permiso y pedir acceso especial |
-| Datos | Todo local (AsyncStorage + archivos), sin backend, sin analytics | Data Safety simple: “no se recopila nada” |
-| Política de privacidad | No existe | Crear y hostear |
-| Ficha / assets | Solo iconos de la app; no hay feature graphic ni capturas de tienda | Crear |
-| Tests / ESLint | No hay | No bloquea Play; recomendable a futuro |
+| target SDK | **36** (`expo-modules-core` default) | Meets the API 36 requirement |
+| Typecheck | Passes (`tsc --noEmit`) | — |
+| `expo-doctor` | Per README, 20/20 | Re-run before the build |
+| EAS project | **Not linked**: missing `extra.eas.projectId` in `app.json` | `eas init` |
+| `eas.json` | dev/preview/production profiles | Missing `autoIncrement` and submit config |
+| Android package | `com.lore64210.organizer` (lowercase) | Set before the first build |
+| Version | `1.1.0`, `versionCode: 1` | With `appVersionSource: remote`, EAS manages the versionCode |
+| Declared permissions | INTERNET, VIBRATE, CAMERA, RECORD_AUDIO, MODIFY_AUDIO_SETTINGS, POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED, READ/WRITE_EXTERNAL_STORAGE (≤ API 32) | Justify camera/microphone in the listing and the policy |
+| `SYSTEM_ALERT_WINDOW` | Comes from the Expo template, the app does not use it | Block it in release (`blockedPermissions`) |
+| `FOREGROUND_SERVICE_MEDIA_PLAYBACK` | Added by `expo-audio` because `enableBackgroundPlayback` defaults to `true` | Set it to `false`; avoids declaring a foreground service on Play |
+| Exact alarms | `SCHEDULE_EXACT_ALARM` is **not** declared → under Doze it uses `setAndAllowWhileIdle` (inexact) | Add the permission and request special access |
+| Data | All local (AsyncStorage + files), no backend, no analytics | Simple Data Safety: "nothing is collected" |
+| Privacy policy | Does not exist | Create and host it |
+| Listing / assets | Only app icons; no feature graphic or store screenshots | Create them |
+| Tests / ESLint | None | Does not block Play; recommended later |
 
-### Lectura de permisos
+### Permission reading
 
-- `CAMERA`: fotos y escaneo de códigos QR/barras (pantalla de cámara).
-- `RECORD_AUDIO`: notas de audio.
-- `POST_NOTIFICATIONS`: alarmas/recordatorios (se pide en runtime).
-- `RECEIVE_BOOT_COMPLETED`: reprogramar alarmas tras reiniciar (lo maneja `expo-notifications`).
-- `READ/WRITE_EXTERNAL_STORAGE` con `maxSdkVersion=32`: solo Android 12 o menor, por el picker de imágenes.
-- **No** se declara `READ_MEDIA_IMAGES`/`READ_MEDIA_VIDEO`: bien, porque `expo-image-picker` usa el Photo Picker en Android 13+. Eso evita el formulario de permisos de fotos de Play.
+- `CAMERA`: photos and QR/barcode scanning (camera screen).
+- `RECORD_AUDIO`: audio notes.
+- `POST_NOTIFICATIONS`: alarms/reminders (requested at runtime).
+- `RECEIVE_BOOT_COMPLETED`: reschedule alarms after a reboot (handled by `expo-notifications`).
+- `READ/WRITE_EXTERNAL_STORAGE` with `maxSdkVersion=32`: Android 12 or lower only, for the image picker.
+- `READ_MEDIA_IMAGES`/`READ_MEDIA_VIDEO` are **not** declared: good, because `expo-image-picker` uses the Photo Picker on Android 13+. That avoids Play's photo permissions form.
 
 ---
 
-## 2. Decisiones bloqueantes (definir antes de tocar código)
+## 2. Blocking decisions (make them before touching code)
 
-| Decisión | Por qué importa | Recomendación |
+| Decision | Why it matters | Recommendation |
 |---|---|---|
-| **Tipo de cuenta**: personal u organización | La cuenta personal nueva exige 12 testers / 14 días antes de producción. La de organización exige D-U-N-S y verificación comercial. | Personal si sos vos solo; organización si va a facturar una empresa |
-| **Package name** | Es permanente: no se puede cambiar después del primer upload (sería otra app). | `com.lore64210.organizer` en minúsculas, o un dominio propio (`com.tudominio.organizer`) |
-| **Nombre en Play** | Máximo 30 caracteres. “Organizer” es genérico y difícil de encontrar/marcar. | Un nombre algo más específico: “Organizer — Recordatorios” o una marca propia |
-| **Email de contacto** | Se muestra en la ficha y en la política de privacidad. | Uno dedicado al proyecto |
-| **URL de política de privacidad** | Campo obligatorio de la ficha. Tiene que ser pública y estable. | GitHub Pages del repo (si es público), Notion o sitio propio |
-| **¿También iOS?** | Cambia el bundle identifier y suma trabajo de assets/revisión. | Android primero; iOS después reutilizando el mismo nombre |
-| **Alarmas exactas** | Sin esto, un recordatorio puede llegar tarde en Doze. Para una app de recordatorios es calidad básica. | Sí: `SCHEDULE_EXACT_ALARM` + pedido de acceso especial (no `USE_EXACT_ALARM`) |
+| **Account type**: personal or organization | A new personal account requires 12 testers / 14 days before production. The organization one requires a D-U-N-S number and business verification. | Personal if it is just you; organization if a company will be billing |
+| **Package name** | It is permanent: it cannot be changed after the first upload (it would be another app). | `com.lore64210.organizer` in lowercase, or your own domain (`com.yourdomain.organizer`) |
+| **Play name** | Maximum 30 characters. "Organizer" is generic and hard to find/register. | A slightly more specific name: "Organizer — Reminders" or your own brand |
+| **Contact email** | Shown in the listing and in the privacy policy. | One dedicated to the project |
+| **Privacy policy URL** | Required field of the listing. It must be public and stable. | GitHub Pages of the repo (if public), Notion or your own site |
+| **iOS too?** | It changes the bundle identifier and adds asset/review work. | Android first; iOS later reusing the same name |
+| **Exact alarms** | Without this, a reminder can arrive late under Doze. For a reminders app this is basic quality. | Yes: `SCHEDULE_EXACT_ALARM` + special access request (not `USE_EXACT_ALARM`) |
 
-> **Ojo con el package:** Play lo trata como identificador único y permanente. Aunque Android acepta mayúsculas, la convención y varias herramientas esperan minúsculas. Definilo ahora.
-
----
-
-## 3. Fase 0 — Cuenta y verificaciones (1–3 días, a veces más)
-
-- [ ] Crear cuenta en [play.google.com/console](https://play.google.com/console) y pagar los **$25** (pago único).
-- [ ] Completar **verificación de identidad** (documento oficial; si es organización, D-U-N-S).
-- [ ] Configurar **verificación en dos pasos** en la cuenta de Google.
-- [ ] Completar **verificación de dispositivo**: desde la Play Console web, tarea “Verify that you have access to an Android mobile device”. Se hace con la app **Play Console** en un Android 10+ no rooteado. Tarda menos de un minuto.
-- [ ] Si la cuenta es **personal creada después del 13/11/2023**: asumir el requisito de **closed testing con 12 testers opt-in durante 14 días continuos** y luego solicitar acceso a producción (la revisión de esa solicitud suele tardar ≤7 días).
-- [ ] Definir el **email de contacto público** y el nombre de desarrollador que se verá en Play.
+> **Mind the package:** Play treats it as a unique, permanent identifier. Even though Android accepts uppercase, the convention and several tools expect lowercase. Decide it now.
 
 ---
 
-## 4. Fase 1 — Preparar el proyecto (repo)
+## 3. Phase 0 — Account and verifications (1–3 days, sometimes longer)
 
-### 4.1 Vincular EAS
+- [ ] Create an account at [play.google.com/console](https://play.google.com/console) and pay the **$25** (one-time).
+- [ ] Complete **identity verification** (official document; D-U-N-S if it is an organization).
+- [ ] Set up **two-step verification** on the Google account.
+- [ ] Complete **device verification**: from the Play Console web, the task "Verify that you have access to an Android mobile device". It is done with the **Play Console** app on a non-rooted Android 10+ device. It takes less than a minute.
+- [ ] If the account is a **personal one created after 2023-11-13**: assume the **closed testing with 12 opt-in testers for 14 continuous days** requirement, then request production access (review of that request usually takes ≤7 days).
+- [ ] Decide the **public contact email** and the developer name shown on Play.
+
+---
+
+## 4. Phase 1 — Prepare the project (repo)
+
+### 4.1 Link EAS
 
 ```powershell
 npx eas-cli@latest login
 npx eas-cli@latest init
 ```
 
-Eso agrega `extra.eas.projectId` y `owner` en `app.json`. Verificá que el `slug` (`organizer`) sea el definitivo.
+That adds `extra.eas.projectId` and `owner` to `app.json`. Check that the `slug` (`organizer`) is final.
 
 ### 4.2 `app.json`
 
-Cambios propuestos:
+Proposed changes:
 
 ```jsonc
 {
   "expo": {
-    "name": "Organizer",                 // nombre visible; ajustar si cambia la marca
+    "name": "Organizer",                 // display name; adjust if the brand changes
     "android": {
-      "package": "com.lore64210.organizer", // minúsculas, definitivo
+      "package": "com.lore64210.organizer", // lowercase, final
       "blockedPermissions": [
         "android.permission.SYSTEM_ALERT_WINDOW"
       ],
@@ -114,7 +114,7 @@ Cambios propuestos:
     "plugins": [
       // ...
       ["expo-audio", {
-        "microphonePermission": "Organizer necesita el micrófono para grabar notas de audio.",
+        "microphonePermission": "Organizer needs the microphone to record audio notes.",
         "recordAudioAndroid": true,
         "enableBackgroundPlayback": false
       }]
@@ -123,13 +123,13 @@ Cambios propuestos:
 }
 ```
 
-- `blockedPermissions`: la app no dibuja sobre otras apps; sacarlo reduce fricción en la revisión.
-- `enableBackgroundPlayback: false`: la app reproduce audio solo en primer plano. Evita `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_MEDIA_PLAYBACK` y la declaración de foreground service en Play.
-- `SCHEDULE_EXACT_ALARM`: permiso de acceso especial (el usuario lo habilita en Ajustes). **No** usar `USE_EXACT_ALARM`, que Play reserva para apps de alarma/reloj/calendario y tiene revisión aparte.
+- `blockedPermissions`: the app does not draw over other apps; removing it reduces review friction.
+- `enableBackgroundPlayback: false`: the app plays audio in the foreground only. It avoids `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_MEDIA_PLAYBACK` and the foreground service declaration on Play.
+- `SCHEDULE_EXACT_ALARM`: special access permission (the user enables it in Settings). **Do not** use `USE_EXACT_ALARM`, which Play reserves for alarm/clock/calendar apps and reviews separately.
 
-### 4.3 Código de alarmas exactas
+### 4.3 Exact alarm code
 
-`expo-notifications` 58 ya expone las funciones:
+`expo-notifications` 58 already exposes the functions:
 
 ```ts
 import * as Notifications from 'expo-notifications';
@@ -141,15 +141,15 @@ export const ensureExactAlarmPermission = async (): Promise<boolean> => {
   const current = await Notifications.getExactAlarmPermissionsAsync();
   if (current.granted) return true;
 
-  // Muestra una explicación propia antes de abrir Ajustes.
+  // Show your own explanation before opening Settings.
   const requested = await Notifications.requestExactAlarmPermissionsAsync();
   return requested.granted;
 };
 ```
 
-Llamarlo antes de agendar (o al abrir la app por primera vez), con un diálogo que explique: “Para que la alarma suene a la hora exacta, permití ‘Alarmas y recordatorios’”.
+Call it before scheduling (or the first time the app opens), with a dialog explaining: "For the alarm to ring at the exact time, allow 'Alarms and reminders'".
 
-> Nota: si el usuario revoca el permiso desde Ajustes, Android reinicia la app y la promesa puede no resolverse. Volvé a consultar `getExactAlarmPermissionsAsync()` en el próximo arranque.
+> Note: if the user revokes the permission from Settings, Android restarts the app and the promise may never resolve. Check `getExactAlarmPermissionsAsync()` again on the next launch.
 
 ### 4.4 `eas.json`
 
@@ -172,68 +172,68 @@ Llamarlo antes de agendar (o al abrir la app por primera vez), con un diálogo q
 }
 ```
 
-`autoIncrement: true` hace que EAS suba el `versionCode` solo en cada build de producción.
+`autoIncrement: true` makes EAS bump the `versionCode` automatically on every production build.
 
-### 4.5 Secretos y keystore
+### 4.5 Secrets and keystore
 
-- Agregar a `.gitignore`: `google-service-account*.json`, `*.aab`, `*.apk` (los `.jks`/`.p8`/`.key` ya están).
-- EAS genera y guarda el keystore de upload. Hacé backup con `npx eas-cli credentials` (Android → Keystore).
-- Al subir el primer AAB, aceptá **Play App Signing** (Google guarda la clave de firma de la app; vos conservás la de upload).
+- Add to `.gitignore`: `google-service-account*.json`, `*.aab`, `*.apk` (`.jks`/`.p8`/`.key` are already there).
+- EAS generates and stores the upload keystore. Back it up with `npx eas-cli credentials` (Android → Keystore).
+- When uploading the first AAB, accept **Play App Signing** (Google stores the app signing key; you keep the upload one).
 
-### 4.6 Verificación previa al build
+### 4.6 Pre-build verification
 
 ```powershell
 npx expo-doctor
 npm run typecheck
-npx eas-cli build -p android --profile preview   # APK para probar en dispositivo
+npx eas-cli build -p android --profile preview   # APK to test on a device
 ```
 
 ---
 
-## 5. Fase 2 — QA antes de la tienda
+## 5. Phase 2 — QA before the store
 
-- [ ] Instalación limpia en un Android físico (no Expo Go): la app abre, pide permisos y persiste datos.
-- [ ] Actualización desde la versión anterior (1.1.0) sin perder datos.
-- [ ] Permisos denegados: cámara, micrófono, fotos y notificaciones. La app no debe romperse.
-- [ ] Notificación programada a 5–10 minutos, con pantalla bloqueada y batería en optimización: verificar que llegue a tiempo con `SCHEDULE_EXACT_ALARM` concedido.
-- [ ] Reinicio del dispositivo: la alarma pendiente sigue programada.
-- [ ] Grabar audio, reproducirlo, adjuntar foto, escanear QR/barras, reordenar listas, borrar ítems.
-- [ ] Tema claro/oscuro, textos largos, teclado abierto, rotación y tamaños de pantalla chicos.
-- [ ] Espacio de almacenamiento bajo y archivos huérfanos.
-- [ ] Pre-launch report de Play (corre automático en internal/closed testing): revisar crashes, ANR, accesibilidad y problemas de permisos.
-- [ ] Opcional pero recomendado: crash reporting (Sentry/Crashlytics). Si se agrega, **actualizar Data Safety**.
+- [ ] Clean install on a physical Android device (not Expo Go): the app opens, requests permissions and persists data.
+- [ ] Update from the previous version (1.1.0) without losing data.
+- [ ] Denied permissions: camera, microphone, photos and notifications. The app must not break.
+- [ ] Notification scheduled 5–10 minutes ahead, with the screen locked and battery optimization on: verify it arrives on time with `SCHEDULE_EXACT_ALARM` granted.
+- [ ] Device reboot: the pending alarm is still scheduled.
+- [ ] Record audio, play it back, attach a photo, scan QR/barcodes, reorder lists, delete items.
+- [ ] Light/dark theme, long texts, open keyboard, rotation and small screen sizes.
+- [ ] Low storage space and orphan files.
+- [ ] Play pre-launch report (runs automatically in internal/closed testing): review crashes, ANRs, accessibility and permission issues.
+- [ ] Optional but recommended: crash reporting (Sentry/Crashlytics). If added, **update Data Safety**.
 
 ---
 
-## 6. Fase 3 — Ficha y formularios en Play Console
+## 6. Phase 3 — Listing and forms in Play Console
 
-### 6.1 Crear la app
+### 6.1 Create the app
 
-- Nombre (≤30), idioma predeterminado **español (Latinoamérica o España)**, tipo **App**, gratis.
-- Package name: el mismo de `app.json`. No se puede cambiar.
+- Name (≤30), default language **Spanish (Latin America or Spain)**, type **App**, free.
+- Package name: the same one from `app.json`. It cannot be changed.
 
-### 6.2 Assets de la ficha
+### 6.2 Listing assets
 
-| Elemento | Requisito |
+| Item | Requirement |
 |---|---|
-| Icono | PNG 512×512, 32 bits (exportar desde `assets/icon.png`, que es 1024×1024) |
-| Feature graphic | PNG/JPEG 1024×500, sin transparencia |
-| Capturas de teléfono | Mínimo 2, ideal 4–8; 16:9 o 9:16; entre 320 y 3840 px |
-| Capturas de tablet | Opcionales (7" y 10") |
-| Video | Opcional, YouTube |
-| Descripción corta | ≤80 caracteres |
-| Descripción completa | ≤4000 caracteres |
-| Categoría | Productividad |
-| Email de contacto | Público |
-| Política de privacidad | URL pública |
+| Icon | 512×512 PNG, 32-bit (export from `assets/icon.png`, which is 1024×1024) |
+| Feature graphic | 1024×500 PNG/JPEG, no transparency |
+| Phone screenshots | Minimum 2, ideally 4–8; 16:9 or 9:16; between 320 and 3840 px |
+| Tablet screenshots | Optional (7" and 10") |
+| Video | Optional, YouTube |
+| Short description | ≤80 characters |
+| Full description | ≤4000 characters |
+| Category | Productivity |
+| Contact email | Public |
+| Privacy policy | Public URL |
 
-### 6.3 Textos sugeridos
+### 6.3 Suggested copy
 
-**Descripción corta (es):**
+**Short description (es):**
 
 > Recordatorios con listas, fotos, audio y alarmas. Todo offline y privado.
 
-**Descripción completa (es) — borrador:**
+**Full description (es) — draft:**
 
 > Organizer es una app de recordatorios que funciona sin conexión y guarda todo en tu dispositivo.
 >
@@ -251,156 +251,156 @@ npx eas-cli build -p android --profile preview   # APK para probar en dispositiv
 >
 > Organizer no recopila datos, no tiene anuncios y no requiere cuenta.
 
-_(Ajustar si alguna función no está disponible en la versión que se publica.)_
+_(Adjust if any feature is not available in the version being published.)_
 
-**English listing (opcional):** la app ya tiene i18n `en`/`es`; conviene agregar la ficha en inglés para no perder instalaciones.
+**English listing (optional):** the app already has `en`/`es` i18n; adding the English listing is recommended so you do not miss installs.
 
-### 6.4 Formularios obligatorios
+### 6.4 Required forms
 
-- **Acceso a la app:** “Todas las funciones están disponibles sin iniciar sesión” (no hay login).
-- **Anuncios:** No.
-- **Clasificación de contenido (IARC):** cuestionario; sin violencia, contenido sexual, drogas, juegos de azar, compras ni interacción entre usuarios. Resultado esperado: “Para todos” / 3+.
-- **Público objetivo:** 13+ (evita el régimen de Familias y COPPA). Si se elige menor de 13, hay requisitos extra.
-- **Data Safety:** “No se recopilan ni comparten datos”. Fotos, audio y texto se guardan **solo en el dispositivo**; no se transmiten. La eliminación se hace desinstalando o borrando datos de la app.
-- **Permisos sensibles:** cámara y micrófono se justifican en la descripción y la política. No hay formulario de `READ_MEDIA_*` porque no se declara.
-- **Foreground service:** al desactivar `enableBackgroundPlayback`, no debería aparecer la declaración de FGS. Verificar en Play Console tras el primer AAB.
-- **Noticias / gobierno / salud / finanzas:** No.
-- **Firma:** Play App Signing.
+- **App access:** "All features are available without signing in" (there is no login).
+- **Ads:** No.
+- **Content rating (IARC):** questionnaire; no violence, sexual content, drugs, gambling, purchases or user interaction. Expected result: "Everyone" / 3+.
+- **Target audience:** 13+ (avoids the Families policy and COPPA). If you choose under 13, there are extra requirements.
+- **Data Safety:** "No data is collected or shared". Photos, audio and text are stored **only on the device**; they are not transmitted. Deletion is done by uninstalling the app or clearing its data.
+- **Sensitive permissions:** camera and microphone are justified in the description and the policy. There is no `READ_MEDIA_*` form because it is not declared.
+- **Foreground service:** by setting `enableBackgroundPlayback` to false, the FGS declaration should not appear. Verify in Play Console after the first AAB.
+- **News / government / health / finance:** No.
+- **Signing:** Play App Signing.
 
-### 6.5 Política de privacidad (esqueleto)
+### 6.5 Privacy policy (skeleton)
 
-Publicar en una URL estable con estas secciones:
+Publish it at a stable URL with these sections:
 
-1. Responsable y contacto (nombre/email).
-2. Qué datos guarda la app: listas, notas, fotos, audios, fechas de alarma.
-3. Dónde: únicamente en el almacenamiento local del dispositivo; no hay servidores.
-4. Permisos y para qué se usan (cámara, micrófono, fotos, notificaciones).
-5. Que no se recopilan, venden ni comparten datos; no hay analytics ni publicidad.
-6. Cómo eliminar los datos: borrar ítems, borrar datos de la app o desinstalar.
-7. Menores: la app no está dirigida a menores de 13.
-8. Cambios de la política y fecha de vigencia.
-9. Contacto para consultas.
+1. Controller and contact (name/email).
+2. What data the app stores: lists, notes, photos, audio, alarm dates.
+3. Where: only in the device's local storage; there are no servers.
+4. Permissions and what they are used for (camera, microphone, photos, notifications).
+5. That no data is collected, sold or shared; there is no analytics or advertising.
+6. How to delete data: delete items, clear app data or uninstall.
+7. Minors: the app is not directed at children under 13.
+8. Policy changes and effective date.
+9. Contact for questions.
 
-> La política tiene que ser coherente con lo que realmente hace la app. Si más adelante se agrega backup en la nube, analytics o crash reporting, hay que actualizarla junto con Data Safety.
+> The policy must be consistent with what the app actually does. If cloud backup, analytics or crash reporting are added later, it must be updated together with Data Safety.
 
 ---
 
-## 7. Fase 4 — Build, testing y publicación
+## 7. Phase 4 — Build, testing and publishing
 
 ```powershell
-# 1. Build de producción (AAB)
+# 1. Production build (AAB)
 npx eas-cli build -p android --profile production
 
-# 2. Subir a internal testing (requiere service account de Google Cloud)
+# 2. Upload to internal testing (requires a Google Cloud service account)
 npx eas-cli submit -p android --profile production
 ```
 
-### Service account para `eas submit`
+### Service account for `eas submit`
 
-1. Crear un proyecto en Google Cloud y habilitar **Google Play Android Developer API**.
-2. Crear una **service account** y descargar el JSON.
-3. En Play Console → Usuarios y permisos, invitar el email de la service account con permiso para **release a testing tracks** (y producción cuando corresponda).
-4. Guardar el JSON fuera del repo y referenciarlo en `eas.json` (`android.serviceAccountKeyPath`) o pasar la ruta al ejecutar.
+1. Create a project in Google Cloud and enable the **Google Play Android Developer API**.
+2. Create a **service account** and download the JSON.
+3. In Play Console → Users and permissions, invite the service account email with permission to **release to testing tracks** (and production when applicable).
+4. Store the JSON outside the repo and reference it in `eas.json` (`android.serviceAccountKeyPath`) or pass the path when running.
 
-> Para el primer release también se puede subir el AAB a mano desde Play Console; es más simple y no requiere service account todavía.
+> For the first release you can also upload the AAB by hand from Play Console; it is simpler and does not require a service account yet.
 
-### Circuito de tracks
+### Track circuit
 
-1. **Internal testing**: hasta 100 testers, disponible en minutos. Ideal para el primer smoke test del AAB real.
-2. **Closed testing**: obligatorio si la cuenta es personal nueva. 12 testers opt-in, 14 días continuos. Recolectar feedback y corregir.
-3. **Solicitar acceso a producción** desde el Dashboard (si aplica). Responder las tres secciones del formulario y esperar la revisión.
-4. **Producción**: rollout escalonado (10% → 50% → 100%), monitorear Android vitals y reviews.
+1. **Internal testing**: up to 100 testers, available within minutes. Ideal for the first smoke test of the real AAB.
+2. **Closed testing**: mandatory if the account is a new personal one. 12 opt-in testers, 14 continuous days. Collect feedback and fix issues.
+3. **Request production access** from the Dashboard (if applicable). Answer the three form sections and wait for the review.
+4. **Production**: staged rollout (10% → 50% → 100%), monitor Android vitals and reviews.
 
-### Post-lanzamiento
+### Post-launch
 
-- Revisar crashes/ANR en **Android vitals**.
-- Responder reviews.
-- Para cada update: `autoIncrement` sube el versionCode; nuevo AAB; mismo circuito (producción ya no requiere 12 testers).
-- Si se agrega EAS Update (OTA), configurar `expo-updates`, `runtimeVersion` y canales. No es necesario para el v1.
+- Review crashes/ANRs in **Android vitals**.
+- Reply to reviews.
+- For every update: `autoIncrement` bumps the versionCode; new AAB; same circuit (production no longer requires 12 testers).
+- If EAS Update (OTA) is added, configure `expo-updates`, `runtimeVersion` and channels. It is not needed for v1.
 
 ---
 
-## 8. Cronograma y costos
+## 8. Schedule and costs
 
-| Etapa | Duración estimada |
+| Stage | Estimated duration |
 |---|---|
-| Cuenta + verificación de identidad/dispositivo | 1–3 días (a veces más) |
-| Decisiones + cambios de repo + política + assets | 2–4 días |
-| Build + internal testing + correcciones | 3–7 días |
-| Closed testing (cuenta personal nueva) | **14 días continuos** |
-| Solicitud de acceso a producción | ≤7 días |
-| Revisión del primer release | 1–7 días |
-| **Total** | **4–6 semanas** (personal nueva) / **1–2 semanas** (cuenta con producción) |
+| Account + identity/device verification | 1–3 days (sometimes longer) |
+| Decisions + repo changes + policy + assets | 2–4 days |
+| Build + internal testing + fixes | 3–7 days |
+| Closed testing (new personal account) | **14 continuous days** |
+| Production access request | ≤7 days |
+| First release review | 1–7 days |
+| **Total** | **4–6 weeks** (new personal account) / **1–2 weeks** (account with production) |
 
-Costos: **$25** de registro; EAS plan gratuito (con límites); política de privacidad gratis en GitHub Pages/Notion; opcional dominio propio y crash reporting.
+Costs: **$25** registration; EAS free plan (with limits); privacy policy free on GitHub Pages/Notion; optional custom domain and crash reporting.
 
 ---
 
-## 9. Checklist final
+## 9. Final checklist
 
-**Cuenta**
-- [ ] Cuenta Play Developer creada y paga
-- [ ] Identidad verificada
-- [ ] Dispositivo Android verificado
-- [ ] 2FA activo
+**Account**
+- [ ] Play Developer account created and paid
+- [ ] Identity verified
+- [ ] Android device verified
+- [ ] 2FA enabled
 
 **Repo**
-- [ ] `eas init` y `extra.eas.projectId`
-- [ ] Package definitivo en minúsculas
-- [ ] `autoIncrement` en producción
-- [ ] `blockedPermissions` para `SYSTEM_ALERT_WINDOW`
+- [ ] `eas init` and `extra.eas.projectId`
+- [ ] Final package name in lowercase
+- [ ] `autoIncrement` in production
+- [ ] `blockedPermissions` for `SYSTEM_ALERT_WINDOW`
 - [ ] `enableBackgroundPlayback: false`
-- [ ] `SCHEDULE_EXACT_ALARM` + flujo de permiso
-- [ ] `.gitignore` para service account y artefactos
-- [ ] `expo-doctor` y `typecheck` OK
-- [ ] Keystore respaldado
+- [ ] `SCHEDULE_EXACT_ALARM` + permission flow
+- [ ] `.gitignore` for service account and artifacts
+- [ ] `expo-doctor` and `typecheck` OK
+- [ ] Keystore backed up
 
-**Producto**
-- [ ] QA en dispositivo físico
-- [ ] Alarmas exactas probadas en Doze
-- [ ] Permisos denegados probados
-- [ ] Pre-launch report revisado
+**Product**
+- [ ] QA on a physical device
+- [ ] Exact alarms tested under Doze
+- [ ] Denied permissions tested
+- [ ] Pre-launch report reviewed
 
 **Play Console**
-- [ ] App creada con package correcto
-- [ ] Ficha es/en completa
-- [ ] Icono 512, feature graphic y capturas
-- [ ] Política de privacidad publicada
+- [ ] App created with the correct package
+- [ ] ES/EN listing complete
+- [ ] 512 icon, feature graphic and screenshots
+- [ ] Privacy policy published
 - [ ] Data Safety
-- [ ] Clasificación de contenido
-- [ ] Público objetivo
-- [ ] Anuncios / acceso / demás declaraciones
+- [ ] Content rating
+- [ ] Target audience
+- [ ] Ads / access / other declarations
 - [ ] Play App Signing
 
 **Release**
-- [ ] AAB de producción
-- [ ] Internal testing aprobado
-- [ ] Closed testing 12/14 (si aplica)
-- [ ] Acceso a producción aprobado
-- [ ] Rollout escalonado
+- [ ] Production AAB
+- [ ] Internal testing approved
+- [ ] Closed testing 12/14 (if applicable)
+- [ ] Production access approved
+- [ ] Staged rollout
 
 ---
 
-## 10. Riesgos y mitigaciones
+## 10. Risks and mitigations
 
-| Riesgo | Mitigación |
+| Risk | Mitigation |
 |---|---|
-| El package name queda mal para siempre | Definirlo antes del primer upload; usar minúsculas y un dominio propio si es posible |
-| “Organizer” es genérico y puede chocar con marcas | Verificar búsqueda en Play y marca; considerar un nombre más distintivo |
-| Rechazo por alarmas exactas | Usar `SCHEDULE_EXACT_ALARM` (acceso otorgado por el usuario), no `USE_EXACT_ALARM` |
-| Rechazo por foreground service | Desactivar background playback; la app no lo necesita |
-| Data Safety inexacto | Declarar “no se recopila” solo mientras todo sea local; actualizar si se agrega analytics/nube |
-| 12 testers no se consiguen | Reclutar desde ahora (familia, amigos, colegas); explicar que deben quedar opt-in 14 días |
-| Primer review tarda | No planificar el lanzamiento para una fecha exacta; usar internal testing mientras tanto |
-| Pérdida del keystore | Backup vía `eas credentials`; Play App Signing permite recuperar la clave de upload |
+| The package name is wrong forever | Decide it before the first upload; use lowercase and your own domain if possible |
+| "Organizer" is generic and may clash with brands | Check the Play search and trademark; consider a more distinctive name |
+| Rejection due to exact alarms | Use `SCHEDULE_EXACT_ALARM` (access granted by the user), not `USE_EXACT_ALARM` |
+| Rejection due to foreground service | Disable background playback; the app does not need it |
+| Inaccurate Data Safety | Declare "nothing is collected" only while everything is local; update it if analytics/cloud are added |
+| Cannot find 12 testers | Recruit now (family, friends, colleagues); explain they must stay opt-in for 14 days |
+| The first review takes a while | Do not plan a launch for an exact date; use internal testing meanwhile |
+| Keystore loss | Back it up via `eas credentials`; Play App Signing allows recovering the upload key |
 
 ---
 
-## 11. Próximos pasos
+## 11. Next steps
 
-1. Confirmar las decisiones de la sección 2 (tipo de cuenta, package, nombre, email, URL).
-2. Aplicar los cambios de `app.json`/`eas.json` y el flujo de alarmas exactas.
-3. Redactar y publicar la política de privacidad.
-4. Generar los assets de tienda (icono 512, feature graphic, capturas).
-5. Crear la app en Play Console y completar la ficha.
-6. Build de producción → internal testing.
+1. Confirm the decisions from section 2 (account type, package, name, email, URL).
+2. Apply the `app.json`/`eas.json` changes and the exact alarm flow.
+3. Write and publish the privacy policy.
+4. Generate the store assets (512 icon, feature graphic, screenshots).
+5. Create the app in Play Console and complete the listing.
+6. Production build → internal testing.

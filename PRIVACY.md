@@ -1,53 +1,57 @@
-# Política de privacidad de Organizer
+# Organizer Privacy Policy
 
-_Última actualización: 2 de noviembre de 2026._
+_Last updated: November 2, 2026._
 
-Organizer es una app de recordatorios que funciona sin conexión. Esta política explica qué datos usa y dónde se guardan.
+Organizer is a reminder app that works offline. This policy explains what data it uses and where that data is stored.
 
-## Qué datos guarda la app
+## What data the app stores
 
-- Las listas, recordatorios, notas de texto, fechas de alarma y elementos de checklist que creás.
-- Las fotos que sacás o elegís desde la galería.
-- Las notas de audio que grabás.
-- Preferencias de la app, como el tema claro u oscuro y el idioma.
+- The lists, reminders, text notes, alarm dates and checklist items you create.
+- Photos you take or pick from the gallery.
+- Audio notes you record.
+- App preferences, such as the light or dark theme and the language.
 
-## Dónde se guardan
+## Where the data is stored
 
-Todos esos datos se guardan **únicamente en el almacenamiento local de tu dispositivo**. Organizer no tiene servidores, no crea cuentas y no transmite el contenido de tus recordatorios a ningún servicio.
+All of that data is stored **only in your device's local storage**. Organizer has no servers, creates no accounts and does not transmit the content of your reminders to any service.
 
-## Permisos
+## Permissions
 
-| Permiso | Uso |
+| Permission | Purpose |
 |---|---|
-| Cámara | Sacar fotos y escanear códigos QR/barras |
-| Micrófono | Grabar notas de audio |
-| Notificaciones | Mostrar alarmas y recordatorios |
-| Fotos / almacenamiento | Elegir imágenes de la galería (solo en Android 12 o menor) |
+| Camera | Take photos and scan QR/barcode codes |
+| Microphone | Record audio notes |
+| Notifications | Show alarms and reminders |
+| Photos / storage | Pick images from the gallery (Android 12 or lower only) |
 
-Los permisos se piden en el momento en que usás la función correspondiente. Podés rechazarlos y usar el resto de la app.
+Permissions are requested at the moment you use the corresponding feature. You can deny them and still use the rest of the app.
 
-## Lo que la app NO hace
+## What the app does NOT do
 
-- No recopila datos personales.
-- No envía datos a servidores propios ni de terceros.
-- No usa analytics, publicidad ni rastreadores.
-- No vende ni comparte información.
-- No requiere registro ni inicio de sesión.
+- It does not collect personal data.
+- It does not send data to its own or third-party servers.
+- It does not use analytics, advertising or trackers.
+- It does not sell or share information.
+- It does not require sign-up or login.
 
-## Eliminar tus datos
+## Deleting your data
 
-- Podés borrar recordatorios, fotos y audios desde la propia app.
-- Para eliminar todo, desinstalá la app o borrá sus datos desde **Ajustes → Apps → Organizer → Almacenamiento → Borrar datos**.
-- Como no hay cuentas ni copias en la nube, no queda información en ningún servidor.
+- You can delete reminders, photos and audio from within the app.
+- To delete everything, uninstall the app or clear its data from **Settings → Apps → Organizer → Storage → Clear data**.
+- Since there are no accounts or cloud backups, no information remains on any server.
 
-## Menores
+## Minors
 
-Organizer no está dirigida a menores de 13 años y no recopila datos de ningún usuario.
+Organizer is not directed at children under 13 and does not collect data from any user.
 
-## Cambios
+## Changes
 
-Si en el futuro se agrega una función que implique enviar datos (por ejemplo, backup en la nube o reportes de errores), esta política se actualizará antes de habilitarla.
+If a future feature involves sending data (for example, cloud backup or crash reports), this policy will be updated before that feature is enabled.
 
-## Contacto
+## Contact
 
-Para consultas sobre privacidad, abrí un issue en <https://github.com/lore64210/organizer/issues>.
+For privacy questions, open an issue at <https://github.com/lore64210/organizer/issues>.
+
+---
+
+[Versión en español](./PRIVACY.es.md)

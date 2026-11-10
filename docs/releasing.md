@@ -1,148 +1,148 @@
-# Publicar una versión (GitHub Releases)
+# Publishing a version (GitHub Releases)
 
-El release se arma con **EAS Build**. Hay dos caminos:
+The release is built with **EAS Build**. There are two paths:
 
-- **Automático (recomendado):** al cambiar `expo.version` en `app.json` y pushear a `master`, el workflow crea el tag `v<version>` y publica el release.
-- **Manual:** al pushear un tag `v*`, publica ese tag.
+- **Automatic (recommended):** when `expo.version` changes in `app.json` and you push to `master`, the workflow creates the `v<version>` tag and publishes the release.
+- **Manual:** pushing a `v*` tag publishes that tag.
 
-El workflow está en [`.github/workflows/release-apk.yml`](../.github/workflows/release-apk.yml). No se publica nada si la versión no cambió, así que podés pushear código y docs sin generar releases de más.
+The workflow lives in [`.github/workflows/release-apk.yml`](../.github/workflows/release-apk.yml). Nothing is published if the version did not change, so you can push code and docs without generating extra releases.
 
-## Configuración inicial (una sola vez)
+## Initial setup (once)
 
-1. Crear una cuenta gratis en <https://expo.dev/signup>.
-2. Iniciar sesión y vincular el proyecto:
+1. Create a free account at <https://expo.dev/signup>.
+2. Sign in and link the project:
 
    ```powershell
    npx eas-cli@latest login
    npx eas-cli@latest init
    ```
 
-   `eas init` agrega `extra.eas.projectId` y `owner` en `app.json`. Sin eso, el workflow falla. Commiteá y pusheá ese cambio antes del primer release.
+   `eas init` adds `extra.eas.projectId` and `owner` to `app.json`. Without that, the workflow fails. Commit and push that change before the first release.
 
-3. Crear un **access token** en <https://expo.dev/settings/access-tokens>.
-4. En GitHub: **Settings → Secrets and variables → Actions → New repository secret**, nombre `EXPO_TOKEN`, valor el token.
-5. Verificar que el perfil `release-apk` exista en `eas.json` (ya está configurado).
-6. **Generar el keystore una vez.** EAS lo pide en la primera compilación:
+3. Create an **access token** at <https://expo.dev/settings/access-tokens>.
+4. In GitHub: **Settings → Secrets and variables → Actions → New repository secret**, name `EXPO_TOKEN`, value the token.
+5. Check that the `release-apk` profile exists in `eas.json` (already configured).
+6. **Generate the keystore once.** EAS asks for it on the first build:
 
    ```powershell
    npx eas-cli build -p android --profile release-apk
    ```
 
-   Aceptá generar un keystore nuevo. Esa compilación corre en la nube (no hace falta Android Studio) y consume uno de los 15 builds gratuitos. Después, el workflow puede compilar sin preguntas.
+   Accept generating a new keystore. That build runs in the cloud (no Android Studio needed) and uses one of the 15 free builds. After that, the workflow can build without prompts.
 
-## Publicar automáticamente (recomendado)
+## Publish automatically (recommended)
 
-1. Actualizá `expo.version` en `app.json` (por ejemplo `1.1.0` → `1.2.0`). Opcionalmente, actualizá también `version` en `package.json` para que coincidan. El `versionCode` de Android lo maneja EAS solo (`autoIncrement: true` + `appVersionSource: remote`).
-2. Commiteá y pusheá a `master`:
+1. Update `expo.version` in `app.json` (for example `1.1.0` → `1.2.0`). Optionally, update `version` in `package.json` too so they match. EAS handles the Android `versionCode` (`autoIncrement: true` + `appVersionSource: remote`).
+2. Commit and push to `master`:
 
    ```powershell
    git add app.json package.json
-   git commit -m "Bump version a 1.2.0"
+   git commit -m "Bump version to 1.2.0"
    git push origin master
    ```
 
-3. El workflow **Detectar cambio de versión** compara `app.json` contra el commit anterior del push:
-   - Si la versión cambió y el tag `v1.2.0` no existe, compila el APK y crea el release.
-   - Si la versión no cambió, termina sin publicar nada.
-   - Si el tag ya existe, no lo pisa.
-4. Seguilo en **Actions → Release APK**.
-5. Cuando termina, el APK queda en:
+3. The **Detect version change** workflow compares `app.json` against the previous commit of the push:
+   - If the version changed and the `v1.2.0` tag does not exist, it builds the APK and creates the release.
+   - If the version did not change, it finishes without publishing anything.
+   - If the tag already exists, it does not overwrite it.
+4. Follow it in **Actions → Release APK**.
+5. When it finishes, the APK is available at:
 
-   - Página del release: `https://github.com/lore64210/organizer/releases/latest`
-   - Descarga directa: `https://github.com/lore64210/organizer/releases/latest/download/organizer.apk`
-   - Checksum: `SHA256SUMS.txt` adjunto al release.
+   - Release page: `https://github.com/lore64210/organizer/releases/latest`
+   - Direct download: `https://github.com/lore64210/organizer/releases/latest/download/organizer.apk`
+   - Checksum: `SHA256SUMS.txt` attached to the release.
 
-No hace falta crear el tag a mano: lo crea el workflow apuntando al commit que pusheaste.
+You do not need to create the tag by hand: the workflow creates it pointing to the commit you pushed.
 
-Cada release incluye en las notas un **QR** que apunta a `releases/latest/download/organizer.apk`. Sirve para abrir el release en la computadora y escanearlo con el teléfono para descargar el APK sin pasarlo por cable ni por chat.
+Every release includes a **QR** in its notes pointing to `releases/latest/download/organizer.apk`. It is useful to open the release on your computer and scan it with your phone to download the APK without going through a cable or a chat app.
 
-### Cómo detecta el cambio
+### How the change is detected
 
-- Lee `expo.version` de `app.json` (esa es la fuente de verdad).
-- Lo compara con la versión del commit `before` del evento `push`, así funciona aunque pushees varios commits juntos.
-- Si no hay commit anterior (primer push o rama nueva), publica.
-- Si el tag `v<version>` ya existe, no publica de nuevo. Para rehacerlo, subí la versión o borrá el tag/release manualmente.
+- It reads `expo.version` from `app.json` (that is the source of truth).
+- It compares it with the version of the `before` commit of the `push` event, so it works even if you push several commits together.
+- If there is no previous commit (first push or new branch), it publishes.
+- If the `v<version>` tag already exists, it does not publish again. To redo it, bump the version or delete the tag/release manually.
 
-### Publicar un tag manual
+### Publishing a manual tag
 
-Sigue funcionando si querés publicar un tag puntual sin tocar la versión:
+It still works if you want to publish a specific tag without touching the version:
 
 ```powershell
 git tag v1.2.0
 git push origin v1.2.0
 ```
 
-Si el tag ya existía y querés rehacerlo:
+If the tag already existed and you want to redo it:
 
 ```powershell
 git tag -d v1.2.0
 git push origin :refs/tags/v1.2.0
 ```
 
-## Publicación manual (si el workflow falla)
+## Manual publishing (if the workflow fails)
 
 ```powershell
 npx eas-cli build -p android --profile release-apk
 ```
 
-Descargá el APK desde el link que imprime EAS y creá el release:
+Download the APK from the link EAS prints and create the release:
 
 ```powershell
 Get-FileHash .\organizer.apk -Algorithm SHA256 | Format-List
 gh release create v1.2.0 .\organizer.apk `
   --title "Organizer 1.2.0" `
-  --notes "Cambios de la versión..."
+  --notes "Changes in this version..."
 ```
 
-## Keystore y actualizaciones
+## Keystore and updates
 
-- EAS genera y guarda el keystore de firma la primera vez. **No cambies de cuenta EAS ni regeneres el keystore**: si cambia la firma, los usuarios tienen que desinstalar y pierden los datos.
-- Hacé backup con:
+- EAS generates and stores the signing keystore the first time. **Do not change EAS accounts or regenerate the keystore**: if the signature changes, users have to uninstall and lose their data.
+- Back it up with:
 
   ```powershell
   npx eas-cli credentials
   ```
 
-  Elegí Android → Keystore → descargar.
-- El package (`com.lore64210.organizer`) y la firma deben mantenerse iguales en todas las versiones.
+  Choose Android → Keystore → download.
+- The package (`com.lore64210.organizer`) and the signature must stay the same across all versions.
 
-## Tamaño del APK
+## APK size
 
-El APK de `v1.1.0` pesó **113,6 MB** porque era universal e incluía cuatro arquitecturas:
+The `v1.1.0` APK weighed **113.6 MB** because it was universal and included four architectures:
 
-| ABI | Tamaño de libs |
+| ABI | Libs size |
 |---|---|
-| `x86` | 28,3 MB |
-| `x86_64` | 27,7 MB |
-| `arm64-v8a` | 26,3 MB |
-| `armeabi-v7a` | 18,0 MB |
+| `x86` | 28.3 MB |
+| `x86_64` | 27.7 MB |
+| `arm64-v8a` | 26.3 MB |
+| `armeabi-v7a` | 18.0 MB |
 
-`x86` y `x86_64` solo sirven para emuladores; los teléfonos reales son ARM. Además, las librerías nativas iban sin comprimir.
+`x86` and `x86_64` are only useful for emulators; real phones are ARM. On top of that, the native libraries were shipped uncompressed.
 
-La configuración actual de `expo-build-properties` (en `app.json`) hace que el perfil `release-apk`:
+The current `expo-build-properties` configuration (in `app.json`) makes the `release-apk` profile:
 
-- compile solo `arm64-v8a` y `armeabi-v7a`;
-- comprima las libs nativas en el APK (`useLegacyPackaging`);
-- aplique R8 y eliminación de recursos (`enableMinifyInReleaseBuilds` + `enableShrinkResourcesInReleaseBuilds`).
+- build only `arm64-v8a` and `armeabi-v7a`;
+- compress the native libs inside the APK (`useLegacyPackaging`);
+- apply R8 and resource shrinking (`enableMinifyInReleaseBuilds` + `enableShrinkResourcesInReleaseBuilds`).
 
-El próximo build debería quedar bastante por debajo de 114 MB (estimado **30–45 MB**). Confirmá el tamaño en el release y probá el APK en un dispositivo antes de compartirlo. Si R8 rompe algo, quitá `enableMinifyInReleaseBuilds`/`enableShrinkResourcesInReleaseBuilds` y volvé a compilar.
+The next build should land well below 114 MB (estimated **30–45 MB**). Confirm the size in the release and test the APK on a device before sharing it. If R8 breaks something, remove `enableMinifyInReleaseBuilds`/`enableShrinkResourcesInReleaseBuilds` and rebuild.
 
-Si alguna vez necesitás un APK para emulador, agregá `x86_64` a `buildArchs` en un perfil de build aparte. El escáner de códigos (ML Kit) agrega ~5 MB por ABI; si se quita esa función, el APK baja otro poco.
+If you ever need an emulator APK, add `x86_64` to `buildArchs` in a separate build profile. The code scanner (ML Kit) adds ~5 MB per ABI; removing that feature would shrink the APK a bit more.
 
-## Límites y costos
+## Limits and costs
 
-- **GitHub Releases**: gratis, sin límite de bandwidth; hasta 1.000 archivos por release y 2 GiB por archivo.
-- **GitHub Actions**: gratis en repos públicos.
-- **EAS Build Free**: 15 builds Android por mes, cola de baja prioridad y timeout de 45 minutos. Si se agota la cuota, hay que esperar al mes siguiente o pasar a un plan pago (Android medium: USD 1 por build).
-- Como solo se compila cuando cambia la versión, los pushes normales no consumen builds. Un bump de versión consume uno.
-- El APK es universal (todas las ABIs), así que pesa más que un AAB. Es normal.
+- **GitHub Releases**: free, no bandwidth limit; up to 1,000 files per release and 2 GiB per file.
+- **GitHub Actions**: free on public repos.
+- **EAS Build Free**: 15 Android builds per month, low-priority queue and a 45-minute timeout. If the quota runs out, you have to wait until next month or move to a paid plan (Android medium: USD 1 per build).
+- Since it only builds when the version changes, regular pushes do not consume builds. A version bump consumes one.
+- The APK is universal (all ABIs), so it is heavier than an AAB. That is normal.
 
-## Problemas comunes
+## Common issues
 
-| Error | Causa / solución |
+| Error | Cause / fix |
 |---|---|
-| `EAS project not configured` | Falta `eas init` o `extra.eas.projectId` en `app.json` |
-| `Invalid EXPO_TOKEN` | El secreto no existe, está vencido o no tiene acceso al proyecto |
-| `Build limit exceeded` | Se agotaron los 15 builds gratuitos del mes |
-| `App not installed` al actualizar | Cambió la firma o el package; desinstalar antes (se pierden datos) |
-| El APK no aparece en el release | Revisar el paso “Build APK” en Actions; el JSON de EAS no tenía `artifacts.buildUrl` |
+| `EAS project not configured` | Missing `eas init` or `extra.eas.projectId` in `app.json` |
+| `Invalid EXPO_TOKEN` | The secret does not exist, expired or lacks access to the project |
+| `Build limit exceeded` | The 15 free builds for the month ran out |
+| `App not installed` when updating | The signature or package changed; uninstall first (data is lost) |
+| The APK does not show up in the release | Check the "Build APK" step in Actions; the EAS JSON had no `artifacts.buildUrl` |

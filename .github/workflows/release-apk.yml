@@ -185,7 +185,7 @@ jobs:
 
           **Instalación:** Android 7.0 o superior. Permití instalar apps de origen desconocido.
           **Verificación:** el release incluye SHA256SUMS.txt.
-          **Instrucciones:** https://github.com/lore64210/organizer/blob/master/docs/install.md
+          **Instrucciones:** https://github.com/lore64210/organizer/blob/master/docs/install.es.md
 
           ---
 

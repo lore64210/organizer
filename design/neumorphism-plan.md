@@ -1,87 +1,87 @@
-# Neumorfismo híbrido · Plan de implementación
+# Hybrid neumorphism · Implementation plan
 
-Documento de referencia para la actualización visual de **Organizer**.
-La maqueta aprobable está en `design/neumorphism-preview.html`.
+Reference document for the visual update of **Organizer**.
+The approvable mockup is in `design/neumorphism-preview.html`.
 
-## Estado
+## Status
 
-- [x] Fase 1 · Tokens (`theme.ts`, `types.ts`) y helpers (`src/utils/neumorphic.ts`)
-- [x] Fase 2 · Chrome: `IconButton`, `AnimatedIconButton`, `Checkbox`, `DialogButton`, modales
-- [x] Fase 3 · Filas: `SwipeToDelete`, `HomeItem`, `ItemList`
-- [x] `expo-blur` instalado
-- [x] Fase 5a · `DialogProvider` como overlay en la misma ventana + blur real (iOS/Android 12+)
-- [x] Fase 5b · Menú de acciones y chrome de cámara con vidrio
-- [x] Fase 5c · `ModalTitle` / `ModalAudio` movidos a un portal glass en la raíz
-- [x] Fase 5d · Galería de imágenes en el portal, con `GlassBackdrop` y visor negro
-- [x] Transición de tema por crossfade nativo (mismo comportamiento en web y mobile)
-- [ ] Fase 4 · Ajuste fino en dispositivo (Android viejo, contraste, animación de tema)
+- [x] Phase 1 · Tokens (`theme.ts`, `types.ts`) and helpers (`src/utils/neumorphic.ts`)
+- [x] Phase 2 · Chrome: `IconButton`, `AnimatedIconButton`, `Checkbox`, `DialogButton`, modals
+- [x] Phase 3 · Rows: `SwipeToDelete`, `HomeItem`, `ItemList`
+- [x] `expo-blur` installed
+- [x] Phase 5a · `DialogProvider` as an overlay in the same window + real blur (iOS/Android 12+)
+- [x] Phase 5b · Actions menu and camera chrome with glass
+- [x] Phase 5c · `ModalTitle` / `ModalAudio` moved to a glass portal at the root
+- [x] Phase 5d · Image gallery in the portal, with `GlassBackdrop` and a black viewer
+- [x] Theme transition via native crossfade (same behavior on web and mobile)
+- [ ] Phase 4 · Fine-tuning on device (old Android, contrast, theme animation)
 
 ---
 
-## 1. Decisión de diseño
+## 1. Design decision
 
-Neumorfismo **híbrido**, no total:
+**Hybrid** neumorphism, not full:
 
-| Zona | Tratamiento |
+| Area | Treatment |
 | --- | --- |
-| FAB y menú de acciones | Elevado (`raised`) + estado inset al presionar |
-| Header (tema, galería, badge) | Elevado suave |
-| Modales y diálogos | Tarjeta elevada sobre backdrop oscuro |
-| Checkbox | Sin marcar: elevado · Marcado: inset + ámbar |
-| Reproductor de audio | Botón elevado + pista hundida |
-| Filas de lista | Elevación mínima (sombra 4 px), inset al presionar |
-| Pantalla de cámara | Sin cambios (fondo negro, el visor manda) |
-| Galería | Thumbnails con relieve mínimo; visor sin cambios |
+| FAB and actions menu | Raised + inset state on press |
+| Header (theme, gallery, badge) | Soft raised |
+| Modals and dialogs | Raised card over a dark backdrop |
+| Checkbox | Unchecked: raised · Checked: inset + amber |
+| Audio player | Raised button + sunken track |
+| List rows | Minimal elevation (4 px shadow), inset on press |
+| Camera screen | No changes (black background, the viewfinder rules) |
+| Gallery | Thumbnails with minimal relief; viewer unchanged |
 
-**Regla:** la sombra comunica profundidad; el color de acento comunica acción.
+**Rule:** shadow communicates depth; accent color communicates action.
 
 ---
 
 ## 2. Tokens
 
-Implementar en `src/config/theme.ts` y `src/config/types.ts`.
+Implement in `src/config/theme.ts` and `src/config/types.ts`.
 
-### Oscuro
+### Dark
 
-| Token | Valor | Uso |
+| Token | Value | Use |
 | --- | --- | --- |
-| `surfaceColor` | `#071F35` | Fondo y superficie (unificados) |
-| `shadowLight` | `#103A57` | Sombra clara (arriba-izquierda) |
-| `shadowDark` | `#02101D` | Sombra oscura (abajo-derecha) |
-| `textColor` | `#E9EEF4` | Texto principal (contraste ~14:1) |
-| `accentColor` | `#ECB365` | Iconos activos, títulos, foco |
-| `mutedColor` | `#8EA5BA` | Metadatos |
-| `insetColor` | `#041624` | Superficies hundidas |
-| `deleteButtonColor` | `#B3363C` | Acción destructiva |
+| `surfaceColor` | `#071F35` | Background and surface (unified) |
+| `shadowLight` | `#103A57` | Light shadow (top-left) |
+| `shadowDark` | `#02101D` | Dark shadow (bottom-right) |
+| `textColor` | `#E9EEF4` | Main text (~14:1 contrast) |
+| `accentColor` | `#ECB365` | Active icons, titles, focus |
+| `mutedColor` | `#8EA5BA` | Metadata |
+| `insetColor` | `#041624` | Sunken surfaces |
+| `deleteButtonColor` | `#B3363C` | Destructive action |
 
-### Claro
+### Light
 
-| Token | Valor | Uso |
+| Token | Value | Use |
 | --- | --- | --- |
-| `surfaceColor` | `#E6EBF1` | Fondo y superficie |
-| `shadowLight` | `#FFFFFF` | Sombra clara |
-| `shadowDark` | `#C2CCD9` | Sombra oscura |
-| `textColor` | `#16324A` | Texto principal (~10:1) |
-| `accentColor` | `#2E5C7A` | Iconos activos, títulos |
-| `mutedColor` | `#5C7287` | Metadatos |
-| `insetColor` | `#DBE3EC` | Superficies hundidas |
-| `deleteButtonColor` | `#C2383F` | Acción destructiva |
+| `surfaceColor` | `#E6EBF1` | Background and surface |
+| `shadowLight` | `#FFFFFF` | Light shadow |
+| `shadowDark` | `#C2CCD9` | Dark shadow |
+| `textColor` | `#16324A` | Main text (~10:1) |
+| `accentColor` | `#2E5C7A` | Active icons, titles |
+| `mutedColor` | `#5C7287` | Metadata |
+| `insetColor` | `#DBE3EC` | Sunken surfaces |
+| `deleteButtonColor` | `#C2383F` | Destructive action |
 
-> Corrige los dos fallos actuales del tema claro:
-> `#EEEEEE` sobre `#61A4BC` = **2.40:1** y placeholder sobre tarjeta = **2.04:1**.
+> Fixes the two current issues in the light theme:
+> `#EEEEEE` on `#61A4BC` = **2.40:1** and placeholder on card = **2.04:1**.
 
 ---
 
-## 3. Receta técnica (RN 0.88 / Expo 58)
+## 3. Technical recipe (RN 0.88 / Expo 58)
 
-`boxShadow` es nativo en New Architecture, admite **múltiples sombras** e **inset**.
-No hace falta ninguna librería de terceros.
+`boxShadow` is native in the New Architecture, supports **multiple shadows** and **inset**.
+No third-party library is needed.
 
 ```ts
 import { Platform, type ViewStyle } from 'react-native';
 import type { Theme } from '../config/types';
 
-// Android: outset desde API 28 (9), inset desde API 29 (10).
+// Android: outset from API 28 (9), inset from API 29 (10).
 export const supportsOutsetShadow =
   Platform.OS !== 'android' || Number(Platform.Version) >= 28;
 export const supportsInsetShadow =
@@ -106,22 +106,22 @@ export const raised = (
 };
 ```
 
-Forma recomendada (más legible) de la cadena final:
+Recommended (more readable) form of the final string:
 
 ```ts
 boxShadow: `6px 6px 12px ${theme.shadowDark}, -6px -6px 12px ${theme.shadowLight}`
 boxShadow: `inset 4px 4px 8px ${theme.shadowDark}, inset -4px -4px 8px ${theme.shadowLight}`
 ```
 
-Notas:
+Notes:
 
-- `boxShadow` **no es animable**: animar `transform` / `opacity`, nunca la sombra.
-- En iOS el relieve se ve desde el primer frame; en Android depende de API.
-- En RN Web (`react-native-web` 0.21) se mapea a CSS `box-shadow`; el inset funciona.
-- Opcional: `backgroundImage: 'linear-gradient(...)'` nativo para dar un brillo sutil
-  en la esquina superior (sin `expo-linear-gradient`).
+- `boxShadow` **is not animatable**: animate `transform` / `opacity`, never the shadow.
+- On iOS the relief is visible from the first frame; on Android it depends on the API level.
+- On RN Web (`react-native-web` 0.21) it maps to CSS `box-shadow`; inset works.
+- Optional: native `backgroundImage: 'linear-gradient(...)'` to add a subtle glow
+  in the top corner (without `expo-linear-gradient`).
 
-### Fallback sin `boxShadow`
+### Fallback without `boxShadow`
 
 ```ts
 const neumorphicFallback: ViewStyle = {
@@ -133,29 +133,29 @@ const neumorphicFallback: ViewStyle = {
 
 ---
 
-## 4. Mapa de cambios por archivo
+## 4. Change map by file
 
-| Archivo | Cambio |
+| File | Change |
 | --- | --- |
-| `src/config/types.ts` | Añadir `surfaceColor`, `shadowLight`, `shadowDark`, `accentColor`, `mutedColor`, `insetColor`, `hairlineColor` |
-| `src/config/theme.ts` | Nuevas paletas y radios (se conservan 18/12/28/999) |
-| `src/utils/neumorphic.ts` (nuevo) | Helpers `raised()`, `inset()`, flags de soporte |
-| `src/components/atoms/IconButton.tsx` | Fondo `surfaceColor` + `raised('md')`; `underlayColor: transparent`; pressed → `inset` |
-| `src/components/atoms/AnimatedIconButton.tsx` | Igual que `IconButton`; animar solo `bottom` y `opacity` |
-| `src/components/atoms/Checkbox.tsx` | Sin marcar `raised('sm')`; marcado `inset` + check ámbar |
-| `src/components/atoms/DialogButton.tsx` | Ghost elevado; primario con acento; danger sólido |
-| `src/components/molecules/modalStyles.ts` | Tarjeta `surfaceColor` + `raised('lg')`; quitar sombra negra |
-| `src/components/molecules/Header.tsx` | Botones elevados; borde inferior → hairline o ninguno |
-| `src/components/molecules/HomeItem.tsx` | Fila `surfaceColor` + `raised('sm')`; pressed inset |
-| `src/components/molecules/ItemList.tsx` | Igual + `insetColor` para inputs y pista de audio |
-| `src/components/molecules/SwipeToDelete.tsx` | **Reestructurar**: sombra en wrapper exterior, `overflow: hidden` solo en el contenido |
-| `src/components/organisms/HomeScreen.tsx` / `ReminderScreen.tsx` | Quitar `shadowColor/elevation` de los FAB; usar helpers |
-| `src/providers/DialogProvider.tsx` | Sin cambios de lógica; hereda `modalStyles` |
+| `src/config/types.ts` | Add `surfaceColor`, `shadowLight`, `shadowDark`, `accentColor`, `mutedColor`, `insetColor`, `hairlineColor` |
+| `src/config/theme.ts` | New palettes and radii (18/12/28/999 are kept) |
+| `src/utils/neumorphic.ts` (new) | `raised()`, `inset()` helpers, support flags |
+| `src/components/atoms/IconButton.tsx` | `surfaceColor` background + `raised('md')`; `underlayColor: transparent`; pressed → `inset` |
+| `src/components/atoms/AnimatedIconButton.tsx` | Same as `IconButton`; animate only `bottom` and `opacity` |
+| `src/components/atoms/Checkbox.tsx` | Unchecked `raised('sm')`; checked `inset` + amber check |
+| `src/components/atoms/DialogButton.tsx` | Raised ghost; accent primary; solid danger |
+| `src/components/molecules/modalStyles.ts` | Card `surfaceColor` + `raised('lg')`; remove the black shadow |
+| `src/components/molecules/Header.tsx` | Raised buttons; bottom border → hairline or none |
+| `src/components/molecules/HomeItem.tsx` | Row `surfaceColor` + `raised('sm')`; pressed inset |
+| `src/components/molecules/ItemList.tsx` | Same + `insetColor` for inputs and the audio track |
+| `src/components/molecules/SwipeToDelete.tsx` | **Restructure**: shadow on the outer wrapper, `overflow: hidden` only on the content |
+| `src/components/organisms/HomeScreen.tsx` / `ReminderScreen.tsx` | Remove `shadowColor/elevation` from the FABs; use the helpers |
+| `src/providers/DialogProvider.tsx` | No logic changes; inherits `modalStyles` |
 
-### Punto crítico: `SwipeToDelete`
+### Critical point: `SwipeToDelete`
 
 ```tsx
-// La sombra va FUERA del clip; el clip solo envuelve el contenido deslizable.
+// The shadow goes OUTSIDE the clip; the clip only wraps the swipeable content.
 <View style={[raised(theme, 'sm'), { borderRadius: 20 }]}>
   <ReanimatedSwipeable
     containerStyle={{ borderRadius: 20, overflow: 'hidden', backgroundColor: theme.surfaceColor }}
@@ -166,20 +166,20 @@ const neumorphicFallback: ViewStyle = {
 </View>
 ```
 
-Si la sombra queda dentro del contenedor con `overflow: 'hidden'`, se recorta y
-el efecto desaparece.
+If the shadow ends up inside a container with `overflow: 'hidden'`, it gets clipped and
+the effect disappears.
 
 ---
 
-## 5. Fases
+## 5. Phases
 
-1. **Tokens + helpers** (`theme.ts`, `types.ts`, `neumorphic.ts`). Sin cambios visuales aún.
-2. **Chrome**: `IconButton`, `AnimatedIconButton`, `Checkbox`, `DialogButton`, modales.
-3. **Filas**: `HomeItem`, `ItemList`, `SwipeToDelete`.
-4. **Ajuste fino**: contraste, Android antiguo, animación de tema, tema claro.
-5. **Capa glass**: `GlassOverlay`, modales, menú de acciones y cámara (ver sección 6).
+1. **Tokens + helpers** (`theme.ts`, `types.ts`, `neumorphic.ts`). No visual changes yet.
+2. **Chrome**: `IconButton`, `AnimatedIconButton`, `Checkbox`, `DialogButton`, modals.
+3. **Rows**: `HomeItem`, `ItemList`, `SwipeToDelete`.
+4. **Fine-tuning**: contrast, old Android, theme animation, light theme.
+5. **Glass layer**: `GlassOverlay`, modals, actions menu and camera (see section 6).
 
-Validación entre fases:
+Validation between phases:
 
 ```bash
 npm run typecheck
@@ -188,53 +188,53 @@ npm run web
 
 ---
 
-## 6. Capa glass (complemento)
+## 6. Glass layer (complement)
 
-El vidrio **no reemplaza** al neumorfismo: se usa solo para lo que flota y necesita
-mostrar contexto detrás.
+Glass **does not replace** neumorphism: it is used only for what floats and needs to
+show context behind it.
 
-### Reparto de roles
+### Role split
 
-| Capa | Elementos | Tratamiento |
+| Layer | Elements | Treatment |
 | --- | --- | --- |
-| 1 · Base | Fondo, filas, header, inputs | Neumórfico, **opaco** |
-| 2 · Flotante | Modales, diálogos, menú de acciones, toasts, chrome de cámara | **Glass**: tinte + blur + borde de luz |
-| 3 · Acción | Confirmar, eliminar, iconos activos | Color pleno (ámbar / rojo), **nunca glass** |
+| 1 · Base | Background, rows, header, inputs | Neumorphic, **opaque** |
+| 2 · Floating | Modals, dialogs, actions menu, toasts, camera chrome | **Glass**: tint + blur + light border |
+| 3 · Action | Confirm, delete, active icons | Solid color (amber / red), **never glass** |
 
-Reglas:
+Rules:
 
-- Máximo **2 o 3 superficies glass** visibles a la vez.
-- Nunca glass sobre glass (el blur se vuelve barro).
-- Un modal glass **necesita un scrim** detrás; sin contenido visible el vidrio parece plástico sucio.
-- Sombra del glass: una sola sombra difusa + `inset 0 1px 0` de luz. No usar la doble sombra neumórfica.
+- At most **2 or 3 glass surfaces** visible at once.
+- Never glass over glass (the blur turns to mud).
+- A glass modal **needs a scrim** behind it; without visible content, glass looks like dirty plastic.
+- Glass shadow: a single diffuse shadow + `inset 0 1px 0` of light. Do not use the double neumorphic shadow.
 
-### Tokens glass
+### Glass tokens
 
 ```ts
-// Oscuro
+// Dark
 glassBackground: 'rgba(9, 33, 54, 0.52)',
 glassBorder: 'rgba(255, 255, 255, 0.16)',
 glassHighlight: 'rgba(255, 255, 255, 0.22)',
 glassScrim: 'rgba(2, 10, 18, 0.42)',
 
-// Claro
+// Light
 glassBackground: 'rgba(255, 255, 255, 0.55)',
 glassBorder: 'rgba(255, 255, 255, 0.85)',
 glassHighlight: 'rgba(255, 255, 255, 0.95)',
 glassScrim: 'rgba(22, 50, 74, 0.28)',
 ```
 
-### Instalación
+### Installation
 
 ```bash
 npx expo install expo-blur
 ```
 
-En SDK 58 `expo-blur` es estable en Android, pero **requiere** `BlurTargetView`:
-sin eso el resultado es solo un fondo semitransparente.
+On SDK 58 `expo-blur` is stable on Android, but it **requires** `BlurTargetView`:
+without it the result is just a semi-transparent background.
 
 ```tsx
-// App.tsx: un único target para toda la app
+// App.tsx: a single target for the whole app
 const blurTargetRef = useRef<View | null>(null);
 
 <BlurTargetView ref={blurTargetRef} style={{ flex: 1 }}>
@@ -243,7 +243,7 @@ const blurTargetRef = useRef<View | null>(null);
 
 <BlurView
   blurTarget={blurTargetRef}
-  blurMethod="dimezisBlurViewSdk31Plus" // evita RenderScript en Android < 12
+  blurMethod="dimezisBlurViewSdk31Plus" // avoids RenderScript on Android < 12
   intensity={30}
   tint="dark"
   style={{ overflow: 'hidden', borderRadius: 24 }}
@@ -252,37 +252,37 @@ const blurTargetRef = useRef<View | null>(null);
 </BlurView>
 ```
 
-- `blurMethod` por defecto en Android es `'none'` → solo tinte.
-- `dimezisBlurViewSdk31Plus` blurea en API 31+ y degrada a tinte en el resto:
-  es el mejor balance rendimiento/efecto.
-- `borderRadius` en `BlurView` necesita `overflow: 'hidden'`.
-- Renderizar el `BlurView` **después** de la lista (el blur no se refresca si se monta antes que el contenido dinámico).
+- The default `blurMethod` on Android is `'none'` → tint only.
+- `dimezisBlurViewSdk31Plus` blurs on API 31+ and degrades to a tint on older versions:
+  it is the best performance/effect balance.
+- `borderRadius` on `BlurView` requires `overflow: 'hidden'`.
+- Render the `BlurView` **after** the list (the blur does not refresh if it mounts before the dynamic content).
 
-### El límite de los modales en Android
+### The Android modal limitation
 
-`BlurView` dentro de un `Modal` de React Native **no puede leer la pantalla**: el Modal
-se dibuja en una ventana nativa aparte. Consecuencia:
+`BlurView` inside a React Native `Modal` **cannot read the screen**: the Modal
+is drawn in a separate native window. Consequence:
 
-- **iOS**: funciona bien.
-- **Android**: el blur sale gris/negro o no sale.
+- **iOS**: works fine.
+- **Android**: the blur comes out gray/black or does not show up.
 
-Se eligió el primer camino y ya está implementado:
+The first path was chosen and is already implemented:
 
-1. **Implementado**: los overlays viven en la raíz de la app, fuera del `BlurTargetView`,
-   mediante `OverlayProvider` + `OverlayHost` (`src/providers/OverlayProvider.tsx`).
-   `DialogProvider` los renderiza sobre `children` y maneja la tecla atrás con `BackHandler`.
-   La ref del `BlurTargetView` se comparte con `BlurTargetContext`.
-2. **Alternativa descartada**: mantener `Modal` y usar vidrio sin blur en Android
-   (`blurMethod="none"` + tinte + borde). Se ve aceptable, pero no es vidrio real.
+1. **Implemented**: overlays live at the app root, outside `BlurTargetView`,
+   through `OverlayProvider` + `OverlayHost` (`src/providers/OverlayProvider.tsx`).
+   `DialogProvider` renders them over `children` and handles the back key with `BackHandler`.
+   The `BlurTargetView` ref is shared with `BlurTargetContext`.
+2. **Discarded alternative**: keep `Modal` and use glass without blur on Android
+   (`blurMethod="none"` + tint + border). It looks acceptable, but it is not real glass.
 
-`ModalTitle`, `ModalAudio` y `GalleryModal` ya usan el portal (`GlassOverlay` /
-`GlassBackdrop`). La galería usa `GlassBackdrop` para el fondo y mantiene el visor de
-imágenes en negro para no alterar los colores de las fotos.
+`ModalTitle`, `ModalAudio` and `GalleryModal` already use the portal (`GlassOverlay` /
+`GlassBackdrop`). The gallery uses `GlassBackdrop` for the background and keeps the image
+viewer black so it does not alter the photo colors.
 
-### Cámara
+### Camera
 
-Sobre el visor **no** conviene blur real: cuesta y no se actualiza de forma fiable con
-video. Ahí el vidrio es "falso":
+Over the viewfinder, real blur is **not** a good idea: it is expensive and does not refresh
+reliably with video. There the glass is "fake":
 
 ```ts
 {
@@ -293,43 +293,43 @@ video. Ahí el vidrio es "falso":
 }
 ```
 
-El borde superior claro + el tinte ya leen como vidrio sobre la imagen.
+The light top border + the tint already read as glass over the image.
 
-### Archivos nuevos/afectados
+### New/affected files
 
-| Archivo | Cambio |
+| File | Change |
 | --- | --- |
-| `src/components/atoms/GlassOverlay.tsx` (nuevo) | Tarjeta glass + backdrop para overlays en la raíz |
-| `src/components/atoms/GlassBackdrop.tsx` (nuevo) | Fondo full-screen con blur para overlays de pantalla completa |
-| `src/providers/OverlayProvider.tsx` (nuevo) | Portal: acciones estables y host que renderiza los overlays |
-| `src/providers/BlurTargetContext.tsx` (nuevo) | Ref compartida del `BlurTargetView` |
-| `src/config/theme.ts` / `types.ts` | Tokens `glass*` |
+| `src/components/atoms/GlassOverlay.tsx` (new) | Glass card + backdrop for root overlays |
+| `src/components/atoms/GlassBackdrop.tsx` (new) | Full-screen blurred background for full-screen overlays |
+| `src/providers/OverlayProvider.tsx` (new) | Portal: stable actions and a host that renders the overlays |
+| `src/providers/BlurTargetContext.tsx` (new) | Shared ref for `BlurTargetView` |
+| `src/config/theme.ts` / `types.ts` | `glass*` tokens |
 | `src/providers/DialogProvider.tsx` | `Modal` → overlay + `BlurTargetView` + `OverlayHost` |
-| `src/components/molecules/ModalTitle.tsx` / `ModalAudio.tsx` | `Modal` → portal glass |
-| `src/components/organisms/GalleryModal.tsx` | `Modal` → portal con `GlassBackdrop`; visor negro |
-| `src/components/organisms/CameraScreen.tsx` | Chrome glass sin blur |
-| `src/components/molecules/Header.tsx` | Sin cambios (base neumórfica) |
+| `src/components/molecules/ModalTitle.tsx` / `ModalAudio.tsx` | `Modal` → glass portal |
+| `src/components/organisms/GalleryModal.tsx` | `Modal` → portal with `GlassBackdrop`; black viewer |
+| `src/components/organisms/CameraScreen.tsx` | Glass chrome without blur |
+| `src/components/molecules/Header.tsx` | No changes (neumorphic base) |
 
-### Rendimiento
+### Performance
 
-- No usar `BlurView` dentro de listas ni de celdas reordenables.
-- No animar `intensity` en bucles; animar `opacity` y `transform` del contenedor.
-- Menos de 3 `BlurView` montados a la vez.
-- En Android < 12, `dimezisBlurViewSdk31Plus` evita el coste de RenderScript.
+- Do not use `BlurView` inside lists or reorderable cells.
+- Do not animate `intensity` in loops; animate the container's `opacity` and `transform`.
+- Fewer than 3 mounted `BlurView`s at a time.
+- On Android < 12, `dimezisBlurViewSdk31Plus` avoids the RenderScript cost.
 
 ---
 
-## 7. Riesgos y mitigaciones
+## 7. Risks and mitigations
 
-| Riesgo | Mitigación |
+| Risk | Mitigation |
 | --- | --- |
-| Baja affordance (todo parece plano) | Acento en iconos activos + inset al presionar + radios consistentes |
-| Sombras recortadas | Mover la sombra fuera de `overflow: hidden` |
-| Coste en listas largas | Sombra de 4 px, sin blur alto; no animar `boxShadow` |
-| Android < 9 / < 10 | Fallback con borde hairline; verificar en dispositivo |
-| Contraste insuficiente | Tokens ya validados; no volver a texto claro sobre tarjeta clara |
-| Modo oscuro "apagado" | `surfaceColor` un tono por encima del fondo actual para que la luz se lea |
-| Blur real en modales Android | Convertir diálogos a overlay en la misma ventana o usar tinte sin blur |
-| Blur caro / no se actualiza sobre video | Vidrio falso en cámara; blur solo en superficies estáticas |
-| Exceso de capas | Máximo 2-3 superficies glass; la base siempre opaca |
-| Texto sobre glass poco legible | Tinte con opacidad mínima + borde; validar contraste sobre el peor fondo |
+| Low affordance (everything looks flat) | Accent on active icons + inset on press + consistent radii |
+| Clipped shadows | Move the shadow outside `overflow: hidden` |
+| Cost on long lists | 4 px shadow, no heavy blur; do not animate `boxShadow` |
+| Android < 9 / < 10 | Hairline border fallback; verify on a device |
+| Insufficient contrast | Tokens are already validated; do not go back to light text on light cards |
+| "Washed out" dark mode | `surfaceColor` one shade above the current background so the light reads |
+| Real blur in Android modals | Convert dialogs to same-window overlays or use tint without blur |
+| Expensive blur / does not refresh over video | Fake glass on the camera; blur only on static surfaces |
+| Too many layers | At most 2-3 glass surfaces; the base is always opaque |
+| Hard-to-read text over glass | Tint with minimum opacity + border; validate contrast over the worst background |

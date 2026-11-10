@@ -1,12 +1,13 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Demo de Organizer</title>
+    <title data-i18n="meta.title">Organizer demo</title>
     <meta
       name="description"
-      content="Probá Organizer en el navegador. Demo interactiva con datos de ejemplo."
+      content="Try Organizer in your browser. An interactive demo with sample data."
+      data-i18n-content="meta.description"
     />
     <meta name="theme-color" content="#041624" />
     <link rel="icon" href="assets/favicon.png" />
@@ -105,6 +106,39 @@
         display: flex;
         align-items: center;
         gap: 10px;
+      }
+
+      .lang-switch {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        padding: 3px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(7, 31, 53, 0.75);
+      }
+
+      .lang-switch button {
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        font: inherit;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        padding: 6px 10px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: color 0.18s ease, background 0.18s ease;
+      }
+
+      .lang-switch button:hover {
+        color: var(--text);
+      }
+
+      .lang-switch button[aria-pressed='true'] {
+        background: rgba(236, 179, 101, 0.16);
+        color: var(--accent);
       }
 
       .btn {
@@ -415,33 +449,38 @@
   </head>
   <body>
     <header class="topbar">
-      <a class="mobile-back" href="./" aria-label="Volver al portfolio">←</a>
-      <a class="brand" href="./">
+      <a class="mobile-back" href="./?lang=en" data-home-link aria-label="Back to the site" data-i18n-aria="nav.backAria">←</a>
+      <a class="brand" href="./?lang=en" data-home-link>
         <img src="assets/icon.png" alt="" width="34" height="34" />
         <span class="brand-name">ORGANIZER</span>
       </a>
       <div class="top-actions">
-        <a class="btn btn-ghost" href="./">← Portfolio</a>
+        <div class="lang-switch" role="group" aria-label="Language / Idioma">
+          <button type="button" data-set-lang="en" aria-pressed="true" lang="en">EN</button>
+          <button type="button" data-set-lang="es" aria-pressed="false" lang="es">ES</button>
+        </div>
+        <a class="btn btn-ghost" href="./?lang=en" data-home-link data-i18n="nav.site">← Site</a>
         <a
           class="btn btn-primary"
           href="https://github.com/lore64210/organizer/releases/latest/download/organizer.apk"
+          data-i18n="cta.download"
         >
-          Descargar APK
+          Download APK
         </a>
       </div>
     </header>
 
     <main class="stage">
       <section class="intro">
-        <p class="eyebrow">Demo interactiva</p>
-        <h1>Probalá Organizer<br /><span class="accent">en el navegador.</span></h1>
-        <p>
-          Datos de ejemplo, listas, checklist, alarmas y los dos temas. Sin instalar
-          nada y sin crear una cuenta.
+        <p class="eyebrow" data-i18n="intro.eyebrow">Interactive demo</p>
+        <h1 data-i18n-html="intro.title">Try Organizer<br /><span class="accent">in your browser.</span></h1>
+        <p data-i18n="intro.body">
+          Sample data, lists, checklists, alarms and both themes. Nothing to install
+          and no account to create.
         </p>
         <div class="meta">
-          <span><i class="dot"></i> Se guarda en tu navegador</span>
-          <span><i class="dot"></i> Sin registro</span>
+          <span><i class="dot"></i><span data-i18n="intro.meta.local">Saved in your browser</span></span>
+          <span><i class="dot"></i><span data-i18n="intro.meta.noAccount">No sign-up</span></span>
         </div>
       </section>
 
@@ -450,7 +489,8 @@
           <iframe
             id="demo-frame"
             src="demo/?embedded=1"
-            title="Demo de Organizer"
+            title="Organizer demo"
+            data-i18n-aria="demo.frameTitle"
             allow="camera; microphone; clipboard-write"
           ></iframe>
         </div>
@@ -458,35 +498,165 @@
           <a
             class="btn btn-primary"
             href="https://github.com/lore64210/organizer/releases/latest/download/organizer.apk"
+            data-i18n="cta.downloadApp"
           >
-            Descargar app para Android
+            Download the Android app
           </a>
-          <span class="under-note">APK firmado · Android 7.0+</span>
+          <span class="under-note" data-i18n="demo.underNote">Signed APK · Android 7.0+</span>
         </div>
       </div>
 
       <section class="side">
-        <p class="eyebrow">Qué probar</p>
-        <p>
-          Abrí una lista, tildá ítems, agregá texto, cambiá el tema y mirá la galería.
-          Las alarmas y la cámara están limitadas en el navegador; en el APK funcionan
-          completas.
+        <p class="eyebrow" data-i18n="side.eyebrow">What to try</p>
+        <p data-i18n="side.body">
+          Open a list, check off items, add text, switch the theme and browse the
+          gallery. Alarms and the camera are limited in the browser; in the APK they
+          work fully.
         </p>
         <div class="actions">
-          <button class="btn btn-secondary" type="button" id="reset-demo">
-            Reiniciar demo
+          <button class="btn btn-secondary" type="button" id="reset-demo" data-i18n="demo.reset">
+            Reset demo
           </button>
-          <a class="btn btn-ghost" href="demo/">Pantalla completa →</a>
+          <a class="btn btn-ghost" href="demo/" data-i18n="demo.fullscreen">Fullscreen →</a>
         </div>
-        <div class="note">
-          <strong>Demo web:</strong> las notificaciones no existen en navegador y la
-          cámara/audio dependen de los permisos del navegador. Para la experiencia
-          completa, instalá el APK.
+        <div class="note" data-i18n-html="demo.note">
+          <strong>Web demo:</strong> notifications don't exist in the browser and the
+          camera/audio depend on browser permissions. For the full experience, install
+          the APK.
         </div>
       </section>
     </main>
 
     <script>
+      const LANG_STORAGE_KEY = 'organizer-lang';
+
+      const translations = {
+        en: {
+          'meta.title': 'Organizer demo',
+          'meta.description':
+            'Try Organizer in your browser. An interactive demo with sample data.',
+          'nav.backAria': 'Back to the site',
+          'nav.site': '← Site',
+          'cta.download': 'Download APK',
+          'cta.downloadApp': 'Download the Android app',
+          'intro.eyebrow': 'Interactive demo',
+          'intro.title':
+            'Try Organizer<br /><span class="accent">in your browser.</span>',
+          'intro.body':
+            'Sample data, lists, checklists, alarms and both themes. Nothing to install and no account to create.',
+          'intro.meta.local': 'Saved in your browser',
+          'intro.meta.noAccount': 'No sign-up',
+          'demo.frameTitle': 'Organizer demo',
+          'demo.underNote': 'Signed APK · Android 7.0+',
+          'side.eyebrow': 'What to try',
+          'side.body':
+            'Open a list, check off items, add text, switch the theme and browse the gallery. Alarms and the camera are limited in the browser; in the APK they work fully.',
+          'demo.reset': 'Reset demo',
+          'demo.fullscreen': 'Fullscreen →',
+          'demo.note':
+            '<strong>Web demo:</strong> notifications don\'t exist in the browser and the camera/audio depend on browser permissions. For the full experience, install the APK.',
+        },
+        es: {
+          'meta.title': 'Demo de Organizer',
+          'meta.description':
+            'Probá Organizer en el navegador. Demo interactiva con datos de ejemplo.',
+          'nav.backAria': 'Volver al portfolio',
+          'nav.site': '← Portfolio',
+          'cta.download': 'Descargar APK',
+          'cta.downloadApp': 'Descargar app para Android',
+          'intro.eyebrow': 'Demo interactiva',
+          'intro.title':
+            'Probá Organizer<br /><span class="accent">en el navegador.</span>',
+          'intro.body':
+            'Datos de ejemplo, listas, checklist, alarmas y los dos temas. Sin instalar nada y sin crear una cuenta.',
+          'intro.meta.local': 'Se guarda en tu navegador',
+          'intro.meta.noAccount': 'Sin registro',
+          'demo.frameTitle': 'Demo de Organizer',
+          'demo.underNote': 'APK firmado · Android 7.0+',
+          'side.eyebrow': 'Qué probar',
+          'side.body':
+            'Abrí una lista, tildá ítems, agregá texto, cambiá el tema y mirá la galería. Las alarmas y la cámara están limitadas en el navegador; en el APK funcionan completas.',
+          'demo.reset': 'Reiniciar demo',
+          'demo.fullscreen': 'Pantalla completa →',
+          'demo.note':
+            '<strong>Demo web:</strong> las notificaciones no existen en navegador y la cámara/audio dependen de los permisos del navegador. Para la experiencia completa, instalá el APK.',
+        },
+      };
+
+      const SUPPORTED_LANGS = Object.keys(translations);
+      let currentLang = 'en';
+
+      const translate = (key) =>
+        translations[currentLang]?.[key] ?? translations.en[key] ?? key;
+
+      const applyLanguage = (lang, { updateUrl = false, persist = true } = {}) => {
+        currentLang = SUPPORTED_LANGS.includes(lang) ? lang : 'en';
+        document.documentElement.lang = currentLang;
+
+        document.querySelectorAll('[data-i18n]').forEach((element) => {
+          element.textContent = translate(element.dataset.i18n);
+        });
+        document.querySelectorAll('[data-i18n-html]').forEach((element) => {
+          element.innerHTML = translate(element.dataset.i18nHtml);
+        });
+        document.querySelectorAll('[data-i18n-aria]').forEach((element) => {
+          element.setAttribute('aria-label', translate(element.dataset.i18nAria));
+        });
+        document.querySelectorAll('[data-i18n-content]').forEach((element) => {
+          element.setAttribute('content', translate(element.dataset.i18nContent));
+        });
+        document.querySelectorAll('[data-set-lang]').forEach((button) => {
+          button.setAttribute(
+            'aria-pressed',
+            String(button.dataset.setLang === currentLang)
+          );
+        });
+        document.querySelectorAll('[data-home-link]').forEach((link) => {
+          link.href = `./?lang=${currentLang}`;
+        });
+
+        if (persist) {
+          try {
+            localStorage.setItem(LANG_STORAGE_KEY, currentLang);
+          } catch {
+            // Sin almacenamiento la preferencia dura lo que la página.
+          }
+        }
+
+        if (updateUrl) {
+          const url = new URL(window.location.href);
+          url.searchParams.set('lang', currentLang);
+          window.history.replaceState({}, '', url);
+        }
+      };
+
+      const readInitialLang = () => {
+        const fromUrl = new URLSearchParams(window.location.search)
+          .get('lang')
+          ?.slice(0, 2)
+          .toLowerCase();
+        if (SUPPORTED_LANGS.includes(fromUrl)) {
+          return fromUrl;
+        }
+        try {
+          const stored = localStorage.getItem(LANG_STORAGE_KEY);
+          if (SUPPORTED_LANGS.includes(stored)) {
+            return stored;
+          }
+        } catch {
+          // Ignorado: se usa el idioma por defecto.
+        }
+        return 'en';
+      };
+
+      document.querySelectorAll('[data-set-lang]').forEach((button) => {
+        button.addEventListener('click', () => {
+          applyLanguage(button.dataset.setLang, { updateUrl: true });
+        });
+      });
+
+      applyLanguage(readInitialLang());
+
       const frame = document.getElementById('demo-frame');
       const reset = document.getElementById('reset-demo');
 

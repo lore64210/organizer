@@ -1,89 +1,89 @@
 # Organizer
 
-App de recordatorios con listas, notas de texto, imágenes, audio y alarmas.
-Funciona offline: todo se guarda en el dispositivo con AsyncStorage + Redux Persist.
+Reminder app with lists, text notes, images, audio and alarms.
+It works offline: everything is stored on the device with AsyncStorage + Redux Persist.
 
 - **Expo SDK 58** · React Native 0.88 · React 19 · TypeScript 6
-- Navegación: `@react-navigation/stack` v7
-- Estado: Redux 5 + `react-redux` 9 + `redux-persist`
-- Listas reordenables: `react-native-reorderable-list` (Reanimated 4)
-- Audio: `expo-audio` · Cámara: `expo-camera` (`CameraView`) · Notificaciones: `expo-notifications`
+- Navigation: `@react-navigation/stack` v7
+- State: Redux 5 + `react-redux` 9 + `redux-persist`
+- Reorderable lists: `react-native-reorderable-list` (Reanimated 4)
+- Audio: `expo-audio` · Camera: `expo-camera` (`CameraView`) · Notifications: `expo-notifications`
 
-## Descargar
+## Download
 
 [![Android 7.0+](https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white)](https://github.com/lore64210/organizer/releases/latest)
 [![Expo SDK 58](https://img.shields.io/badge/Expo-SDK%2058-000020?logo=expo&logoColor=white)](https://expo.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-[⬇️ Descargar APK](https://github.com/lore64210/organizer/releases/latest) · [🖥️ Demo web](https://lore64210.github.io/organizer/demo.html) · [🌐 Portfolio](https://lore64210.github.io/organizer/) · [Instrucciones de instalación](docs/install.md)
+[⬇️ Download APK](https://github.com/lore64210/organizer/releases/latest) · [🖥️ Web demo](https://lore64210.github.io/organizer/demo.html) · [🌐 Portfolio](https://lore64210.github.io/organizer/) · [Install instructions](docs/install.md)
 
-Se distribuye como APK firmado desde [GitHub Releases](https://github.com/lore64210/organizer/releases). Funciona offline y no requiere cuenta.
-
-<p align="center">
-  <img src="docs/assets/qr.png" width="160" alt="QR para descargar el APK" />
-</p>
-
-### Demo web
-
-La demo corre en el navegador con datos de ejemplo. Las notificaciones no existen en web y la cámara, el audio y la persistencia de archivos están limitados; para la experiencia completa, instalá el APK.
+It is distributed as a signed APK from [GitHub Releases](https://github.com/lore64210/organizer/releases). It works offline and requires no account.
 
 <p align="center">
-  <img src="docs/assets/home-dark.png" width="240" alt="Organizer en tema oscuro" />
-  <img src="docs/assets/reminder-light.png" width="240" alt="Recordatorio con checklist en tema claro" />
+  <img src="docs/assets/qr.png" width="160" alt="QR code to download the APK" />
 </p>
 
-## Requisitos
+### Web demo
 
-| Herramienta | Versión |
+The demo runs in the browser with sample data. Notifications do not exist on the web, and the camera, audio and file persistence are limited; for the full experience, install the APK.
+
+<p align="center">
+  <img src="docs/assets/home-dark.png" width="240" alt="Organizer in dark theme" />
+  <img src="docs/assets/reminder-light.png" width="240" alt="Reminder with a checklist in light theme" />
+</p>
+
+## Requirements
+
+| Tool | Version |
 |---|---|
-| Node.js | **24 LTS** (SDK 58 exige `^22.13`, `^24.3` o `>=26`) |
-| npm | 10+ (viene con Node) |
-| Expo Go | última versión, desde Play Store / App Store |
+| Node.js | **24 LTS** (SDK 58 requires `^22.13`, `^24.3` or `>=26`) |
+| npm | 10+ (bundled with Node) |
+| Expo Go | latest version, from Play Store / App Store |
 
-El proyecto incluye `.nvmrc`. Si usás nvm-windows:
+The project includes `.nvmrc`. If you use nvm-windows:
 
 ```powershell
 nvm use 24.11.1
 node -v   # v24.11.1
 ```
 
-> Si `nvm use` falla por permisos, abrí la terminal como administrador.
+> If `nvm use` fails due to permissions, open the terminal as administrator.
 
-## Instalación
+## Install
 
 ```powershell
 npm ci
-npx expo-doctor   # debe pasar 20/20
+npx expo-doctor   # should pass 20/20
 ```
 
-## Desarrollo
+## Development
 
 ```powershell
 npm start          # Metro + QR
-npm run start:clear # igual, limpiando caché
-npm run android    # abre en un emulador/dispositivo Android (requiere adb)
-npm run web        # versión web (algunas features nativas no aplican)
+npm run start:clear # same, clearing the cache
+npm run android    # opens on an Android emulator/device (requires adb)
+npm run web        # web version (some native features do not apply)
 npm run typecheck  # tsc --noEmit
 ```
 
-Con **Expo Go** (camino recomendado, no requiere Android Studio):
+With **Expo Go** (recommended path, no Android Studio required):
 
-1. Instalá Expo Go en el teléfono.
-2. Conectá el teléfono y la PC a la **misma red Wi-Fi**.
-3. `npm start` y escaneá el QR (Android: desde Expo Go; iOS: con la cámara).
-4. Si no conecta, permití `node.exe` en el Firewall de Windows (puerto 8081).
+1. Install Expo Go on your phone.
+2. Connect the phone and the PC to the **same Wi-Fi network**.
+3. `npm start` and scan the QR (Android: from Expo Go; iOS: with the camera).
+4. If it does not connect, allow `node.exe` in Windows Firewall (port 8081).
 
-### Limitaciones de Expo Go
+### Expo Go limitations
 
-- Las notificaciones **locales** (alarmas) funcionan.
-- El **push remoto** no está soportado en Android desde SDK 53 (no lo usamos).
-- Para builds nativos (EAS o `expo run:android`) hace falta Android Studio + JDK 17/21 y `ANDROID_HOME`.
+- **Local** notifications (alarms) work.
+- **Remote push** is not supported on Android since SDK 53 (we do not use it).
+- Native builds (EAS or `expo run:android`) require Android Studio + JDK 17/21 and `ANDROID_HOME`.
 
-## Estructura
+## Structure
 
 ```
 index.ts                  registerRootComponent
-App.tsx                   providers, splash, fuentes, notificaciones
+App.tsx                   providers, splash, fonts, notifications
 src/
   components/
     atoms/                IconButton, Checkbox, DialogButton, Glass*
@@ -92,44 +92,44 @@ src/
     templates/            StackNavigator
   config/
     i18n.ts               i18n-js v4 + expo-localization
-    translations.ts       textos es/en
-    theme.ts              temas claro/oscuro
-    types.ts              modelos y tipos del store
-    redux/                actions, reducers, store, hooks tipados
+    translations.ts       en/es strings
+    theme.ts              light/dark themes
+    types.ts              store models and types
+    redux/                actions, reducers, store, typed hooks
   hooks/                  useKeyboardOffset
-  providers/              diálogos, overlays, blur y altura del header
+  providers/              dialogs, overlays, blur and header height
   services/
-    notifications.ts      permisos, canal Android, agendar/cancelar alarmas
-  utils/                  fechas, archivos, migración de medios, reorder, uuid
+    notifications.ts      permissions, Android channel, schedule/cancel alarms
+  utils/                  dates, files, media migration, reorder, uuid
 ```
 
-## Notas de la actualización (SDK 44 → 58)
+## Upgrade notes (SDK 44 → 58)
 
-- `expo-av` fue eliminado del SDK → migrado a `expo-audio` (grabación y reproducción).
-- `expo-camera` cambió a `CameraView` + `useCameraPermissions`.
-- `expo-barcode-scanner` fue eliminado → el escaneo usa `expo-camera`.
-- `expo-app-loading` fue eliminado → `expo-splash-screen`.
-- `react-native-drax` (sin mantenimiento y sin soporte Fabric) → `react-native-reorderable-list`.
-  Se perdió el gesto "arrastrar al tacho": ahora se reordena con long-press y se borra con el botón de tacho.
-- `i18n-js` v4 (`I18n` class + `store`) y `expo-localization` (`getLocales()`).
-- `redux` 5 / `react-redux` 9: selectores y dispatch tipados, sin `@ts-ignore`.
-- Alarmas: se guardan como ISO UTC real (antes había un ajuste manual de zona horaria que se rompía con el horario de verano).
-- Persistencia: una sola clave (`persist:root`) con `version: 2` y migración.
+- `expo-av` was removed from the SDK → migrated to `expo-audio` (recording and playback).
+- `expo-camera` changed to `CameraView` + `useCameraPermissions`.
+- `expo-barcode-scanner` was removed → scanning uses `expo-camera`.
+- `expo-app-loading` was removed → `expo-splash-screen`.
+- `react-native-drax` (unmaintained and without Fabric support) → `react-native-reorderable-list`.
+  The "drag to trash" gesture was lost: items are now reordered with a long press and deleted with the trash button.
+- `i18n-js` v4 (`I18n` class + `store`) and `expo-localization` (`getLocales()`).
+- `redux` 5 / `react-redux` 9: typed selectors and dispatch, no `@ts-ignore`.
+- Alarms: stored as real ISO UTC (previously there was a manual time zone adjustment that broke with daylight saving time).
+- Persistence: a single key (`persist:root`) with `version: 2` and migration.
 
-## Pendientes conocidos
+## Known pending items
 
-- El selector de fecha/hora usa el diálogo nativo de Android; en iOS se muestra inline (falta envolverlo en un modal propio).
-- Sin tests automatizados ni ESLint todavía.
+- The date/time picker uses Android's native dialog; on iOS it is shown inline (still needs to be wrapped in a custom modal).
+- No automated tests or ESLint yet.
 
-## Publicación
+## Release
 
-- Al cambiar `expo.version` en `app.json` y pushear a `master`, el workflow crea el tag `v<version>` y publica el APK en GitHub Releases.
-- También se puede publicar un tag `v*` manualmente.
-- Guía paso a paso: [`docs/releasing.md`](docs/releasing.md).
-- Instalación en Android: [`docs/install.md`](docs/install.md).
-- Privacidad: [`PRIVACY.md`](PRIVACY.md).
-- Plan de Play Store (referencia): [`docs/playstore-plan.md`](docs/playstore-plan.md).
+- When `expo.version` changes in `app.json` and you push to `master`, the workflow creates the `v<version>` tag and publishes the APK on GitHub Releases.
+- You can also publish a `v*` tag manually.
+- Step-by-step guide: [`docs/releasing.md`](docs/releasing.md).
+- Android install: [`docs/install.md`](docs/install.md).
+- Privacy: [`PRIVACY.md`](PRIVACY.md).
+- Play Store plan (reference): [`docs/playstore-plan.md`](docs/playstore-plan.md).
 
-## Licencia
+## License
 
-Código publicado con fines de portfolio. Todos los derechos reservados. Si querés reutilizarlo, abrí un issue.
+Code published for portfolio purposes. All rights reserved. If you want to reuse it, open an issue.

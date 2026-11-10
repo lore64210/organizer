@@ -1,74 +1,78 @@
-# Instalar Organizer en Android
+# Install Organizer on Android
 
-Organizer se distribuye como **APK firmado** desde GitHub Releases. No está en Google Play, así que Android va a pedirte que permitas la instalación desde el navegador o el gestor de archivos.
+Organizer is distributed as a **signed APK** from GitHub Releases. It is not on Google Play, so Android will ask you to allow installation from your browser or file manager.
 
-## Requisitos
+## Requirements
 
-- Android **7.0 (API 24) o superior**.
-- Espacio libre para la app y tus fotos/audios.
-- No hace falta root ni una cuenta.
+- Android **7.0 (API 24) or newer**.
+- Free space for the app and your photos/audio.
+- No root and no account required.
 
-## Descargar
+## Download
 
-- Última versión: <https://github.com/lore64210/organizer/releases/latest>
-- Descarga directa del APK: <https://github.com/lore64210/organizer/releases/latest/download/organizer.apk>
+- Latest version: <https://github.com/lore64210/organizer/releases/latest>
+- Direct APK download: <https://github.com/lore64210/organizer/releases/latest/download/organizer.apk>
 - Portfolio: <https://lore64210.github.io/organizer/>
-- Demo web: <https://lore64210.github.io/organizer/demo.html>
+- Web demo: <https://lore64210.github.io/organizer/demo.html>
 
 <p align="center">
-  <img src="assets/qr.png" width="220" alt="Código QR para descargar el APK" />
+  <img src="assets/qr.png" width="220" alt="QR code to download the APK" />
 </p>
 
-Cada release incluye un archivo `SHA256SUMS.txt` para verificar la descarga.
+Every release includes a `SHA256SUMS.txt` file to verify the download.
 
-## Instalar
+## Install
 
-1. Abrí el link desde el **teléfono** (no desde la computadora).
-2. Descargá el APK.
-3. Si Android lo pide, permití **“Instalar apps desconocidas”** para el navegador o el gestor de archivos que estés usando.
-4. Abrí el archivo descargado y tocá **Instalar**.
-5. Si Play Protect muestra una advertencia, elegí **“Instalar de todos modos”**. Es normal en apps fuera de Play.
+1. Open the link from your **phone** (not from a computer).
+2. Download the APK.
+3. If Android asks, allow **"Install unknown apps"** for the browser or file manager you are using.
+4. Open the downloaded file and tap **Install**.
+5. If Play Protect shows a warning, choose **"Install anyway"**. This is normal for apps outside Play.
 
-## Actualizar
+## Update
 
-- Descargá el APK nuevo y instalalo **encima** de la versión anterior.
-- Mientras se mantenga el mismo package (`com.lore64210.organizer`) y la misma firma, Android conserva tus datos.
-- Si Android dice **“App no instalada”**, probablemente sea un conflicto de firma: desinstalá la versión vieja (perdés los datos locales) e instalá la nueva.
+- Download the new APK and install it **on top of** the previous version.
+- As long as the package (`com.lore64210.organizer`) and the signature stay the same, Android keeps your data.
+- If Android says **"App not installed"**, it is probably a signature conflict: uninstall the old version (you will lose local data) and install the new one.
 
-La app **no se actualiza sola**: hay que volver a descargar el APK cuando salga una versión nueva.
+The app **does not update itself**: you have to download the APK again when a new version is released.
 
-## Verificar el APK (opcional)
+## Verify the APK (optional)
 
-En Windows:
+On Windows:
 
 ```powershell
 Get-FileHash .\organizer.apk -Algorithm SHA256
 ```
 
-Compará el resultado con el contenido de `SHA256SUMS.txt` del release.
+Compare the result with the contents of the release's `SHA256SUMS.txt`.
 
-## Permisos
+## Permissions
 
-| Permiso | Para qué |
+| Permission | Purpose |
 |---|---|
-| Cámara | Sacar fotos y escanear códigos QR/barras |
-| Micrófono | Grabar notas de audio |
-| Notificaciones | Alarmas y recordatorios |
-| Fotos / almacenamiento | Elegir imágenes (solo en Android 12 o menor) |
+| Camera | Take photos and scan QR/barcode codes |
+| Microphone | Record audio notes |
+| Notifications | Alarms and reminders |
+| Photos / storage | Pick images (Android 12 or lower only) |
 
-Podés rechazar cualquiera y usar el resto de la app, salvo la función que depende de ese permiso.
+You can deny any of them and still use the rest of the app, except for the feature that depends on that permission.
 
-## Privacidad
+## Privacy
 
-Organizer funciona **offline**. Las listas, notas, fotos y audios se guardan únicamente en el almacenamiento de tu dispositivo. No hay servidores, cuentas, analytics ni publicidad. Ver [`PRIVACY.md`](../PRIVACY.md).
+Organizer works **offline**. Lists, notes, photos and audio are stored only on your device's storage. There are no servers, accounts, analytics or advertising. See [`PRIVACY.md`](../PRIVACY.md).
 
-## Problemas comunes
+## Common issues
 
-- **“Por seguridad, tu teléfono no puede instalar apps desconocidas”**: habilitá el permiso para la app desde la que abrís el APK (Ajustes → Apps → Acceso especial → Instalar apps desconocidas).
-- **Play Protect bloquea la instalación**: tocá “Más detalles” → “Instalar de todos modos”. Si no aparece, desactivá temporalmente “Analizar apps” en Play Store.
-- **El APK no descarga**: probá desde el navegador del teléfono, no desde un visor interno de Instagram/LinkedIn.
-- **La app se cierra al abrir**: verificá que el Android sea 7.0+ y que hayas instalado el APK completo (no un archivo parcial).
+- **"For your security, your phone can't install unknown apps"**: enable the permission for the app you open the APK from (Settings → Apps → Special app access → Install unknown apps).
+- **Play Protect blocks the installation**: tap "More details" → "Install anyway". If it does not appear, temporarily turn off "Scan apps" in the Play Store.
+- **The APK won't download**: try the phone's browser, not an in-app viewer such as Instagram or LinkedIn.
+- **The app closes on launch**: check that Android is 7.0+ and that you installed the complete APK (not a partial file).
 
-## Código
+## Code
 
-El código fuente está en <https://github.com/lore64210/organizer>. Es un proyecto de portfolio; todos los derechos reservados.
+The source code is at <https://github.com/lore64210/organizer>. It is a portfolio project; all rights reserved.
+
+---
+
+[Versión en español](./install.es.md)

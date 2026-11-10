@@ -1,19 +1,21 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Organizer — recordatorios offline para Android</title>
+    <title data-i18n="meta.title">Organizer — offline reminders for Android</title>
     <meta
       name="description"
-      content="Organizer es una app de recordatorios offline con listas, notas, fotos, audio y alarmas. Todo queda en tu dispositivo. Descargá el APK desde GitHub Releases."
+      content="Organizer is an offline reminder app with lists, notes, photos, audio and alarms. Everything stays on your device. Download the APK from GitHub Releases."
+      data-i18n-content="meta.description"
     />
     <meta name="theme-color" content="#071F35" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Organizer — recordatorios offline para Android" />
+    <meta property="og:title" content="Organizer — offline reminders for Android" data-i18n-content="meta.title" />
     <meta
       property="og:description"
-      content="Listas, notas, fotos, audio y alarmas. Sin cuenta, sin nube y sin analytics."
+      content="Lists, notes, photos, audio and alarms. No account, no cloud, no analytics."
+      data-i18n-content="meta.ogDescription"
     />
     <meta property="og:image" content="https://lore64210.github.io/organizer/assets/home-dark.png" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -111,6 +113,10 @@
         height: 36px;
       }
 
+      .brand-name {
+        white-space: nowrap;
+      }
+
       .nav-links {
         display: flex;
         align-items: center;
@@ -165,6 +171,45 @@
 
       .nav .btn {
         padding: 11px 17px;
+      }
+
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .lang-switch {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        padding: 3px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(4, 22, 36, 0.6);
+      }
+
+      .lang-switch button {
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        font: inherit;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        padding: 7px 11px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: color 0.18s ease, background 0.18s ease;
+      }
+
+      .lang-switch button:hover {
+        color: var(--text);
+      }
+
+      .lang-switch button[aria-pressed='true'] {
+        background: rgba(236, 179, 101, 0.16);
+        color: var(--accent);
       }
 
       /* ---------- Hero ---------- */
@@ -769,6 +814,19 @@
           display: none;
         }
 
+        .nav {
+          gap: 12px;
+        }
+
+        .nav .btn {
+          padding: 10px 14px;
+          font-size: 12px;
+        }
+
+        .lang-switch button {
+          padding: 6px 9px;
+        }
+
         section {
           padding: 58px 0;
         }
@@ -788,6 +846,12 @@
         }
       }
 
+      @media (max-width: 420px) {
+        .brand-name {
+          display: none;
+        }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         html {
           scroll-behavior: auto;
@@ -804,17 +868,23 @@
       <div class="container nav">
         <a class="brand" href="#top">
           <img src="assets/icon.png" alt="" width="36" height="36" />
-          ORGANIZER
+          <span class="brand-name">ORGANIZER</span>
         </a>
-        <nav class="nav-links" aria-label="Navegación principal">
-          <a href="demo.html">Demo</a>
-          <a href="#funciones">Producto</a>
-          <a href="#privacidad">Privacidad</a>
+        <nav class="nav-links" aria-label="Main navigation" data-i18n-aria="nav.aria">
+          <a href="demo.html?lang=en" data-demo-link data-i18n="nav.demo">Demo</a>
+          <a href="#funciones" data-i18n="nav.product">Product</a>
+          <a href="#privacidad" data-i18n="nav.privacy">Privacy</a>
           <a href="https://github.com/lore64210/organizer" rel="noreferrer">GitHub</a>
         </nav>
-        <a class="btn btn-primary" href="https://github.com/lore64210/organizer/releases/latest">
-          Descargar APK
-        </a>
+        <div class="nav-actions">
+          <div class="lang-switch" role="group" aria-label="Language / Idioma">
+            <button type="button" data-set-lang="en" aria-pressed="true" lang="en">EN</button>
+            <button type="button" data-set-lang="es" aria-pressed="false" lang="es">ES</button>
+          </div>
+          <a class="btn btn-primary" href="https://github.com/lore64210/organizer/releases/latest">
+            <span data-i18n="cta.download">Download APK</span>
+          </a>
+        </div>
       </div>
     </header>
 
@@ -822,16 +892,16 @@
       <div class="container">
         <section class="hero" aria-labelledby="hero-title">
           <div>
-            <p class="eyebrow">Android · offline-first · sin cuentas</p>
-            <h1 id="hero-title">
-              Tus recordatorios,<br />
-              en tu teléfono.<br />
-              <span class="accent">No en la nube.</span>
+            <p class="eyebrow" data-i18n="hero.eyebrow">Android · offline-first · no accounts</p>
+            <h1 id="hero-title" data-i18n-html="hero.title">
+              Your reminders,<br />
+              on your phone.<br />
+              <span class="accent">Not in the cloud.</span>
             </h1>
-            <p class="lead">
-              Listas, notas, fotos, audio y alarmas en una app que funciona sin conexión.
-              Todo se guarda en tu dispositivo: sin servidores, sin analytics y sin crear
-              una cuenta.
+            <p class="lead" data-i18n="hero.lead">
+              Lists, notes, photos, audio and alarms in an app that works without a
+              connection. Everything is stored on your device: no servers, no analytics
+              and no account to create.
             </p>
             <div class="hero-actions">
               <a class="btn btn-primary" href="https://github.com/lore64210/organizer/releases/latest">
@@ -839,19 +909,19 @@
                   <path d="M5 16.5A7 7 0 0 1 6.3 5.1 8 8 0 0 1 20 10.5a5.5 5.5 0 0 1-1.5 10.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                   <path d="M12 12v9m0 0-3-3m3 3 3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                Descargar APK
+                <span data-i18n="cta.download">Download APK</span>
               </a>
-              <a class="btn btn-secondary" href="demo.html">
-                Probar demo web
+              <a class="btn btn-secondary" href="demo.html?lang=en" data-demo-link data-i18n="cta.demo">
+                Try the web demo
               </a>
-              <a class="btn btn-ghost" href="https://github.com/lore64210/organizer">
-                Ver código →
+              <a class="btn btn-ghost" href="https://github.com/lore64210/organizer" data-i18n="cta.code">
+                View code →
               </a>
             </div>
             <div class="hero-meta">
-              <span><i class="dot"></i> Android 7.0+</span>
-              <span><i class="dot"></i> APK firmado</span>
-              <span><i class="dot"></i> 100% local</span>
+              <span><i class="dot"></i><span data-i18n="hero.meta.android">Android 7.0+</span></span>
+              <span><i class="dot"></i><span data-i18n="hero.meta.apk">Signed APK</span></span>
+              <span><i class="dot"></i><span data-i18n="hero.meta.local">100% local</span></span>
             </div>
           </div>
 
@@ -859,7 +929,8 @@
             <div class="phone">
               <img
                 src="assets/home-dark.png"
-                alt="Pantalla principal de Organizer con recordatorios de ejemplo"
+                alt="Organizer home screen with sample reminders"
+                data-i18n-alt="hero.imgAlt"
                 width="488"
                 height="1055"
               />
@@ -868,25 +939,26 @@
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M3 3l18 18M8.5 8.5a7 7 0 0 1 9 0M5 5a11 11 0 0 1 14 0M12 17.5h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
               </svg>
-              Sin conexión
+              <span data-i18n="hero.chip.offline">Offline</span>
             </span>
             <span class="float-chip chip-b">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
                 <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              100% local
+              <span data-i18n="hero.meta.local">100% local</span>
             </span>
           </div>
         </section>
 
         <section id="funciones" aria-labelledby="features-title">
           <div class="section-head">
-            <p class="eyebrow">Producto y tecnología</p>
-            <h2 id="features-title">Lo esencial, sin ruido.</h2>
-            <p>
-              Las funciones justas para organizarte, con una arquitectura offline-first
-              detrás: todo se guarda en el dispositivo y funciona sin conexión.
+            <p class="eyebrow" data-i18n="features.eyebrow">Product &amp; technology</p>
+            <h2 id="features-title" data-i18n="features.title">The essentials, without the noise.</h2>
+            <p data-i18n="features.lead">
+              Just the features you need to get organized, backed by an offline-first
+              architecture: everything is stored on the device and works without a
+              connection.
             </p>
           </div>
 
@@ -899,8 +971,8 @@
                   </svg>
                 </div>
                 <div class="feature-copy">
-                  <h3>Offline de verdad</h3>
-                  <p>Listas, fotos, audio y alarmas viven en el dispositivo. La app abre y funciona sin red.</p>
+                  <h3 data-i18n="feature.offline.title">Truly offline</h3>
+                  <p data-i18n="feature.offline.body">Lists, photos, audio and alarms live on your device. The app opens and works without a network.</p>
                 </div>
               </article>
 
@@ -911,8 +983,8 @@
                   </svg>
                 </div>
                 <div class="feature-copy">
-                  <h3>Listas y checklists</h3>
-                  <p>Reordená con long-press, tildá ítems y seguí el progreso de cada lista.</p>
+                  <h3 data-i18n="feature.lists.title">Lists and checklists</h3>
+                  <p data-i18n="feature.lists.body">Reorder with a long press, check off items and track each list's progress.</p>
                 </div>
               </article>
 
@@ -925,8 +997,8 @@
                   </svg>
                 </div>
                 <div class="feature-copy">
-                  <h3>Fotos, audio y QR</h3>
-                  <p>Galería por recordatorio, notas de voz y escaneo de códigos con la cámara.</p>
+                  <h3 data-i18n="feature.media.title">Photos, audio and QR</h3>
+                  <p data-i18n="feature.media.body">A gallery per reminder, voice notes and camera code scanning.</p>
                 </div>
               </article>
 
@@ -938,40 +1010,40 @@
                   </svg>
                 </div>
                 <div class="feature-copy">
-                  <h3>Alarmas, temas e idioma</h3>
-                  <p>Notificaciones locales, claro/oscuro y textos en español e inglés.</p>
+                  <h3 data-i18n="feature.alarms.title">Alarms, themes and language</h3>
+                  <p data-i18n="feature.alarms.body">Local notifications, light/dark themes and copy in English and Spanish.</p>
                 </div>
               </article>
             </div>
 
             <div class="tech-panel">
-              <p class="eyebrow" style="margin: 0 0 2px">Bajo el capó</p>
+              <p class="eyebrow" style="margin: 0 0 2px" data-i18n="tech.eyebrow">Under the hood</p>
               <ul class="tech-list">
                 <li>
-                  <strong>Estado</strong>
-                  <span>Redux 5 + redux-persist con migración de versión y una sola clave.</span>
+                  <strong data-i18n="tech.state.k">State</strong>
+                  <span data-i18n="tech.state.v">Redux 5 + redux-persist with version migration and a single key.</span>
                 </li>
                 <li>
-                  <strong>Medios</strong>
-                  <span>Archivos copiados a <code>documentDirectory</code>, con migración desde caché.</span>
+                  <strong data-i18n="tech.media.k">Media</strong>
+                  <span data-i18n-html="tech.media.v">Files copied to <code>documentDirectory</code>, with migration from cache.</span>
                 </li>
                 <li>
-                  <strong>Alarmas</strong>
-                  <span>ISO UTC real y <code>expo-notifications</code>, sin romperse con el horario de verano.</span>
+                  <strong data-i18n="tech.alarms.k">Alarms</strong>
+                  <span data-i18n-html="tech.alarms.v">Real UTC ISO and <code>expo-notifications</code>, without breaking on daylight saving time.</span>
                 </li>
                 <li>
-                  <strong>UI</strong>
-                  <span>Reanimated 4, gestos y listas reordenables.</span>
+                  <strong data-i18n="tech.ui.k">UI</strong>
+                  <span data-i18n="tech.ui.v">Reanimated 4, gestures and reorderable lists.</span>
                 </li>
                 <li>
-                  <strong>Distribución</strong>
-                  <span>EAS Build + GitHub Releases. Sin Play Store, sin cuenta.</span>
+                  <strong data-i18n="tech.dist.k">Distribution</strong>
+                  <span data-i18n="tech.dist.v">EAS Build + GitHub Releases. No Play Store, no account.</span>
                 </li>
               </ul>
 
-              <div class="code-card" aria-label="Fragmento de configuración de persistencia">
+              <div class="code-card" aria-label="Persistence configuration snippet" data-i18n-aria="tech.code.label">
                 <div class="code-head"><i></i><i></i><i></i> src/config/redux/store.ts</div>
-                <pre><code><span class="c">// Todo el estado vive en el dispositivo</span>
+                <pre><code><span class="c" data-i18n="tech.code.comment">// All state lives on the device</span>
 <span class="k">const</span> persistConfig = {
   key: <span class="s">'root'</span>,
   version: <span class="s">2</span>,
@@ -992,7 +1064,8 @@
               <div class="phone">
                 <img
                   src="assets/home-light.png"
-                  alt="Organizer en tema claro"
+                  alt="Organizer in light theme"
+                  data-i18n-alt="showcase.homeAlt"
                   width="488"
                   height="1055"
                 />
@@ -1000,37 +1073,38 @@
               <div class="phone">
                 <img
                   src="assets/reminder-light.png"
-                  alt="Recordatorio con checklist en tema claro"
+                  alt="Reminder with a checklist in light theme"
+                  data-i18n-alt="showcase.reminderAlt"
                   width="488"
                   height="1055"
                 />
               </div>
             </div>
             <div class="showcase-copy">
-              <p class="eyebrow">Diseño</p>
-              <h2 id="showcase-title">Neumorfismo suave, dos temas.</h2>
-              <p>
-                Una interfaz táctil que se siente como un objeto físico. El relieve no
-                decora: separa, agrupa y da feedback sin gritar.
+              <p class="eyebrow" data-i18n="showcase.eyebrow">Design</p>
+              <h2 id="showcase-title" data-i18n="showcase.title">Soft neumorphism, two themes.</h2>
+              <p data-i18n="showcase.lead">
+                A tactile interface that feels like a physical object. The relief isn't
+                decoration: it separates, groups and gives feedback without shouting.
               </p>
               <ul class="check-list">
                 <li>
                   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-                  <span>Transición de tema con crossfade y <strong>Reanimated 4</strong>.</span>
+                  <span data-i18n-html="showcase.item1">Theme transition with crossfade and <strong>Reanimated 4</strong>.</span>
                 </li>
                 <li>
                   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-                  <span>Header con vidrio, galería con zoom y modales propios.</span>
+                  <span data-i18n="showcase.item2">Glass header, zoomable gallery and custom modals.</span>
                 </li>
                 <li>
                   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-                  <span>Accesibilidad: roles, labels y estados en cada control.</span>
+                  <span data-i18n="showcase.item3">Accessibility: roles, labels and states on every control.</span>
                 </li>
               </ul>
             </div>
@@ -1046,14 +1120,15 @@
               </svg>
             </div>
             <div>
-              <h2 id="privacy-title">Privacidad por diseño</h2>
-              <p>
-                Sin servidores, sin analytics, sin publicidad y sin cuentas. Tus listas,
-                fotos y audios no salen del teléfono. Podés borrar todo desinstalando la app.
+              <h2 id="privacy-title" data-i18n="privacy.title">Privacy by design</h2>
+              <p data-i18n="privacy.body">
+                No servers, no analytics, no ads and no accounts. Your lists, photos and
+                audio never leave the phone. You can delete everything by uninstalling
+                the app.
               </p>
             </div>
-            <a class="btn btn-secondary" href="https://github.com/lore64210/organizer/blob/master/PRIVACY.md">
-              Leer la política
+            <a class="btn btn-secondary" href="https://github.com/lore64210/organizer/blob/master/PRIVACY.md" data-i18n="privacy.cta" data-privacy-link>
+              Read the policy
             </a>
           </div>
         </section>
@@ -1061,36 +1136,37 @@
         <section id="descargar" aria-labelledby="download-title">
           <div class="download">
             <div class="download-card">
-              <p class="eyebrow">Descargar</p>
-              <h2 id="download-title">Llevátela en el bolsillo.</h2>
-              <p style="color: var(--muted); font-size: 14px; margin: 0">
-                APK firmado para Android 7.0 o superior. Instalá desde el navegador,
-                permití el origen desconocido y listo. No hace falta cuenta.
+              <p class="eyebrow" data-i18n="download.eyebrow">Download</p>
+              <h2 id="download-title" data-i18n="download.title">Take it in your pocket.</h2>
+              <p style="color: var(--muted); font-size: 14px; margin: 0" data-i18n="download.lead">
+                Signed APK for Android 7.0 or newer. Install it from the browser, allow
+                unknown sources and you're done. No account needed.
               </p>
               <div class="download-actions">
-                <a class="btn btn-primary" href="https://github.com/lore64210/organizer/releases/latest/download/organizer.apk">
-                  Descargar APK
+                <a class="btn btn-primary" href="https://github.com/lore64210/organizer/releases/latest/download/organizer.apk" data-i18n="cta.download">
+                  Download APK
                 </a>
                 <button
                   class="btn btn-secondary copy-btn"
                   type="button"
                   data-copy="https://github.com/lore64210/organizer/releases/latest/download/organizer.apk"
+                  data-i18n="cta.copy"
                 >
-                  Copiar link
+                  Copy link
                 </button>
-                <a class="btn btn-ghost" href="https://github.com/lore64210/organizer/blob/master/docs/install.md">
-                  Instrucciones →
+                <a class="btn btn-ghost" href="https://github.com/lore64210/organizer/blob/master/docs/install.md" data-i18n="download.instructions" data-install-link>
+                  Instructions →
                 </a>
               </div>
-              <p class="small">
-                Cada release incluye <code>SHA256SUMS.txt</code> para verificar la descarga.
-                Las versiones se publican en GitHub Releases.
+              <p class="small" data-i18n-html="download.note">
+                Every release includes <code>SHA256SUMS.txt</code> to verify the download.
+                Versions are published on GitHub Releases.
               </p>
             </div>
 
             <div class="qr-card">
-              <img src="assets/qr.png" alt="Código QR para descargar el APK de Organizer" width="512" height="512" />
-              <p>Escaneá desde tu Android</p>
+              <img src="assets/qr.png" alt="QR code to download the Organizer APK" data-i18n-alt="download.qrAlt" width="512" height="512" />
+              <p data-i18n="download.qrNote">Scan from your Android</p>
             </div>
           </div>
         </section>
@@ -1100,16 +1176,16 @@
 
     <footer>
       <div class="container footer-inner">
-        <div>
-          <strong style="color: var(--text)">Organizer</strong> — proyecto de portfolio.
-          Hecho con Expo + React Native.
+        <div data-i18n-html="footer.tagline">
+          <strong style="color: var(--text)">Organizer</strong> — portfolio project.
+          Built with Expo + React Native.
         </div>
         <div class="footer-links">
-          <a href="demo.html">Demo web</a>
+          <a href="demo.html?lang=en" data-demo-link data-i18n="footer.demo">Web demo</a>
           <a href="https://github.com/lore64210/organizer">GitHub</a>
           <a href="https://github.com/lore64210/organizer/releases">Releases</a>
-          <a href="https://github.com/lore64210/organizer/blob/master/PRIVACY.md">Privacidad</a>
-          <a href="https://github.com/lore64210/organizer/blob/master/docs/install.md">Instalación</a>
+          <a href="https://github.com/lore64210/organizer/blob/master/PRIVACY.md" data-i18n="footer.privacy" data-privacy-link>Privacy</a>
+          <a href="https://github.com/lore64210/organizer/blob/master/docs/install.md" data-i18n="footer.install" data-install-link>Install</a>
         </div>
         <span>© <span id="year">2026</span></span>
       </div>
@@ -1118,18 +1194,283 @@
     <script>
       document.getElementById('year').textContent = new Date().getFullYear();
 
+      const LANG_STORAGE_KEY = 'organizer-lang';
+
+      const translations = {
+        en: {
+          'meta.title': 'Organizer — offline reminders for Android',
+          'meta.description':
+            'Organizer is an offline reminder app with lists, notes, photos, audio and alarms. Everything stays on your device. Download the APK from GitHub Releases.',
+          'meta.ogDescription':
+            'Lists, notes, photos, audio and alarms. No account, no cloud, no analytics.',
+          'nav.aria': 'Main navigation',
+          'nav.demo': 'Demo',
+          'nav.product': 'Product',
+          'nav.privacy': 'Privacy',
+          'cta.download': 'Download APK',
+          'cta.demo': 'Try the web demo',
+          'cta.code': 'View code →',
+          'hero.eyebrow': 'Android · offline-first · no accounts',
+          'hero.title':
+            'Your reminders,<br />on your phone.<br /><span class="accent">Not in the cloud.</span>',
+          'hero.lead':
+            'Lists, notes, photos, audio and alarms in an app that works without a connection. Everything is stored on your device: no servers, no analytics and no account to create.',
+          'hero.meta.android': 'Android 7.0+',
+          'hero.meta.apk': 'Signed APK',
+          'hero.meta.local': '100% local',
+          'hero.chip.offline': 'Offline',
+          'hero.imgAlt': 'Organizer home screen with sample reminders',
+          'features.eyebrow': 'Product & technology',
+          'features.title': 'The essentials, without the noise.',
+          'features.lead':
+            'Just the features you need to get organized, backed by an offline-first architecture: everything is stored on the device and works without a connection.',
+          'feature.offline.title': 'Truly offline',
+          'feature.offline.body':
+            'Lists, photos, audio and alarms live on your device. The app opens and works without a network.',
+          'feature.lists.title': 'Lists and checklists',
+          'feature.lists.body':
+            "Reorder with a long press, check off items and track each list's progress.",
+          'feature.media.title': 'Photos, audio and QR',
+          'feature.media.body':
+            'A gallery per reminder, voice notes and camera code scanning.',
+          'feature.alarms.title': 'Alarms, themes and language',
+          'feature.alarms.body':
+            'Local notifications, light/dark themes and copy in English and Spanish.',
+          'tech.eyebrow': 'Under the hood',
+          'tech.state.k': 'State',
+          'tech.state.v':
+            'Redux 5 + redux-persist with version migration and a single key.',
+          'tech.media.k': 'Media',
+          'tech.media.v':
+            'Files copied to <code>documentDirectory</code>, with migration from cache.',
+          'tech.alarms.k': 'Alarms',
+          'tech.alarms.v':
+            'Real UTC ISO and <code>expo-notifications</code>, without breaking on daylight saving time.',
+          'tech.ui.k': 'UI',
+          'tech.ui.v': 'Reanimated 4, gestures and reorderable lists.',
+          'tech.dist.k': 'Distribution',
+          'tech.dist.v': 'EAS Build + GitHub Releases. No Play Store, no account.',
+          'tech.code.label': 'Persistence configuration snippet',
+          'tech.code.comment': '// All state lives on the device',
+          'showcase.eyebrow': 'Design',
+          'showcase.title': 'Soft neumorphism, two themes.',
+          'showcase.lead':
+            "A tactile interface that feels like a physical object. The relief isn't decoration: it separates, groups and gives feedback without shouting.",
+          'showcase.item1':
+            'Theme transition with crossfade and <strong>Reanimated 4</strong>.',
+          'showcase.item2': 'Glass header, zoomable gallery and custom modals.',
+          'showcase.item3':
+            'Accessibility: roles, labels and states on every control.',
+          'showcase.homeAlt': 'Organizer in light theme',
+          'showcase.reminderAlt': 'Reminder with a checklist in light theme',
+          'privacy.title': 'Privacy by design',
+          'privacy.body':
+            'No servers, no analytics, no ads and no accounts. Your lists, photos and audio never leave the phone. You can delete everything by uninstalling the app.',
+          'privacy.cta': 'Read the policy',
+          'download.eyebrow': 'Download',
+          'download.title': 'Take it in your pocket.',
+          'download.lead':
+            "Signed APK for Android 7.0 or newer. Install it from the browser, allow unknown sources and you're done. No account needed.",
+          'cta.copy': 'Copy link',
+          'cta.copied': 'Copied',
+          'cta.copyError': "Couldn't copy",
+          'download.instructions': 'Instructions →',
+          'download.note':
+            'Every release includes <code>SHA256SUMS.txt</code> to verify the download. Versions are published on GitHub Releases.',
+          'download.qrAlt': 'QR code to download the Organizer APK',
+          'download.qrNote': 'Scan from your Android',
+          'footer.tagline':
+            '<strong style="color: var(--text)">Organizer</strong> — portfolio project. Built with Expo + React Native.',
+          'footer.demo': 'Web demo',
+          'footer.privacy': 'Privacy',
+          'footer.install': 'Install',
+        },
+        es: {
+          'meta.title': 'Organizer — recordatorios offline para Android',
+          'meta.description':
+            'Organizer es una app de recordatorios offline con listas, notas, fotos, audio y alarmas. Todo queda en tu dispositivo. Descargá el APK desde GitHub Releases.',
+          'meta.ogDescription':
+            'Listas, notas, fotos, audio y alarmas. Sin cuenta, sin nube y sin analytics.',
+          'nav.aria': 'Navegación principal',
+          'nav.demo': 'Demo',
+          'nav.product': 'Producto',
+          'nav.privacy': 'Privacidad',
+          'cta.download': 'Descargar APK',
+          'cta.demo': 'Probar demo web',
+          'cta.code': 'Ver código →',
+          'hero.eyebrow': 'Android · offline-first · sin cuentas',
+          'hero.title':
+            'Tus recordatorios,<br />en tu teléfono.<br /><span class="accent">No en la nube.</span>',
+          'hero.lead':
+            'Listas, notas, fotos, audio y alarmas en una app que funciona sin conexión. Todo se guarda en tu dispositivo: sin servidores, sin analytics y sin crear una cuenta.',
+          'hero.meta.android': 'Android 7.0+',
+          'hero.meta.apk': 'APK firmado',
+          'hero.meta.local': '100% local',
+          'hero.chip.offline': 'Sin conexión',
+          'hero.imgAlt': 'Pantalla principal de Organizer con recordatorios de ejemplo',
+          'features.eyebrow': 'Producto y tecnología',
+          'features.title': 'Lo esencial, sin ruido.',
+          'features.lead':
+            'Las funciones justas para organizarte, con una arquitectura offline-first detrás: todo se guarda en el dispositivo y funciona sin conexión.',
+          'feature.offline.title': 'Offline de verdad',
+          'feature.offline.body':
+            'Listas, fotos, audio y alarmas viven en el dispositivo. La app abre y funciona sin red.',
+          'feature.lists.title': 'Listas y checklists',
+          'feature.lists.body':
+            'Reordená con long-press, tildá ítems y seguí el progreso de cada lista.',
+          'feature.media.title': 'Fotos, audio y QR',
+          'feature.media.body':
+            'Galería por recordatorio, notas de voz y escaneo de códigos con la cámara.',
+          'feature.alarms.title': 'Alarmas, temas e idioma',
+          'feature.alarms.body':
+            'Notificaciones locales, claro/oscuro y textos en español e inglés.',
+          'tech.eyebrow': 'Bajo el capó',
+          'tech.state.k': 'Estado',
+          'tech.state.v':
+            'Redux 5 + redux-persist con migración de versión y una sola clave.',
+          'tech.media.k': 'Medios',
+          'tech.media.v':
+            'Archivos copiados a <code>documentDirectory</code>, con migración desde caché.',
+          'tech.alarms.k': 'Alarmas',
+          'tech.alarms.v':
+            'ISO UTC real y <code>expo-notifications</code>, sin romperse con el horario de verano.',
+          'tech.ui.k': 'UI',
+          'tech.ui.v': 'Reanimated 4, gestos y listas reordenables.',
+          'tech.dist.k': 'Distribución',
+          'tech.dist.v': 'EAS Build + GitHub Releases. Sin Play Store, sin cuenta.',
+          'tech.code.label': 'Fragmento de configuración de persistencia',
+          'tech.code.comment': '// Todo el estado vive en el dispositivo',
+          'showcase.eyebrow': 'Diseño',
+          'showcase.title': 'Neumorfismo suave, dos temas.',
+          'showcase.lead':
+            'Una interfaz táctil que se siente como un objeto físico. El relieve no decora: separa, agrupa y da feedback sin gritar.',
+          'showcase.item1':
+            'Transición de tema con crossfade y <strong>Reanimated 4</strong>.',
+          'showcase.item2': 'Header con vidrio, galería con zoom y modales propios.',
+          'showcase.item3':
+            'Accesibilidad: roles, labels y estados en cada control.',
+          'showcase.homeAlt': 'Organizer en tema claro',
+          'showcase.reminderAlt': 'Recordatorio con checklist en tema claro',
+          'privacy.title': 'Privacidad por diseño',
+          'privacy.body':
+            'Sin servidores, sin analytics, sin publicidad y sin cuentas. Tus listas, fotos y audios no salen del teléfono. Podés borrar todo desinstalando la app.',
+          'privacy.cta': 'Leer la política',
+          'download.eyebrow': 'Descargar',
+          'download.title': 'Llevátela en el bolsillo.',
+          'download.lead':
+            'APK firmado para Android 7.0 o superior. Instalá desde el navegador, permití el origen desconocido y listo. No hace falta cuenta.',
+          'cta.copy': 'Copiar link',
+          'cta.copied': 'Copiado',
+          'cta.copyError': 'No se pudo copiar',
+          'download.instructions': 'Instrucciones →',
+          'download.note':
+            'Cada release incluye <code>SHA256SUMS.txt</code> para verificar la descarga. Las versiones se publican en GitHub Releases.',
+          'download.qrAlt': 'Código QR para descargar el APK de Organizer',
+          'download.qrNote': 'Escaneá desde tu Android',
+          'footer.tagline':
+            '<strong style="color: var(--text)">Organizer</strong> — proyecto de portfolio. Hecho con Expo + React Native.',
+          'footer.demo': 'Demo web',
+          'footer.privacy': 'Privacidad',
+          'footer.install': 'Instalación',
+        },
+      };
+
+      const SUPPORTED_LANGS = Object.keys(translations);
+      let currentLang = 'en';
+
+      const translate = (key) =>
+        translations[currentLang]?.[key] ?? translations.en[key] ?? key;
+
+      const applyLanguage = (lang, { updateUrl = false, persist = true } = {}) => {
+        currentLang = SUPPORTED_LANGS.includes(lang) ? lang : 'en';
+        document.documentElement.lang = currentLang;
+
+        const docsSuffix = currentLang === 'es' ? '.es' : '';
+
+        document.querySelectorAll('[data-i18n]').forEach((element) => {
+          element.textContent = translate(element.dataset.i18n);
+        });
+        document.querySelectorAll('[data-i18n-html]').forEach((element) => {
+          element.innerHTML = translate(element.dataset.i18nHtml);
+        });
+        document.querySelectorAll('[data-i18n-alt]').forEach((element) => {
+          element.alt = translate(element.dataset.i18nAlt);
+        });
+        document.querySelectorAll('[data-i18n-aria]').forEach((element) => {
+          element.setAttribute('aria-label', translate(element.dataset.i18nAria));
+        });
+        document.querySelectorAll('[data-i18n-content]').forEach((element) => {
+          element.setAttribute('content', translate(element.dataset.i18nContent));
+        });
+        document.querySelectorAll('[data-set-lang]').forEach((button) => {
+          button.setAttribute(
+            'aria-pressed',
+            String(button.dataset.setLang === currentLang)
+          );
+        });
+        document.querySelectorAll('[data-demo-link]').forEach((link) => {
+          link.href = `demo.html?lang=${currentLang}`;
+        });
+        document.querySelectorAll('[data-privacy-link]').forEach((link) => {
+          link.href = `https://github.com/lore64210/organizer/blob/master/PRIVACY${docsSuffix}.md`;
+        });
+        document.querySelectorAll('[data-install-link]').forEach((link) => {
+          link.href = `https://github.com/lore64210/organizer/blob/master/docs/install${docsSuffix}.md`;
+        });
+
+        if (persist) {
+          try {
+            localStorage.setItem(LANG_STORAGE_KEY, currentLang);
+          } catch {
+            // Sin almacenamiento la preferencia dura lo que la página.
+          }
+        }
+
+        if (updateUrl) {
+          const url = new URL(window.location.href);
+          url.searchParams.set('lang', currentLang);
+          window.history.replaceState({}, '', url);
+        }
+      };
+
+      const readInitialLang = () => {
+        const fromUrl = new URLSearchParams(window.location.search)
+          .get('lang')
+          ?.slice(0, 2)
+          .toLowerCase();
+        if (SUPPORTED_LANGS.includes(fromUrl)) {
+          return fromUrl;
+        }
+        try {
+          const stored = localStorage.getItem(LANG_STORAGE_KEY);
+          if (SUPPORTED_LANGS.includes(stored)) {
+            return stored;
+          }
+        } catch {
+          // Ignorado: se usa el idioma por defecto.
+        }
+        return 'en';
+      };
+
+      document.querySelectorAll('[data-set-lang]').forEach((button) => {
+        button.addEventListener('click', () => {
+          applyLanguage(button.dataset.setLang, { updateUrl: true });
+        });
+      });
+
+      applyLanguage(readInitialLang());
+
       const copyButton = document.querySelector('[data-copy]');
       if (copyButton) {
-        const original = copyButton.textContent;
         copyButton.addEventListener('click', async () => {
           try {
             await navigator.clipboard.writeText(copyButton.dataset.copy);
-            copyButton.textContent = 'Copiado';
+            copyButton.textContent = translate('cta.copied');
           } catch {
-            copyButton.textContent = 'No se pudo copiar';
+            copyButton.textContent = translate('cta.copyError');
           }
           setTimeout(() => {
-            copyButton.textContent = original;
+            copyButton.textContent = translate('cta.copy');
           }, 1800);
         });
       }
